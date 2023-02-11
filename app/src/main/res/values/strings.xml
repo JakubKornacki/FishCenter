@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Fish Center</string>
+    <string name="register">Register</string>
+    <string name="sign_in">Sign in</string>
+    <string name="username">Username</string>
+    <string name="login">LOGIN</string>
+    <string name="password">Password</string>
+</resources>
