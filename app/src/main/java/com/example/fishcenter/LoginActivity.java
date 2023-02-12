@@ -1,20 +1,24 @@
 package com.example.fishcenter;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
+
+import org.w3c.dom.Text;
 
 
 public class LoginActivity extends AppCompatActivity {
 
 
-    private EditText usernameEditText;
-    private EditText passwordEditText;
-    private Button signInButton;
+    private EditText usernameEditTextLoginActivity;
+    private EditText passwordEditTextLoginActivity;
+    private Button signInButtonLoginActivity;
+
+    private TextView registerTextViewLoginActivity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,41 +31,25 @@ public class LoginActivity extends AppCompatActivity {
 
     }
 
-    protected void getReferencesOfComponents() {
-        usernameEditText = (EditText) findViewById(R.id.editTextUsername);
-        passwordEditText = (EditText) findViewById(R.id.editTextPassword);
-        signInButton = (Button) findViewById(R.id.buttonSignIn);
+    private void getReferencesOfComponents() {
+        usernameEditTextLoginActivity = (EditText) findViewById(R.id.editTextUsername);
+        passwordEditTextLoginActivity = (EditText) findViewById(R.id.editTextPasswordLogin);
+        signInButtonLoginActivity = (Button) findViewById(R.id.buttonSignIn);
+        registerTextViewLoginActivity = (TextView) findViewById(R.id.registerTextViewLogin);
+
     }
 
-    protected void setupOnClickHandlers() {
+    private void setupOnClickHandlers() {
 
 
-        // handle usernameEditText onclick action
-        usernameEditText.setOnClickListener(new View.OnClickListener() {
+        // switch from login activity to the register activity when clicked on the "Don't have an account? Register" TextView on the login activity
+        registerTextViewLoginActivity.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Intent registerActivity = new Intent(getApplicationContext(), RegisterActivity.class);
+                startActivity(registerActivity);
             }
         });
-
-        // handle passwordEditText onclick action
-        passwordEditText.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-            }
-        });
-
-
-        // handle userNameEditText onclick action
-        signInButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-            }
-        });
-
-
-
 
     }
 

@@ -2,7 +2,16 @@
     <string name="app_name">Fish Center</string>
     <string name="register">Register</string>
     <string name="sign_in">Sign in</string>
-    <string name="username">Username</string>
+    <string name="usernameOrEmail">Username or E-mail</string>
     <string name="login">LOGIN</string>
     <string name="password">Password</string>
+    <string name="reTypePassword">Re-type Password</string>
+    <string name="forgotPassword">Forgot password?</string>
+    <string name="sign_up">SIGN UP</string>
+    <string name="email">E-mail</string>
+    <string name="userDoesNotHaveAnAccount">Don\'t have an account? Register</string>
+    <string name="userAlreadyHasAnAccount">Already have an account? Log in</string>
+    <string name="termsAndConditionsCheckBox">Accept our terms &amp; conditions</string>
+
+
 </resources>
