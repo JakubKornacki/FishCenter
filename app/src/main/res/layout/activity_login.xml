@@ -9,136 +9,140 @@
     tools:context=".LoginActivity">
 
 
-    <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="113dp"
-        android:layout_height="107dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.503"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.084"
-        app:srcCompat="@drawable/twotone_phishing_white_48" />
-
-
-    <TextView
-        android:id="@+id/signInTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="172dp"
-        android:layout_marginEnd="120dp"
-        android:fontFamily="@font/amiko_bold"
-        android:text="@string/app_name"
-        android:textAlignment="center"
-        android:textColor="@color/white"
-        android:textSize="30sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <LinearLayout
-        android:id="@+id/linearLayout1"
-        android:layout_width="350dp"
-        android:layout_height="48dp"
-        android:layout_marginEnd="24dp"
-        android:layout_marginBottom="448dp"
-        android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:background="@android:color/transparent">
-
-        <EditText
-            android:id="@+id/editTextUsername"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@null"
-            android:ems="10"
-            android:fontFamily="@font/amiko_semibold"
-            android:hint="@string/usernameOrEmail"
-            android:inputType="textPersonName"
-            android:textAlignment="viewStart"
-            android:textColor="@color/white"
-            android:textColorHint="@color/white" />
 
         <ImageView
-            android:id="@+id/username_icon"
+            android:id="@+id/imageView"
+            android:layout_width="113dp"
+            android:layout_height="107dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.503"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.084"
+            app:srcCompat="@drawable/twotone_phishing_white_48" />
+
+
+        <TextView
+            android:id="@+id/signInTextView"
             android:layout_width="wrap_content"
-            android:layout_height="fill_parent"
-            android:gravity="center_horizontal"
-            android:padding="10dip"
-            android:scaleType="centerCrop"
-            android:src="@drawable/baseline_account_circle_24" />
-
-    </LinearLayout>
-
-
-    <LinearLayout
-        android:id="@+id/linearLayout2"
-        android:layout_width="350dp"
-        android:layout_height="48dp"
-        android:layout_marginEnd="24dp"
-        android:layout_marginBottom="368dp"
-        android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <EditText
-            android:id="@+id/editTextPasswordLogin"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@null"
-            android:ems="10"
-            android:fontFamily="@font/amiko_semibold"
-            android:hint="@string/password"
-            android:inputType="textPassword"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="172dp"
+            android:layout_marginEnd="120dp"
+            android:fontFamily="@font/amiko_bold"
+            android:text="@string/appName"
+            android:textAlignment="center"
             android:textColor="@color/white"
-            android:textColorHint="@color/white" />
+            android:textSize="30sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-        <ImageView
-            android:id="@+id/password_icon"
+
+
+
+        <LinearLayout
+            android:id="@+id/linearLayout1"
+            android:layout_width="350dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="24dp"
+            android:layout_marginBottom="448dp"
+            android:background="@android:color/transparent"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <EditText
+                android:id="@+id/editTextUsername"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@null"
+                android:ems="10"
+                android:fontFamily="@font/amiko_semibold"
+                android:hint="@string/email"
+                android:inputType="textPersonName"
+                android:textAlignment="viewStart"
+                android:textColor="@color/white"
+                android:textColorHint="@color/white" />
+
+            <ImageView
+                android:id="@+id/username_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:gravity="center_horizontal"
+                android:padding="10dip"
+                android:scaleType="centerCrop"
+                android:src="@drawable/baseline_account_circle_24" />
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:id="@+id/linearLayout2"
+            android:layout_width="350dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="24dp"
+            android:layout_marginBottom="368dp"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <EditText
+                android:id="@+id/editTextPasswordLogin"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@null"
+                android:ems="10"
+                android:fontFamily="@font/amiko_semibold"
+                android:hint="@string/password"
+                android:inputType="textPassword"
+                android:textColor="@color/white"
+                android:textColorHint="@color/white" />
+
+            <ImageView
+                android:id="@+id/password_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:gravity="center_horizontal"
+                android:padding="10dip"
+                android:scaleType="centerCrop"
+                android:src="@drawable/baseline_lock_24" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/forgotPasswordTextView"
             android:layout_width="wrap_content"
-            android:layout_height="fill_parent"
-            android:gravity="center_horizontal"
-            android:padding="10dip"
-            android:scaleType="centerCrop"
-            android:src="@drawable/baseline_lock_24" />
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="320dp"
+            android:fontFamily="@font/amiko_semibold"
+            android:text="@string/forgotPassword"
+            android:textColor="@android:color/secondary_text_dark"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-    </LinearLayout>
-
-    <TextView
-        android:id="@+id/forgotPasswordTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="320dp"
-        android:fontFamily="@font/amiko_semibold"
-        android:text="@string/forgotPassword"
-        android:textColor="@android:color/secondary_text_dark"
-        android:textSize="15sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <Button
-        android:id="@+id/buttonSignIn"
-        android:layout_width="299dp"
-        android:layout_height="51dp"
-        android:layout_marginEnd="40dp"
-        android:layout_marginBottom="212dp"
-        android:background="@drawable/button_rounded_corners"
-        android:fontFamily="@font/amiko_bold"
-        android:text="@string/login"
-        android:textAlignment="center"
-        android:textColor="#FFFFFF"
-        android:textSize="20sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        <Button
+            android:id="@+id/buttonSignIn"
+            android:layout_width="299dp"
+            android:layout_height="51dp"
+            android:layout_marginEnd="40dp"
+            android:layout_marginBottom="212dp"
+            android:background="@drawable/button_rounded_corners"
+            android:fontFamily="@font/amiko_bold"
+            android:text="@string/login"
+            android:textAlignment="center"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
 
     <TextView
-        android:id="@+id/registerTextViewLogin"
+        android:id="@+id/switchToLoginActivityRegisterActivity"
         android:layout_width="wrap_content"
         android:layout_height="48dp"
         android:layout_marginEnd="100dp"

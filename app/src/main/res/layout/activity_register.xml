@@ -8,7 +8,7 @@
     tools:context=".RegisterActivity">
 
     <TextView
-        android:id="@+id/registerTextViewLogin"
+        android:id="@+id/switchToLoginActivityRegisterActivity"
         android:layout_width="wrap_content"
         android:layout_height="48dp"
         android:layout_marginEnd="100dp"
@@ -22,7 +22,7 @@
         app:layout_constraintEnd_toEndOf="parent" />
 
     <EditText
-        android:id="@+id/editTextPasswordRegister"
+        android:id="@+id/editTextPasswordRegisterActivity"
         android:layout_width="313dp"
         android:layout_height="48dp"
         android:layout_marginTop="304dp"
@@ -36,13 +36,13 @@
         android:textAlignment="viewStart"
         android:textColor="@color/white"
         android:textColorHint="@color/white"
-        app:layout_constraintBottom_toTopOf="@+id/editTextReTypePasswordRegister"
+        app:layout_constraintBottom_toTopOf="@+id/editTextReTypePasswordRegisterActivity"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.035" />
 
     <EditText
-        android:id="@+id/editTextReTypePasswordRegister"
+        android:id="@+id/editTextReTypePasswordRegisterActivity"
         android:layout_width="314dp"
         android:layout_height="48dp"
         android:layout_marginTop="380dp"
@@ -59,7 +59,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
-        android:id="@+id/editTextEmail"
+        android:id="@+id/editTextEmailRegisterActivity"
         android:layout_width="313dp"
         android:layout_height="48dp"
         android:layout_marginTop="228dp"
@@ -73,20 +73,20 @@
         android:textAlignment="viewStart"
         android:textColor="@color/white"
         android:textColorHint="@color/white"
-        app:layout_constraintBottom_toTopOf="@+id/editTextPasswordRegister"
+        app:layout_constraintBottom_toTopOf="@+id/editTextPasswordRegisterActivity"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.025" />
 
     <Button
-        android:id="@+id/buttonRegister2"
+        android:id="@+id/buttonRegisterActivity"
         android:layout_width="299dp"
         android:layout_height="51dp"
         android:layout_marginEnd="44dp"
         android:layout_marginBottom="184dp"
         android:background="@drawable/button_rounded_corners"
         android:fontFamily="@font/amiko_bold"
-        android:text="@string/sign_up"
+        android:text="@string/signUp"
         android:textAlignment="center"
         android:textColor="#FFFFFF"
         android:textSize="20sp"
@@ -108,7 +108,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <CheckBox
-        android:id="@+id/agreementCheckBox"
+        android:id="@+id/termsAndConditionsCheckBoxRegisterActivity"
         android:layout_width="235dp"
         android:layout_height="48dp"
         android:layout_marginEnd="16dp"

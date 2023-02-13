@@ -8,8 +8,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import org.w3c.dom.Text;
-
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -35,7 +33,7 @@ public class LoginActivity extends AppCompatActivity {
         usernameEditTextLoginActivity = (EditText) findViewById(R.id.editTextUsername);
         passwordEditTextLoginActivity = (EditText) findViewById(R.id.editTextPasswordLogin);
         signInButtonLoginActivity = (Button) findViewById(R.id.buttonSignIn);
-        registerTextViewLoginActivity = (TextView) findViewById(R.id.registerTextViewLogin);
+        registerTextViewLoginActivity = (TextView) findViewById(R.id.switchToLoginActivityRegisterActivity);
 
     }
 
