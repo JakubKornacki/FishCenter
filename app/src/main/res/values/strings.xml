@@ -1,6 +1,5 @@
 <resources>
     <string name="appName">Fish Center</string>
-    <string name="register">Register</string>
     <string name="signIn">Sign in</string>
     <string name="email">E-mail</string>
     <string name="login">LOGIN</string>
@@ -8,8 +7,11 @@
     <string name="reTypePassword">Re-type Password</string>
     <string name="forgotPassword">Forgot password?</string>
     <string name="signUp">SIGN UP</string>
+    <string name="signUp2">Sign Up</string>
     <string name="userDoesNotHaveAnAccount">Don\'t have an account? Register</string>
     <string name="userAlreadyHasAnAccount">Already have an account? Log in</string>
     <string name="termsAndConditionsCheckBox">Accept our terms &amp; conditions</string>
+    <string name="mainActivity">Main Activity</string>
+
 
 </resources>

@@ -2,6 +2,7 @@ package com.example.fishcenter;
 
 import static android.content.ContentValues.TAG;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.method.PasswordTransformationMethod;
@@ -14,6 +15,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.*;
@@ -33,16 +35,18 @@ public class RegisterActivity extends AppCompatActivity {
     private ImageButton passwordVisibleImageButtonRegisterActivity;
     private ImageButton reTypePasswordVisibleImageButtonRegisterActivity;
 
-
-
-
-    // do i really need this?
+    // if the user is already logged in then load the main page activity
     @Override
     public void onStart() {
         super.onStart();
-
-
+        // Check if user is signed in (non-null) and update UI accordingly.
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if(currentUser != null){
+            Intent mainPageActivity = new Intent(getApplicationContext(), MainPageActivity.class);
+            startActivity(mainPageActivity);
+        }
     }
+
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,12 +54,20 @@ public class RegisterActivity extends AppCompatActivity {
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
         // get reference to interactive components on the register activity
-        getReferencesOfComponents();
+        switchToLoginActivityRegisterActivity = findViewById(R.id.switchToLoginActivityRegisterActivity);
+        buttonRegisterActivity = findViewById(R.id.buttonRegisterActivity);
+        editTextEmailRegisterActivity = findViewById(R.id.editTextEmailRegisterActivity);
+        editTextPasswordRegisterActivity = findViewById(R.id.editTextPasswordRegisterActivity);
+        editTextReTypePasswordRegisterActivity = findViewById(R.id.editTextReTypePasswordRegisterActivity);
+        termsAndConditionsCheckBoxRegisterActivity = findViewById(R.id.termsAndConditionsCheckBoxRegisterActivity);
+        passwordVisibleImageButtonRegisterActivity = findViewById(R.id.passwordVisibleImageButtonRegisterActivity);
+        reTypePasswordVisibleImageButtonRegisterActivity = findViewById(R.id.reTypePasswordVisibleImageButtonRegisterActivity);
+
         setupOnClickHandlers();
 
     }
 
-    @NonNull
+
     private boolean verifyPassword(String password, String passwordRetyped) {
         StringBuilder errorMessagePassword = new StringBuilder();
 
@@ -67,22 +79,33 @@ public class RegisterActivity extends AppCompatActivity {
 
         // password length is less than 5 characters
         if(password.length() < 5) {
-            errorMessagePassword.append("* Password needs to have 5 or more characters!\n");
+            errorMessagePassword.append("* Password needs to have at least 5 or more characters!\n");
         }
 
         // check if password contains at least 1 digit from (0 - 9)
-        // check if password contains at least 1 digits from special characters
-        // check if password contains at least 1 lowercase character
-        // check if password contains at least 1 uppercase character
-        if(!(password.matches(".*[0-9]+.*") && password.matches(".*[$&+,:;=?@#|'<>.^*()%!-]+.*") && password.matches(".*[a-z]+.*") && password.matches(".*[A-Z]+.*"))) {
-            errorMessagePassword.append("* Password needs at least:\n 1 numeric character (0-9)!\n 1 special character ($&+,:;=)%!-) etc.\n 1 lowercase character (a-z)\n 1 uppercase letter (A-Z)");
+        if(!password.matches(".*\\d+.*")) {
+            errorMessagePassword.append("* Specify at least 1 numeric character (0-9)!\n");
         }
 
+        // check if password contains at least 1 digits from special characters
+        if(!password.matches(".*[$&+,:;=?@#|'<>.^*()%!-]+.*")) {
+            errorMessagePassword.append("* Specify at least 1 special character ($&+,:;=?@#|'<>.^*()%!-)!\n");
+        }
+
+        // check if password contains at least 1 lowercase character
+        if(!password.matches(".*[a-z]+.*")) {
+            errorMessagePassword.append("* Specify at least 1 lowercase character (a-z)!\n");
+        }
+
+        // check if password contains at least 1 uppercase character
+        if(!password.matches(".*[A-Z]+.*")) {
+            errorMessagePassword.append("* Specify at least 1 1 uppercase letter (A-Z)!\n");
+        }
 
 
         // passwords do not match and both are not empty
         if(!(password.equals(passwordRetyped)) && !(password.isEmpty() && passwordRetyped.isEmpty())) {
-            errorMessagePassword.append("* Passwords need to match!");
+            errorMessagePassword.append("* Passwords do not match!");
         }
 
         // if no error messages were appended to the StringBuilder then all tests have passed and true is returned
@@ -97,7 +120,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     private boolean verifyEmail(String email) {
         StringBuilder errorMessageEmail = new StringBuilder();
-
+        // make sure email is not empty
         if(email.isEmpty()) {
             errorMessageEmail.append("* E-mail cannot be empty!\n");
         }
@@ -109,11 +132,11 @@ public class RegisterActivity extends AppCompatActivity {
 
         // make sure email contains '.' and '@'
         if((email.indexOf('.') == -1 ) && email.indexOf('@') == -1 ) {
-            errorMessageEmail.append("* E-mail needs to contains '.' and '@'!");
+            errorMessageEmail.append("* E-mail needs to contain '.' and '@'!");
         }
+        // display the error messages and return false, clear the error message
         if(errorMessageEmail.length() != 0) {
             editTextEmailRegisterActivity.setError(errorMessageEmail.toString());
-            errorMessageEmail.setLength(0);
             return false;
         }
 
@@ -125,7 +148,7 @@ public class RegisterActivity extends AppCompatActivity {
         if(termsAndConditionsCheckBoxRegisterActivity.isChecked()) {
             return true;
         } else {
-            Toast.makeText(RegisterActivity.this, "Please accept our terms and conditions!", Toast.LENGTH_LONG).show();
+            Toast.makeText(RegisterActivity.this, "Accept our terms and conditions!", Toast.LENGTH_LONG).show();
             return false;
         }
     }
@@ -152,6 +175,8 @@ public class RegisterActivity extends AppCompatActivity {
                             if (task.isSuccessful()) {
                                 // display a toast informing that registration was successful
                                 Toast.makeText(RegisterActivity.this, "Account successfully created!", Toast.LENGTH_LONG).show();
+                                Intent mainPageActivity = new Intent(getApplicationContext(), MainPageActivity.class);
+                                startActivity(mainPageActivity);
                             }
                         }
                     });
@@ -159,7 +184,7 @@ public class RegisterActivity extends AppCompatActivity {
             mAuth.createUserWithEmailAndPassword(email, password).addOnFailureListener(this, new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
-                    Toast.makeText(RegisterActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+                    createErrorAlertDialog("Authentication error!", e.getMessage());
                 }
             });
 
@@ -167,6 +192,15 @@ public class RegisterActivity extends AppCompatActivity {
 
     }
 
+
+    // utility method to an error alert dialog programmatically
+    private void createErrorAlertDialog(String alertTitle, String alertMessage) {
+        AlertDialog.Builder  alert = new AlertDialog.Builder(this);
+        alert.setTitle(alertTitle);
+        alert.setMessage(alertMessage);
+        alert.setIcon(R.drawable.baseline_error_outline_24);
+        alert.show();
+    }
 
     private void setupOnClickHandlers() {
         // switch from login activity to the register activity when clicked on the "Don't have an account? Register" TextView on the login activity
@@ -186,19 +220,6 @@ public class RegisterActivity extends AppCompatActivity {
         reTypePasswordVisibleImageButtonRegisterActivity.setOnClickListener(view ->{
             togglePasswordVisibilityButton(reTypePasswordVisibleImageButtonRegisterActivity, editTextReTypePasswordRegisterActivity);
         });
-
-    }
-
-
-    private void getReferencesOfComponents() {
-        switchToLoginActivityRegisterActivity = findViewById(R.id.switchToLoginActivityRegisterActivity);
-        buttonRegisterActivity = findViewById(R.id.buttonRegisterActivity);
-        editTextEmailRegisterActivity = findViewById(R.id.editTextEmailRegisterActivity);
-        editTextPasswordRegisterActivity = findViewById(R.id.editTextPasswordRegisterActivity);
-        editTextReTypePasswordRegisterActivity = findViewById(R.id.editTextReTypePasswordRegisterActivity);
-        termsAndConditionsCheckBoxRegisterActivity = findViewById(R.id.termsAndConditionsCheckBoxRegisterActivity);
-        passwordVisibleImageButtonRegisterActivity = findViewById(R.id.passwordVisibleImageButtonRegisterActivity);
-        reTypePasswordVisibleImageButtonRegisterActivity = findViewById(R.id.reTypePasswordVisibleImageButtonRegisterActivity);
 
     }
 

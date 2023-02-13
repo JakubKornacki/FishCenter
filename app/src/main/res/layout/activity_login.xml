@@ -50,7 +50,7 @@
             app:layout_constraintEnd_toEndOf="parent">
 
             <EditText
-                android:id="@+id/editTextUsername"
+                android:id="@+id/editTextEmailLoginActivity"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -86,7 +86,7 @@
             app:layout_constraintEnd_toEndOf="parent">
 
             <EditText
-                android:id="@+id/editTextPasswordLogin"
+                android:id="@+id/editTextPasswordLoginActivity"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
