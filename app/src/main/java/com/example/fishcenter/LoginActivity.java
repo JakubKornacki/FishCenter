@@ -11,6 +11,8 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
+
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -21,7 +23,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private TextView registerTextViewLoginActivity;
     private ImageButton passwordVisibleImageButtonActivityLogin;
-
+    FirebaseAuth auth;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,6 +32,7 @@ public class LoginActivity extends AppCompatActivity {
         getReferencesOfComponents();
         // set up the key handlers of all buttons visible on this page
         setupOnClickHandlers();
+        auth = FirebaseAuth.getInstance();
 
     }
 

@@ -53,7 +53,6 @@ public class RegisterActivity extends AppCompatActivity {
         getReferencesOfComponents();
         setupOnClickHandlers();
 
-
     }
 
     @NonNull
@@ -71,13 +70,15 @@ public class RegisterActivity extends AppCompatActivity {
             errorMessagePassword.append("* Password needs to have 5 or more characters!\n");
         }
 
-        // check if password contains at least 1 digit from (0 - 9) "\\d+"
+        // check if password contains at least 1 digit from (0 - 9)
         // check if password contains at least 1 digits from special characters
         // check if password contains at least 1 lowercase character
         // check if password contains at least 1 uppercase character
         if(!(password.matches(".*[0-9]+.*") && password.matches(".*[$&+,:;=?@#|'<>.^*()%!-]+.*") && password.matches(".*[a-z]+.*") && password.matches(".*[A-Z]+.*"))) {
             errorMessagePassword.append("* Password needs at least:\n 1 numeric character (0-9)!\n 1 special character ($&+,:;=)%!-) etc.\n 1 lowercase character (a-z)\n 1 uppercase letter (A-Z)");
         }
+
+
 
         // passwords do not match and both are not empty
         if(!(password.equals(passwordRetyped)) && !(password.isEmpty() && passwordRetyped.isEmpty())) {
@@ -124,7 +125,7 @@ public class RegisterActivity extends AppCompatActivity {
         if(termsAndConditionsCheckBoxRegisterActivity.isChecked()) {
             return true;
         } else {
-            Toast.makeText(RegisterActivity.this, "Please accept our terms and conditions!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(RegisterActivity.this, "Please accept our terms and conditions!", Toast.LENGTH_LONG).show();
             return false;
         }
     }
@@ -144,26 +145,26 @@ public class RegisterActivity extends AppCompatActivity {
 
 
         if(emailVerified && passwordVerified && checkBoxTicked) {
-            mAuth.createUserWithEmailAndPassword(email, password)
-                    .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+            // add a listener which is triggered once the registration process is complete
+            mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
-                                // Sign in success, update UI with the signed-in user's information
-                                //Log.d(TAG, "createUserWithEmail:success");
-                                //FirebaseUser user = mAuth.getCurrentUser();
-                                // updateUI(user);
-                                Toast.makeText(RegisterActivity.this, "Authentication worked.", Toast.LENGTH_SHORT).show();
-
-                            } else {
-                                // If sign in fails, display a message to the user.
-                                Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                                //Toast.makeText(EmailPasswordActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
-                                //  updateUI(null);
+                                // display a toast informing that registration was successful
+                                Toast.makeText(RegisterActivity.this, "Account successfully created!", Toast.LENGTH_LONG).show();
                             }
                         }
                     });
-        }
+            // add an listener which should be triggered if something went wrong with the registration process, for example, a user with this email already exists
+            mAuth.createUserWithEmailAndPassword(email, password).addOnFailureListener(this, new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Toast.makeText(RegisterActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+                }
+            });
+
+            }
+
     }
 
 
