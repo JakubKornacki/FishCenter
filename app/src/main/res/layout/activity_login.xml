@@ -20,27 +20,25 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.084"
-            app:srcCompat="@drawable/twotone_phishing_white_48" />
+            app:srcCompat="@drawable/baseline_phishing_24" />
 
 
-        <TextView
-            android:id="@+id/signInTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="172dp"
-            android:layout_marginEnd="120dp"
-            android:fontFamily="@font/amiko_bold"
-            android:text="@string/appName"
-            android:textAlignment="center"
-            android:textColor="@color/white"
-            android:textSize="30sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+    <TextView
+        android:id="@+id/signInTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/amiko_bold"
+        android:text="@string/appName"
+        android:textAlignment="center"
+        android:textColor="@color/white"
+        android:textSize="30sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.259" />
 
-
-
-
-        <LinearLayout
+    <LinearLayout
             android:id="@+id/linearLayout1"
             android:layout_width="350dp"
             android:layout_height="48dp"
@@ -72,7 +70,7 @@
                 android:gravity="center_horizontal"
                 android:padding="10dip"
                 android:scaleType="centerCrop"
-                android:src="@drawable/baseline_account_circle_24" />
+                android:src="@drawable/baseline_alternate_email_24" />
 
         </LinearLayout>
 
@@ -100,14 +98,15 @@
                 android:textColor="@color/white"
                 android:textColorHint="@color/white" />
 
-            <ImageView
-                android:id="@+id/password_icon"
+            <ImageButton
+                android:id="@+id/passwordVisibleImageButtonActivityLogin"
                 android:layout_width="wrap_content"
                 android:layout_height="fill_parent"
                 android:gravity="center_horizontal"
+                android:background="@null"
                 android:padding="10dip"
                 android:scaleType="centerCrop"
-                android:src="@drawable/baseline_lock_24" />
+                android:src="@drawable/ic_password_visible_toggle_button" />
 
         </LinearLayout>
 
@@ -153,6 +152,7 @@
         android:textSize="15sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 

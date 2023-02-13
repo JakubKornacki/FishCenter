@@ -4,10 +4,12 @@ import static android.content.ContentValues.TAG;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,6 +30,8 @@ public class RegisterActivity extends AppCompatActivity {
     private EditText editTextPasswordRegisterActivity;
     private EditText editTextReTypePasswordRegisterActivity;
     private CheckBox termsAndConditionsCheckBoxRegisterActivity;
+    private ImageButton passwordVisibleImageButtonRegisterActivity;
+    private ImageButton reTypePasswordVisibleImageButtonRegisterActivity;
 
 
 
@@ -174,6 +178,13 @@ public class RegisterActivity extends AppCompatActivity {
             createUserWithFirebase();
         });
 
+        passwordVisibleImageButtonRegisterActivity.setOnClickListener(view ->{
+            togglePasswordVisibilityButton(passwordVisibleImageButtonRegisterActivity, editTextPasswordRegisterActivity);
+        });
+
+        reTypePasswordVisibleImageButtonRegisterActivity.setOnClickListener(view ->{
+            togglePasswordVisibilityButton(reTypePasswordVisibleImageButtonRegisterActivity, editTextReTypePasswordRegisterActivity);
+        });
 
     }
 
@@ -185,6 +196,25 @@ public class RegisterActivity extends AppCompatActivity {
         editTextPasswordRegisterActivity = findViewById(R.id.editTextPasswordRegisterActivity);
         editTextReTypePasswordRegisterActivity = findViewById(R.id.editTextReTypePasswordRegisterActivity);
         termsAndConditionsCheckBoxRegisterActivity = findViewById(R.id.termsAndConditionsCheckBoxRegisterActivity);
+        passwordVisibleImageButtonRegisterActivity = findViewById(R.id.passwordVisibleImageButtonRegisterActivity);
+        reTypePasswordVisibleImageButtonRegisterActivity = findViewById(R.id.reTypePasswordVisibleImageButtonRegisterActivity);
+
     }
 
+    private void togglePasswordVisibilityButton(ImageButton imgBtn, EditText editTextPass) {
+        /* switch between the active and inactive state as defined in the ic_password_visible_toggle_button.xml file
+            this will switch the image of the button and will set the new transformation method of the EditText
+            if null, no transformation method is specified and the password appears as plaintext on the user screen
+            otherwise set a new password transformation method which makes the password appear as sequence of dots */
+        if (imgBtn.isActivated()) {
+            imgBtn.setActivated(false);
+            editTextPass.setTransformationMethod(null);
+            editTextPass.setTransformationMethod(new PasswordTransformationMethod());
+
+        } else {
+            imgBtn.setActivated(true);
+            editTextPass.setTransformationMethod(null);
+        }
+
+    }
 }
