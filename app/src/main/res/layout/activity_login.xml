@@ -24,7 +24,7 @@
 
 
     <TextView
-        android:id="@+id/signInTextView"
+        android:id="@+id/appNameTextViewLoginActivity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="@font/amiko_bold"
@@ -54,14 +54,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="@null"
                 android:ems="10"
                 android:fontFamily="@font/amiko_semibold"
                 android:hint="@string/email"
-                android:inputType="textPersonName"
-                android:textAlignment="viewStart"
-                android:textColor="@color/white"
-                android:textColorHint="@color/white" />
+                android:inputType="textEmailAddress"
+                android:textAlignment="viewStart" />
 
             <ImageView
                 android:id="@+id/username_icon"
@@ -75,57 +72,57 @@
         </LinearLayout>
 
 
-        <LinearLayout
-            android:id="@+id/linearLayout2"
-            android:layout_width="350dp"
-            android:layout_height="48dp"
-            android:layout_marginEnd="24dp"
-            android:layout_marginBottom="368dp"
-            android:orientation="horizontal"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
+    <LinearLayout
+        android:id="@+id/linearLayout2"
+        android:layout_width="350dp"
+        android:layout_height="48dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="370dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-            <EditText
-                android:id="@+id/editTextPasswordLoginActivity"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="@null"
-                android:ems="10"
-                android:fontFamily="@font/amiko_semibold"
-                android:hint="@string/password"
-                android:inputType="textPassword"
-                android:textColor="@color/white"
-                android:textColorHint="@color/white" />
-
-            <ImageButton
-                android:id="@+id/passwordVisibleImageButtonActivityLogin"
-                android:layout_width="wrap_content"
-                android:layout_height="fill_parent"
-                android:gravity="center_horizontal"
-                android:background="@null"
-                android:padding="10dip"
-                android:scaleType="centerCrop"
-                android:src="@drawable/ic_password_visible_toggle_button" />
-
-        </LinearLayout>
-
-        <TextView
-            android:id="@+id/forgotPasswordTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="320dp"
+        <EditText
+            android:id="@+id/editTextPasswordLoginActivity"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:textAlignment="viewStart"
+            android:ems="10"
             android:fontFamily="@font/amiko_semibold"
-            android:text="@string/forgotPassword"
-            android:textColor="@android:color/secondary_text_dark"
-            android:textSize="15sp"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            android:hint="@string/password"
+            android:inputType="textPassword" />
+
+        <ImageButton
+            android:id="@+id/passwordVisibleImageButtonActivityLogin"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:background="@null"
+            android:gravity="center_horizontal"
+            android:contentDescription="@string/showPlaintextPasswordToUser"
+            android:minWidth="48dp"
+            android:padding="10dip"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_password_visible_toggle_button" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/forgotPasswordTextViewLoginActivity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="320dp"
+        android:fontFamily="@font/amiko_semibold"
+        android:text="@string/forgotPassword"
+        android:textColor="?android:attr/colorEdgeEffect"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
         <Button
-            android:id="@+id/buttonSignIn"
+            android:id="@+id/buttonSignInLoginActivity"
             android:layout_width="299dp"
             android:layout_height="51dp"
             android:layout_marginEnd="40dp"
@@ -148,7 +145,7 @@
         android:layout_marginBottom="16dp"
         android:clickable="true"
         android:text="@string/userDoesNotHaveAnAccount"
-        android:textColor="@android:color/secondary_text_dark"
+        android:textColor="@android:color/primary_text_light"
         android:textSize="15sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />

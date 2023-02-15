@@ -1,12 +1,8 @@
 package com.example.fishcenter;
 
-import static android.content.ContentValues.TAG;
-
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.method.PasswordTransformationMethod;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -35,6 +31,8 @@ public class RegisterActivity extends AppCompatActivity {
     private ImageButton passwordVisibleImageButtonRegisterActivity;
     private ImageButton reTypePasswordVisibleImageButtonRegisterActivity;
 
+
+    /*
     // if the user is already logged in then load the main page activity
     @Override
     public void onStart() {
@@ -45,14 +43,15 @@ public class RegisterActivity extends AppCompatActivity {
             Intent mainPageActivity = new Intent(getApplicationContext(), MainPageActivity.class);
             startActivity(mainPageActivity);
         }
-    }
+    } */
 
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
-        // Initialize Firebase Auth
+        // get firebase auth instance
         mAuth = FirebaseAuth.getInstance();
+
         // get reference to interactive components on the register activity
         switchToLoginActivityRegisterActivity = findViewById(R.id.switchToLoginActivityRegisterActivity);
         buttonRegisterActivity = findViewById(R.id.buttonRegisterActivity);
@@ -63,19 +62,19 @@ public class RegisterActivity extends AppCompatActivity {
         passwordVisibleImageButtonRegisterActivity = findViewById(R.id.passwordVisibleImageButtonRegisterActivity);
         reTypePasswordVisibleImageButtonRegisterActivity = findViewById(R.id.reTypePasswordVisibleImageButtonRegisterActivity);
 
+        // setup click handlers
         setupOnClickHandlers();
 
     }
 
 
-    private boolean verifyPassword(String password, String passwordRetyped) {
+    private boolean validatePassword(String password, String passwordRetyped) {
         StringBuilder errorMessagePassword = new StringBuilder();
 
         // check if passwords are empty
         if(password.isEmpty() || passwordRetyped.isEmpty()) {
             errorMessagePassword.append("* Password cannot be empty!\n");
         }
-
 
         // password length is less than 5 characters
         if(password.length() < 5) {
@@ -102,7 +101,6 @@ public class RegisterActivity extends AppCompatActivity {
             errorMessagePassword.append("* Specify at least 1 1 uppercase letter (A-Z)!\n");
         }
 
-
         // passwords do not match and both are not empty
         if(!(password.equals(passwordRetyped)) && !(password.isEmpty() && passwordRetyped.isEmpty())) {
             errorMessagePassword.append("* Passwords do not match!");
@@ -118,7 +116,7 @@ public class RegisterActivity extends AppCompatActivity {
         return true;
     }
 
-    private boolean verifyEmail(String email) {
+    private boolean validateEmail(String email) {
         StringBuilder errorMessageEmail = new StringBuilder();
         // make sure email is not empty
         if(email.isEmpty()) {
@@ -134,6 +132,7 @@ public class RegisterActivity extends AppCompatActivity {
         if((email.indexOf('.') == -1 ) && email.indexOf('@') == -1 ) {
             errorMessageEmail.append("* E-mail needs to contain '.' and '@'!");
         }
+
         // display the error messages and return false, clear the error message
         if(errorMessageEmail.length() != 0) {
             editTextEmailRegisterActivity.setError(errorMessageEmail.toString());
@@ -160,14 +159,14 @@ public class RegisterActivity extends AppCompatActivity {
         String passwordReTyped = editTextReTypePasswordRegisterActivity.getText().toString();
 
         // check for email correctness
-        boolean emailVerified = verifyEmail(email);
+        boolean emailValidated = validateEmail(email);
         // check for password correctness
-        boolean passwordVerified = verifyPassword(password, passwordReTyped);
+        boolean passwordValidated = validatePassword(password, passwordReTyped);
         // check if checkbox is ticked
         boolean checkBoxTicked = verifyCheckBox();
 
 
-        if(emailVerified && passwordVerified && checkBoxTicked) {
+        if(emailValidated && passwordValidated && checkBoxTicked) {
             // add a listener which is triggered once the registration process is complete
             mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                         @Override

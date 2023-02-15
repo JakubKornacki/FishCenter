@@ -38,14 +38,11 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="@null"
             android:ems="10"
             android:fontFamily="@font/amiko_semibold"
+            android:inputType="textEmailAddress"
             android:hint="@string/email"
-            android:inputType="textPersonName"
-            android:textAlignment="viewStart"
-            android:textColor="@color/white"
-            android:textColorHint="@color/white" />
+            android:textAlignment="viewStart" />
 
         <ImageView
             android:id="@+id/username_icon"
@@ -73,14 +70,11 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="@null"
             android:ems="10"
             android:fontFamily="@font/amiko_semibold"
             android:hint="@string/password"
             android:inputType="textPassword"
-            android:textAlignment="viewStart"
-            android:textColor="@color/white"
-            android:textColorHint="@color/white" />
+            android:textAlignment="viewStart" />
 
         <ImageButton
             android:id="@+id/passwordVisibleImageButtonRegisterActivity"
@@ -112,13 +106,11 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="@null"
+            android:textAlignment="viewStart"
             android:ems="10"
             android:fontFamily="@font/amiko_semibold"
             android:hint="@string/reTypePassword"
-            android:inputType="textPassword"
-            android:textColor="@color/white"
-            android:textColorHint="@color/white" />
+            android:inputType="textPassword" />
 
         <ImageButton
             android:id="@+id/reTypePasswordVisibleImageButtonRegisterActivity"
@@ -139,7 +131,7 @@
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="252dp"
         android:text="@string/termsAndConditionsCheckBox"
-        android:textColor="@android:color/secondary_text_dark"
+        android:textColor="@android:color/primary_text_light"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -167,7 +159,7 @@
         android:clickable="true"
         android:focusable="true"
         android:text="@string/userAlreadyHasAnAccount"
-        android:textColor="@android:color/secondary_text_dark"
+        android:textColor="@android:color/primary_text_light"
         android:textSize="15sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />

@@ -11,7 +11,9 @@
     <string name="userDoesNotHaveAnAccount">Don\'t have an account? Register</string>
     <string name="userAlreadyHasAnAccount">Already have an account? Log in</string>
     <string name="termsAndConditionsCheckBox">Accept our terms &amp; conditions</string>
-    <string name="mainActivity">Main Activity</string>
+    <string name="submit">Submit</string>
+    <string name="forgotPasswordDescription">Enter your e-mail address below so that we can send you a password reset e-mail.</string>
+    <string name="showPlaintextPasswordToUser">Show user plaintext or dotted password</string>
 
 
 </resources>

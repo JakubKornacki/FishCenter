@@ -10,7 +10,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -29,35 +28,25 @@ public class LoginActivity extends AppCompatActivity {
     private TextView registerTextViewLoginActivity;
     private ImageButton passwordVisibleImageButtonActivityLogin;
     private FirebaseAuth mAuth;
-
-    /*
-    // if the user is already logged in then load the main page activity
-    @Override
-    public void onStart() {
-        super.onStart();
-        // Check if user is signed in (non-null) and update UI accordingly.
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if(currentUser != null){
-            Intent mainPageActivity = new Intent(getApplicationContext(), MainPageActivity.class);
-            startActivity(mainPageActivity);
-        }
-    } */
+    private TextView forgotPasswordTextViewLoginActivity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        // get firebase auth instance
+        mAuth = FirebaseAuth.getInstance();
+        // change the name of this view to "Sign In" from "Fish Center", way to do it found here https://stackoverflow.com/a/29455956 changing android:label in Android Manifest did not work.
+        getSupportActionBar().setTitle(R.string.signIn);
         // get references to different components visible on this activity such as editTexts and Buttons
         editTextEmailLoginActivity = findViewById(R.id.editTextEmailLoginActivity);
         editTextPasswordLoginActivity = findViewById(R.id.editTextPasswordLoginActivity);
-        signInButtonLoginActivity = findViewById(R.id.buttonSignIn);
+        signInButtonLoginActivity = findViewById(R.id.buttonSignInLoginActivity);
         registerTextViewLoginActivity =  findViewById(R.id.switchToLoginActivityRegisterActivity);
         passwordVisibleImageButtonActivityLogin = findViewById(R.id.passwordVisibleImageButtonActivityLogin);
+        forgotPasswordTextViewLoginActivity = findViewById(R.id.forgotPasswordTextViewLoginActivity);
         // set up the key handlers of all buttons visible on this page
         setupOnClickHandlers();
-        // get firebase auth instance
-        mAuth = FirebaseAuth.getInstance();
-
     }
 
 
@@ -74,12 +63,20 @@ public class LoginActivity extends AppCompatActivity {
             togglePasswordVisibilityButton(passwordVisibleImageButtonActivityLogin, editTextPasswordLoginActivity);
         });
 
+        // sign in button
         signInButtonLoginActivity.setOnClickListener(view -> {
             signInWithFirebase();
         });
+
+        forgotPasswordTextViewLoginActivity.setOnClickListener(view -> {
+            Intent forgotPasswordActivity = new Intent(getApplicationContext(), ForgotPasswordActivity.class);
+            startActivity(forgotPasswordActivity);
+        });
+
+
     }
 
-    private boolean verifyEmail(String email) {
+    private boolean validateEmail(String email) {
         StringBuilder errorMessageEmail = new StringBuilder();
 
         // make sure email is not empty
@@ -97,6 +94,7 @@ public class LoginActivity extends AppCompatActivity {
             errorMessageEmail.append("* E-mail needs to contain '.' and '@'!\n");
         }
 
+        // display error messages if there are any
         if(errorMessageEmail.length() != 0) {
             editTextEmailLoginActivity.setError(errorMessageEmail.toString());
             return false;
@@ -104,13 +102,14 @@ public class LoginActivity extends AppCompatActivity {
         return true;
     }
 
-    private boolean verifyPassword(String password) {
+    private boolean validatePassword(String password) {
         StringBuilder errorMessagePassword = new StringBuilder();
 
         if(password.isEmpty()) {
             errorMessagePassword.append("* Password cannot be empty!\n");
         }
 
+        // display error messages if there are any
         if(errorMessagePassword.length() != 0) {
             editTextPasswordLoginActivity.setError(errorMessagePassword.toString());
             return false;
@@ -124,18 +123,16 @@ public class LoginActivity extends AppCompatActivity {
         String email = editTextEmailLoginActivity.getText().toString();
         String password = editTextPasswordLoginActivity.getText().toString();
 
-        boolean emailVerified = verifyEmail(email);
-        boolean passwordVerified = verifyPassword(password);
+        boolean emailValidated = validateEmail(email);
+        boolean passwordValidated = validatePassword(password);
 
 
-        if(emailVerified && passwordVerified) {
+        if(emailValidated && passwordValidated) {
             mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
                     if (task.isSuccessful()) {
                         // Sign in success, update UI with the signed-in user's information
-                        // FirebaseUser user = mAuth.getCurrentUser();
-                        //updateUI(user);
                         Intent mainPageActivity = new Intent(getApplicationContext(), MainPageActivity.class);
                         startActivity(mainPageActivity);
                     }
