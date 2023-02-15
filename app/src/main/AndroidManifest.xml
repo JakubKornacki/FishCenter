@@ -21,19 +21,24 @@
         </activity>
 
         <activity android:name=".RegisterActivity"
-                  android:label="@string/signUp2"
-                  android:exported="true">
+                  android:parentActivityName=".LoginActivity"
+                  android:label="@string/signUp">
         </activity>
 
         <activity android:name=".MainPageActivity"
-                  android:label="@string/appName"
-                  android:exported="true">
+                  android:label="@string/appName">
         </activity>
 
         <activity android:name=".ForgotPasswordActivity"
-                  android:label="@string/forgotPassword"
-                  android:exported="true">
+                  android:parentActivityName=".LoginActivity"
+                  android:label="@string/forgotPassword">
         </activity>
+
+        <activity android:name=".FishRecognitionActivity"
+            android:parentActivityName=".MainPageActivity"
+            android:label="@string/fishRecognition">
+        </activity>
+
 
         <meta-data android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />

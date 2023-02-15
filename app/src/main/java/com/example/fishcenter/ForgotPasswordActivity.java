@@ -22,6 +22,10 @@ public class ForgotPasswordActivity extends AppCompatActivity {
     private Button submitButtonForgotPasswordActivity;
     private FirebaseAuth auth;
 
+
+
+
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

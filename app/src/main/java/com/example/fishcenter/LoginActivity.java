@@ -16,6 +16,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 
 public class LoginActivity extends AppCompatActivity {
@@ -29,6 +30,19 @@ public class LoginActivity extends AppCompatActivity {
     private ImageButton passwordVisibleImageButtonActivityLogin;
     private FirebaseAuth mAuth;
     private TextView forgotPasswordTextViewLoginActivity;
+
+/*
+    // if the user is still authenticated then redirect him to the main page of the application
+    @Override
+    protected void onStart( ) {
+        super.onStart();
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if(currentUser != null){
+            Intent mainPageActivity = new Intent(getApplicationContext(), MainPageActivity.class);
+            startActivity(mainPageActivity);
+        }
+    } */
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
