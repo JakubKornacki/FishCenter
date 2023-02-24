@@ -31,7 +31,7 @@ public class LoginActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private TextView forgotPasswordTextViewLoginActivity;
 
-/*
+
     // if the user is still authenticated then redirect him to the main page of the application
     @Override
     protected void onStart( ) {
@@ -41,7 +41,7 @@ public class LoginActivity extends AppCompatActivity {
             Intent mainPageActivity = new Intent(getApplicationContext(), MainPageActivity.class);
             startActivity(mainPageActivity);
         }
-    } */
+    }
 
 
     @Override

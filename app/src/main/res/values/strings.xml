@@ -14,4 +14,10 @@
     <string name="forgotPasswordDescription">Enter your e-mail address below so that we can send you a password reset e-mail.</string>
     <string name="showPlaintextPasswordToUser">Show user plaintext or dotted password</string>
     <string name="fishRecognition">Fish Recognition</string>
+    <string name="map">Map</string>
+    <string name="addImage">Add Image</string>
+    <string name="identifyFish">Identify Fish</string>
+
+
+
 </resources>

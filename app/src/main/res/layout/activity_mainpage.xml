@@ -20,16 +20,24 @@
         <ImageButton
             android:id="@+id/fishRecognitionImageButtonMainPageActivity"
             android:contentDescription=""
-
             android:layout_width="0dp"
             android:layout_weight=".30"
-
-
             android:layout_height="match_parent"
             android:background="@null"
             app:srcCompat="@drawable/baseline_photo_camera_24" />
-    </LinearLayout>
 
+        <ImageButton
+            android:id="@+id/googleMapsButtonMainPageActivity"
+            android:contentDescription=""
+            android:layout_width="0dp"
+            android:layout_weight=".30"
+            android:layout_height="match_parent"
+            android:background="@null"
+            app:srcCompat="@drawable/baseline_fmd_good_24"/>
+
+
+
+    </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="60dp"
