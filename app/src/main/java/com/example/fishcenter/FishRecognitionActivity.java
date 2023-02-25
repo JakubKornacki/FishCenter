@@ -40,8 +40,13 @@ public class FishRecognitionActivity extends AppCompatActivity {
     private Button addImageButtonFishRecognitionActivity;
     private ImageView imageViewFishRecognitionActivity;
     private Uri originalImageUri;
+    private FishImage fishImage;
     private ActivityResultLauncher<PickVisualMediaRequest> pickMedia;
     private JSONObject fishialImageRecognitionData;
+
+    private JSONObject sampleFishialAPIFeedback;
+
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -50,6 +55,7 @@ public class FishRecognitionActivity extends AppCompatActivity {
         recognizeFishButtonFishRecognitionActivity = findViewById(R.id.recognizeFishButtonFishRecognitionActivity);
         imageViewFishRecognitionActivity = findViewById(R.id.imageViewFishRecognitionActivity);
         addImageButtonFishRecognitionActivity = findViewById(R.id.addImageButtonFishRecognitionActivity);
+
 
         addImageButtonFishRecognitionActivity.setOnClickListener(view -> {
             launchPhotoPicker();
@@ -64,6 +70,9 @@ public class FishRecognitionActivity extends AppCompatActivity {
             Thread recognizeFishThread = new Thread() {
                 @Override
                 public void run() {
+                    FishImage fishImage = new FishImage(originalImageUri, getContentResolver());
+
+                    /*
                     // get the access token to use the Fishial.AI api
                     JSONObject accessToken = fetchAuthorizationToken();
                     // get image mime type
@@ -79,8 +88,8 @@ public class FishRecognitionActivity extends AppCompatActivity {
                     // obtain data which will be used for uploading the image onto the cloud
                     JSONObject dataForCloudImageUpload = obtainDataForCloudUpload(accessToken, imageName, imageMimeType, imageSize, base64EncodedMD5Checksum);
                     uploadAnImageToTheCloud(dataForCloudImageUpload, imageSize);
-                    fishialImageRecognitionData = fishDetection(dataForCloudImageUpload, accessToken);
-                    System.out.println(fishialImageRecognitionData);
+                    fishialImageRecognitionData = fishDetection(dataForCloudImageUpload, accessToken); */
+
                 }
             };
             recognizeFishThread.start();
@@ -163,13 +172,7 @@ public class FishRecognitionActivity extends AppCompatActivity {
     }
 
 
-    // use the ContentResolver and the image Uri obtained earlier to extract the mime type of the image
-    //https://developer.android.com/training/secure-file-sharing/retrieve-info
-    private String getImageMimeType(Uri imageUri) {
-        ContentResolver contentResolver = this.getContentResolver();
-        String imageMimeType = contentResolver.getType(imageUri);
-        return imageMimeType;
-    }
+
 
 
     private String getImageName(Uri originalImageUri) {
@@ -347,17 +350,12 @@ public class FishRecognitionActivity extends AppCompatActivity {
     private JSONObject fishDetection(JSONObject imageDataOnCloudJSON, JSONObject tokenJSON) {
         JSONObject response = null;
         try {
-            System.out.println(imageDataOnCloudJSON);
-            System.out.println(tokenJSON);
             String urlPath = imageDataOnCloudJSON.getString("signed-id");
             String token = tokenJSON.getString("access_token");
-            URL url = new URL("https://api.fishial.ai/v1/recognition/image?q=" + urlPath);
-            // establish the connection with the endpoint
-            HttpURLConnection http = (HttpURLConnection) url.openConnection();
-            http.setRequestMethod("GET");
-            http.setRequestProperty("Authorization", "Bearer " + token);
-            http.setRequestProperty("Accept", "application/json");
-            http.setDoOutput(true);
+
+            URL url = new URL("https://api.fishial.ai/v1/recognition/image?q="+urlPath);
+            HttpURLConnection http = (HttpURLConnection)url.openConnection();
+            http.setRequestProperty("Authorization", "Bearer "+token);
 
             if (http.getResponseCode() == 200) {
                 BufferedReader responseDataReader = new BufferedReader(new InputStreamReader(http.getInputStream()));
@@ -368,25 +366,22 @@ public class FishRecognitionActivity extends AppCompatActivity {
                 while ((line = responseDataReader.readLine()) != null) {
                     httpResponse.append(line);
                 }
+                // close the buffered reader
                 responseDataReader.close();
 
+                // get fish data in an JSONObject
                 response = new JSONObject(httpResponse.toString());
-            } else {
-                System.out.println(http.getResponseCode());
-                System.out.println(http.getResponseMessage());
             }
-
+            // close the http session
             http.disconnect();
-
         } catch (JSONException e) {
-            throw new RuntimeException(e);
-        } catch (ProtocolException e) {
-            throw new RuntimeException(e);
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(e);}
+        catch (MalformedURLException ex) {
+            throw new RuntimeException(ex);
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
         }
+
         return response;
     }
 
