@@ -1,0 +1,23 @@
+<resources>
+    <string name="appName">Fish Center</string>
+    <string name="signIn">Sign In</string>
+    <string name="email">E-mail</string>
+    <string name="login">LOGIN</string>
+    <string name="password">Password</string>
+    <string name="reTypePassword">Re-type Password</string>
+    <string name="forgotPassword">Forgot password?</string>
+    <string name="signUp">Sign Up</string>
+    <string name="userDoesNotHaveAnAccount">Don\'t have an account? Register</string>
+    <string name="userAlreadyHasAnAccount">Already have an account? Log in</string>
+    <string name="termsAndConditionsCheckBox">Accept our terms &amp; conditions</string>
+    <string name="submit">Submit</string>
+    <string name="forgotPasswordDescription">Enter your e-mail address below so that we can send you a password reset e-mail.</string>
+    <string name="showPlaintextPasswordToUser">Show user plaintext or dotted password</string>
+    <string name="fishRecognition">Fish Recognition</string>
+    <string name="map">Map</string>
+    <string name="addImage">Add Image</string>
+    <string name="identifyFish">Identify Fish</string>
+
+
+
+</resources>

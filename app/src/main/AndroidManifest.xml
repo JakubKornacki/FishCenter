@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"></uses-permission>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"></uses-permission>
+    <uses-permission android:name="android.permission.INTERNET"></uses-permission>
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher_round"
+        android:label="@string/appName"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.FishCenter"
+        tools:targetApi="31">
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="${MAPS_API_KEY}" />
+
+        <activity android:name=".LoginActivity"
+                  android:exported="true"
+                  android:screenOrientation="portrait">
+                  <intent-filter>
+                    <action android:name="android.intent.action.MAIN" />
+                    <category android:name="android.intent.category.LAUNCHER" />
+                  </intent-filter>
+        </activity>
+
+        <activity android:name=".RegisterActivity"
+                  android:parentActivityName=".LoginActivity"
+                  android:label="@string/signUp"
+                  android:screenOrientation="portrait">
+        </activity>
+
+        <activity android:name=".MainPageActivity"
+                  android:label="@string/appName"
+                  android:screenOrientation="portrait">
+        </activity>
+
+        <activity android:name=".ForgotPasswordActivity"
+                  android:parentActivityName=".LoginActivity"
+                  android:label="@string/forgotPassword"
+                  android:screenOrientation="portrait">
+        </activity>
+
+        <activity android:name=".FishRecognitionActivity"
+                  android:parentActivityName=".MainPageActivity"
+                  android:label="@string/fishRecognition"
+                  android:screenOrientation="portrait">
+        </activity>
+
+        <activity android:name=".MapActivity"
+                  android:parentActivityName=".MainPageActivity"
+                  android:label="@string/map"
+                  android:screenOrientation="portrait">
+        </activity>
+
+        <meta-data android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
+
+    </application>
+
+</manifest>
