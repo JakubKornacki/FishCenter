@@ -3,6 +3,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -26,6 +27,7 @@ public class FishialAPIFetchFishData extends Thread {
     private JSONObject fishialImageRecognitionData;
     private FishImage fishImage;
     private Context context;
+
 
     public FishialAPIFetchFishData(FishImage fishImage, Context context) {
         this.fishImage = fishImage;
@@ -66,51 +68,65 @@ public class FishialAPIFetchFishData extends Thread {
         }
     }
 
+
     private ArrayList<Fish> parseJSONToFishObjectArrayList(JSONObject fishData){
         ArrayList<Fish> fishes = new ArrayList<>();
         try {
             // get the species arrayList from fishData (there is one entry for each fish identified in an image)
-                JSONObject result = fishData.getJSONArray("results").getJSONObject(0);
+            for(int i = 0; i < fishData.getJSONArray("results").length(); i++) {
+                JSONObject result = fishData.getJSONArray("results").getJSONObject(i);
                 JSONArray species = result.getJSONArray("species");
                 for (int j = 0; j < species.length(); j++) {
-                    // fish entry currently processed
+                    // always first object
                     JSONObject fishEntryInJSON = species.getJSONObject(0);
 
                     // get fish description as variables
-                    String latinName = fishEntryInJSON.getString("name");
-                    float accuracy = Float.parseFloat(fishEntryInJSON.getString("accuracy"));
+                    String latinName = (fishEntryInJSON.getString("name") != null) ? fishEntryInJSON.getString("name") : "Unknown";
+                    float accuracy = (fishEntryInJSON.getString("accuracy") != null) ? Float.parseFloat(fishEntryInJSON.getString("accuracy")) : null;
 
                     JSONObject fishAnglerData = fishEntryInJSON.getJSONObject("fishangler-data");
-                    String title = fishAnglerData.getString("title");
-                    String mediaUri = fishAnglerData.getJSONObject("photo").getString("mediaUri");
+                    String title = (fishAnglerData.has("title")) ? fishAnglerData.getString("title") : "Unknown";
 
+                    String mediaUri = null;
+                    if(fishAnglerData.has("photo")) {
+                        if(fishAnglerData.getJSONObject("photo").has("mediaUri")) {
+                            mediaUri = fishAnglerData.getJSONObject("photo").getString("mediaUri");
+                        }
+                    }
 
-                    // parse out common names from JSON array to String array
-                    JSONArray commonNamesJSON = fishAnglerData.getJSONArray("commonNames");
-                    String[] commonNames = new String[commonNamesJSON.length()];
-                    for (int k = 0; k < commonNamesJSON.length(); k++) {
-                        commonNames[k] = commonNamesJSON.getString(k);
+                    String[] commonNames = null;
+                    if(fishAnglerData.has("commonNames")) {
+                        // parse out common names from JSON array to String array
+                        JSONArray commonNamesJSON = fishAnglerData.getJSONArray("commonNames");
+                        commonNames = new String[commonNamesJSON.length()];
+                        for (int k = 0; k < commonNamesJSON.length(); k++) {
+                            commonNames[k] = commonNamesJSON.getString(k);
+                        }
                     }
 
                     // more fish variables
-                    String distribution = fishAnglerData.getString("distribution");
+                    String distribution = (fishAnglerData.has("distribution")) ? fishAnglerData.getString("distribution") : "Unknown";
                     boolean scales = fishAnglerData.getBoolean("brack");
                     boolean saltWater = fishAnglerData.getBoolean("saltwater");
                     boolean freshWater = fishAnglerData.getBoolean("fresh");
-                    String coloration = fishAnglerData.getString("coloration");
-                    String feedingBehaviour = fishAnglerData.getString("feedingBehavior");
-                    String healthWarnings = fishAnglerData.getString("healthWarnings");
-                    String foodValue = fishAnglerData.getString("foodValue");
+                    String coloration = (fishAnglerData.has("coloration")) ? fishAnglerData.getString("coloration") : "Unknown";
+                    String feedingBehaviour = (fishAnglerData.has("feedingBehaviour")) ? fishAnglerData.getString("feedingBehaviour") : "Unknown";
+                    String healthWarnings = (fishAnglerData.has("healthWarnings")) ? fishAnglerData.getString("healthWarnings") : "Unknown";
+                    String foodValue = (fishAnglerData.has("foodValue")) ? fishAnglerData.getString("foodValue") : "Unknown" ;
+
 
                     // parse out names of similar species for this fish
-                    JSONArray similarSpeciesJSON = fishAnglerData.getJSONArray("similarSpecies");
-                    String[] similarSpecies = new String[similarSpeciesJSON.length()];
-                    for (int l = 0; l < similarSpeciesJSON.length(); l++) {
-                        JSONObject similarFishJSON = similarSpeciesJSON.getJSONObject(l);
-                        similarSpecies[l] = similarFishJSON.getString("description");
+                    String[] similarSpecies = null;
+                    if(fishAnglerData.has("similarSpecies")) {
+                        JSONArray similarSpeciesJSON = fishAnglerData.getJSONArray("similarSpecies");
+                        similarSpecies = new String[similarSpeciesJSON.length()];
+                        for (int l = 0; l < similarSpeciesJSON.length(); l++) {
+                            JSONObject similarFishJSON = similarSpeciesJSON.getJSONObject(l);
+                            similarSpecies[l] = similarFishJSON.getString("description");
+                        }
                     }
                     // last bit of information
-                    String environmentDetail = fishAnglerData.getString("environmentDetail");
+                    String environmentDetail = (fishAnglerData.has("environmentDetail")) ? fishAnglerData.getString("environmentDetail") : "Unknown" ;
 
                     // create a Fish object out of the gathered info
                     fishes.add(new Fish(
@@ -131,6 +147,7 @@ public class FishialAPIFetchFishData extends Thread {
                             environmentDetail
                     ));
                 }
+            }
             } catch (JSONException ex) {
             throw new RuntimeException(ex);
         }

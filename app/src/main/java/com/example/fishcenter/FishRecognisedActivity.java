@@ -33,7 +33,7 @@ import java.util.ArrayList;
 
 public class FishRecognisedActivity extends AppCompatActivity {
     private ArrayList<Fish> fishes;
-    private ScrollView scrollViewFishRecognisedActivity;
+    private LinearLayout linearLayoutInsideScrollView;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,33 +45,36 @@ public class FishRecognisedActivity extends AppCompatActivity {
         Bundle packagedBundle = getIntent().getBundleExtra("bundle");
         // extract fishes ArrayList out from the bundle
         fishes = (ArrayList<Fish>) packagedBundle.getSerializable("fishes");
-        scrollViewFishRecognisedActivity = findViewById(R.id.scrollViewFishRecognisedActivity);
+        linearLayoutInsideScrollView = findViewById(R.id.linearLayoutInsideScrollView);
 
         // iterate through the returned fishes and append each table to the scroll view
         for(int i = 0; i < fishes.size(); i++) {
-            TableLayout table = drawTable(fishes.get(i));
-            scrollViewFishRecognisedActivity.addView(table);
+            LinearLayout table = drawTable(fishes.get(i));
+            linearLayoutInsideScrollView.addView(table);
         }
-
-        scrollViewFishRecognisedActivity = findViewById(R.id.scrollViewFishRecognisedActivity);
-
-
     }
 
-    // the below method creates a tables that is inserted into a scroll view dynamically
+    // the below method creates a tables that is inserted into a scroll view dynamically which is inserted into a linear layout
     // it also uses predefined strings with HTML markup which are converted into SpannableString objects
     // and inserted into the table row along with the fish data
     // https://developer.android.com/guide/topics/resources/string-resource
-    private TableLayout drawTable(Fish fish) {
+    private LinearLayout drawTable(Fish fish) {
         // reference data
         Context con = getApplicationContext();
         // child should inherits its parent layout params
+        LinearLayout.LayoutParams linearLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         TableLayout.LayoutParams tabLayoutParams = new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT, TableLayout.LayoutParams.WRAP_CONTENT);
         TableRow.LayoutParams tableRowParams = new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.WRAP_CONTENT, 1);
+
+        // linear layout to store the table
+        LinearLayout linearLayout = new LinearLayout(con);
+        linearLayout.setLayoutParams(linearLayoutInsideScrollView.getLayoutParams());
+        linearLayout.setOrientation(LinearLayout.VERTICAL);
+        linearLayout.setBackground(getDrawable(R.drawable.layout_rounded_corners));
         // create the tablelayout
         TableLayout tableLayout = new TableLayout(con);
-        tableLayout.setLayoutParams(scrollViewFishRecognisedActivity.getLayoutParams());
-        tableLayout.setBackground(getDrawable(R.drawable.layout_rounded_corners));
+        tableLayout.setLayoutParams(linearLayoutParams);
+        linearLayout.addView(tableLayout);
 
         // create the header row
         TableRow headerRow = new TableRow(con);
@@ -276,7 +279,7 @@ public class FishRecognisedActivity extends AppCompatActivity {
         environmentalsDetailText.setTextSize(14);
         environmentalDetailRow.addView(environmentalsDetailText);
 
-        return tableLayout;
+        return linearLayout;
     }
 
     private String predAccurString(float predAccuracy) {
@@ -301,10 +304,13 @@ public class FishRecognisedActivity extends AppCompatActivity {
         Spanned span = HtmlCompat.fromHtml(getString(resID), HtmlCompat.FROM_HTML_MODE_LEGACY);
         // requires a spannable string builder to append normal fish text to the bold span
         SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(span);
-        for(int i = 0; i < texts.length-2; i++) {
-            spannableStringBuilder.append(" " + texts[i] + ", ");
+        for(int i = 0; i < texts.length; i++) {
+            if(i != texts.length) {
+                spannableStringBuilder.append(" " + texts[i] + ", ");
+            } else {
+                spannableStringBuilder.append(" " + texts[i] + ", ");
+            }
         }
-        spannableStringBuilder.append(texts[texts.length-1]);
         return spannableStringBuilder;
     }
 

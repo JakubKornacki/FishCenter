@@ -19,6 +19,11 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import org.json.JSONObject;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+
 public class FishRecognitionActivity extends AppCompatActivity {
 
     private Button identifyFishButton;
@@ -47,11 +52,42 @@ public class FishRecognitionActivity extends AppCompatActivity {
                 Toast.makeText(this, "Add an image!", Toast.LENGTH_SHORT).show();
                 return;
             }
+            fishImageLinearLayout.setClickable(false);
+            identifyFishButton.setClickable(false);
             linearLayoutIndeterminateProgressBar.setVisibility(View.VISIBLE);
             FishImage fishImage = new FishImage(originalImageUri, getContentResolver());
             // start the new thread to fetch data about the fish
             FishialAPIFetchFishData fetchFishialRecognitionDataThread = new FishialAPIFetchFishData(fishImage, this);
             fetchFishialRecognitionDataThread.start();
+
+
+            // thread that check if the Fishial requests have been completed every 200 milliseconds
+            // requires a the runOnUiThread with new Runnable object that will set the identify button and image view clickable
+            // it will also make the linear layout with the progress bar invisible
+            // runOnUiThread is needed because only the thread that created the view hierarchy can modify the views
+            // otherwise the Activity will crash and an exception will be raised
+            Thread hideSpinnerAndEnableClicking = new Thread() {
+                @Override
+                public void run() {
+                    super.run();
+                    try {
+                        Thread.sleep(200);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                // if data has been fetched and the thread has finished
+                                if(!fetchFishialRecognitionDataThread.isAlive()) {
+                                    fishImageLinearLayout.setClickable(true);
+                                    identifyFishButton.setClickable(true);
+                                    linearLayoutIndeterminateProgressBar.setVisibility(View.INVISIBLE);
+                                }
+                            }
+                        });
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            };
         });
 
 
@@ -83,5 +119,6 @@ public class FishRecognitionActivity extends AppCompatActivity {
         // although the compiler complains about passing an invalid type to the setMediaType method the Photo Picker works fine and the application runs without crashing
         pickMedia.launch(new PickVisualMediaRequest.Builder().setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly.INSTANCE).build());
     }
+
 
 }
