@@ -59,8 +59,6 @@ public class FishRecognitionActivity extends AppCompatActivity {
             // start the new thread to fetch data about the fish
             FishialAPIFetchFishData fetchFishialRecognitionDataThread = new FishialAPIFetchFishData(fishImage, this);
             fetchFishialRecognitionDataThread.start();
-
-
             // thread that check if the Fishial requests have been completed every 200 milliseconds
             // requires a the runOnUiThread with new Runnable object that will set the identify button and image view clickable
             // it will also make the linear layout with the progress bar invisible
@@ -70,25 +68,26 @@ public class FishRecognitionActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     super.run();
-                    try {
-                        Thread.sleep(200);
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 // if data has been fetched and the thread has finished
-                                if(!fetchFishialRecognitionDataThread.isAlive()) {
-                                    fishImageLinearLayout.setClickable(true);
-                                    identifyFishButton.setClickable(true);
-                                    linearLayoutIndeterminateProgressBar.setVisibility(View.INVISIBLE);
+                                while(!fetchFishialRecognitionDataThread.isAlive()) {
+                                    try {
+                                        fishImageLinearLayout.setClickable(true);
+                                        identifyFishButton.setClickable(true);
+                                        linearLayoutIndeterminateProgressBar.setVisibility(View.INVISIBLE);
+                                        Thread.sleep(200);
+                                    } catch (InterruptedException e) {
+                                        throw new RuntimeException(e);
+                                    }
                                 }
                             }
                         });
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
                     }
-                }
-            };
-        });
+              };
+            hideSpinnerAndEnableClicking.start();
+            });
 
 
         // set an event handler for ActivityResultLauncher<PickVisualMediaRequest> (Photo picker)

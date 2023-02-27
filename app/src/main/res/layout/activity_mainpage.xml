@@ -18,7 +18,7 @@
         app:layout_constraintVertical_bias="1.0">
 
         <ImageButton
-            android:id="@+id/fishRecognitionImageButtonMainPageActivity"
+            android:id="@+id/fishRecognitionImageButton"
             android:contentDescription=""
             android:layout_width="0dp"
             android:layout_weight=".30"
@@ -27,7 +27,7 @@
             app:srcCompat="@drawable/baseline_photo_camera_24" />
 
         <ImageButton
-            android:id="@+id/googleMapsButtonMainPageActivity"
+            android:id="@+id/googleMapsButton"
             android:contentDescription=""
             android:layout_width="0dp"
             android:layout_weight=".30"

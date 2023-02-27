@@ -23,7 +23,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
-            android:background="@drawable/layout_rounded_corners"
+            android:background="@drawable/layout_rounded_corners_white_15"
             android:orientation="horizontal">
 
             <TextView
@@ -44,7 +44,7 @@
             android:layout_width="match_parent"
             android:layout_height="350dp"
             android:layout_margin="15dp"
-            android:background="@drawable/layout_rounded_corners"
+            android:background="@drawable/layout_rounded_corners_white_15"
             android:orientation="horizontal"
             android:visibility="visible">
 
@@ -62,7 +62,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="15dp"
-            android:background="@drawable/layout_rounded_corners"
+            android:background="@drawable/layout_rounded_corners_white_15"
             android:orientation="horizontal"
             android:visibility="visible">
 
@@ -84,7 +84,7 @@
         android:id="@+id/linearLayoutIndeterminateProgressBar"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/graywithopacity"
+        android:background="@color/graywithopacity75"
         android:orientation="vertical"
         android:visibility="invisible"
         android:gravity="center"

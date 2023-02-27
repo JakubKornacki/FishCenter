@@ -1,6 +1,8 @@
 package com.example.fishcenter;
 
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Objects;
 
 public class Fish implements Serializable {
     private String latinName;
@@ -98,4 +100,22 @@ public class Fish implements Serializable {
         return environmentDetail;
     }
 
+    // hashcode and equals methods need to be Overridden to ensure that the hashset can differentiate between two objects
+    // auto generated equals method
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Fish fish = (Fish) o;
+        return Float.compare(fish.predictionAccuracy, predictionAccuracy) == 0 && scales == fish.scales && saltWater == fish.saltWater && freshWater == fish.freshWater && Objects.equals(latinName, fish.latinName) && Objects.equals(fishName, fish.fishName) && Objects.equals(mediaUri, fish.mediaUri) && Arrays.equals(commonNames, fish.commonNames) && Objects.equals(distribution, fish.distribution) && Objects.equals(coloration, fish.coloration) && Objects.equals(feedingBehaviour, fish.feedingBehaviour) && Objects.equals(healthWarnings, fish.healthWarnings) && Objects.equals(foodValue, fish.foodValue) && Arrays.equals(similarSpecies, fish.similarSpecies) && Objects.equals(environmentDetail, fish.environmentDetail);
+    }
+
+    // auto generated hash code method
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(latinName, predictionAccuracy, fishName, mediaUri, distribution, scales, saltWater, freshWater, coloration, feedingBehaviour, healthWarnings, foodValue, environmentDetail);
+        result = 31 * result + Arrays.hashCode(commonNames);
+        result = 31 * result + Arrays.hashCode(similarSpecies);
+        return result;
+    }
 }

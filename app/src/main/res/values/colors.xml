@@ -8,5 +8,9 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="gray">#f2ebeb</color>
-    <color name="graywithopacity">#BFF2EBEB</color>
+    <color name="graywithopacity75">#BFF2EBEB</color>
+    <color name="graywithopacity45">#73F2EBEB</color>
+    <color name="graywithopacity25">#40F2EBEB</color>
+    <color name="ordinaryButtonColor">#7239f7</color>
+    <color name="whitewithopacity55">#8CFFFFFF</color>
 </resources>

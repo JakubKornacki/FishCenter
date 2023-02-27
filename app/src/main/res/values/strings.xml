@@ -1,18 +1,17 @@
 <resources>
     <string name="appName">Fish Center</string>
     <string name="signIn">Sign In</string>
+    <string name="signUp">Sign Up</string>
     <string name="email">E-mail</string>
     <string name="login">LOGIN</string>
     <string name="password">Password</string>
-    <string name="reTypePassword">Re-type Password</string>
+    <string name="retypePassword">Re-type Password</string>
     <string name="forgotPassword">Forgot password?</string>
-    <string name="signUp">Sign Up</string>
-    <string name="userDoesNotHaveAnAccount">Don\'t have an account? Register</string>
-    <string name="userAlreadyHasAnAccount">Already have an account? Log in</string>
+    <string name="userDoesNotHaveAnAccount">Don\'t have an account? &lt;b>Register&lt;/b></string>
+    <string name="userAlreadyHasAnAccount">Already have an account? &lt;b>Log in&lt;/b></string>
     <string name="termsAndConditionsCheckBox">Accept our terms &amp; conditions</string>
     <string name="submit">Submit</string>
     <string name="forgotPasswordDescription">Enter your e-mail address below so that we can send you a password reset e-mail.</string>
-    <string name="showPlaintextPasswordToUser">Show user plaintext or dotted password</string>
     <string name="fishRecognition">Fish Recognition</string>
     <string name="map">Map</string>
     <string name="addImage">Add Image</string>
@@ -21,7 +20,7 @@
     <string name="fishRecognitionActivityDescription">Select the fish image you want and click identify when you\'re ready! \n Tap on the image below to select an image! </string>
     <string name="fishRecognizedResults">Results</string>
     <string name="invalidRequest">Invalid request</string>
-    <string name="somethingWentWrong">Something went wrong...</string>
+    <string name="somethingWentWrong">Something went wrong…</string>
     <string name="errorMessage">We were not able to process your request. Check if you have uploaded an fish image.</string>
     <string name="latinName">&lt;b>Latin name:&lt;/b></string>
     <string name="predictionAccuracy">&lt;b>Prediction accuracy:&lt;/b></string>
@@ -37,6 +36,7 @@
     <string name="similarSpecies">&lt;b>Similar species:&lt;/b></string>
     <string name="environmentalDetails">&lt;b>Environmental details:&lt;/b></string>
     <string name="progressBarText">Hang on while we identify your catch!</string>
-
+    <string name="backToMainMenu">Back to main menu</string>
+    <string name="nickname">Nickname</string>
 
 </resources>

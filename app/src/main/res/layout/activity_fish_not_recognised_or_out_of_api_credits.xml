@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="15dp"
         android:layout_weight="1"
-        android:background="@drawable/layout_rounded_corners"
+        android:background="@drawable/layout_rounded_corners_white_15"
         android:gravity="center"
         android:orientation="vertical"
         android:padding="30dp"
@@ -55,10 +55,10 @@
             android:textSize="15sp" />
 
         <ImageButton
-            android:id="@+id/goBackButtonFishNotRecognisedActivity"
+            android:id="@+id/goBackToFishRecognition"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#7239f7"
+            android:background="@color/ordinaryButtonColor"
             android:contentDescription="This button redirects the user back to the fish recognition page"
             android:minHeight="48dp"
             app:srcCompat="@drawable/baseline_arrow_back_24" />

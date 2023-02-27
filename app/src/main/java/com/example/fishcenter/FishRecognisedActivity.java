@@ -1,39 +1,32 @@
 package com.example.fishcenter;
-
-import static android.text.Html.FROM_HTML_MODE_LEGACY;
-
 import android.content.Context;
-import android.net.Uri;
+import android.content.Intent;
 import android.os.Bundle;
-import android.text.Html;
-import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
-import android.text.SpannedString;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
-
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.text.HtmlCompat;
-
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.Target;
-
-import org.w3c.dom.Text;
-
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class FishRecognisedActivity extends AppCompatActivity {
     private ArrayList<Fish> fishes;
     private LinearLayout linearLayoutInsideScrollView;
+    private Button backToMainMenuButton;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,12 +40,44 @@ public class FishRecognisedActivity extends AppCompatActivity {
         fishes = (ArrayList<Fish>) packagedBundle.getSerializable("fishes");
         linearLayoutInsideScrollView = findViewById(R.id.linearLayoutInsideScrollView);
 
-        // iterate through the returned fishes and append each table to the scroll view
+        // store unique fishes only
+        HashSet<Fish> fishesDisplayed = new HashSet<>();
+        // iterate through the returned fishes and append non-duplicates to linear layout
         for(int i = 0; i < fishes.size(); i++) {
-            LinearLayout table = drawTable(fishes.get(i));
-            linearLayoutInsideScrollView.addView(table);
+            Fish fish = fishes.get(i);
+            if(fishesDisplayed.add(fish)) {
+                LinearLayout table = drawTable(fishes.get(i));
+                linearLayoutInsideScrollView.addView(table);
+            }
         }
+        backToMainMenuButton = createBackToMainMenuButton();
+        linearLayoutInsideScrollView.addView(backToMainMenuButton);
+
+        backToMainMenuButton.setOnClickListener(view ->  {
+            Intent mainMenuActivity = new Intent(getApplicationContext(), MainPageActivity.class);
+            startActivity(mainMenuActivity);
+        });
+
     }
+
+    private Button createBackToMainMenuButton() {
+        Context con = getApplicationContext();
+        Button backToMainMenuButton = new Button(con);
+        backToMainMenuButton.setLayoutParams(linearLayoutInsideScrollView.getLayoutParams());
+        // https://stackoverflow.com/a/32202256 getColor() method is deprecated as of API 23
+        // another way to get color from resources is to use ContextCompat.getColor(context, R.color.color_name)
+        // by passing in the application context along with the resource id of the wanted colour
+        backToMainMenuButton.setBackgroundColor(ContextCompat.getColor(con, R.color.ordinaryButtonColor));
+        backToMainMenuButton.setMinHeight(48);
+        backToMainMenuButton.setText(getText(R.string.backToMainMenu));
+        backToMainMenuButton.setTextColor(getColor(R.color.white));
+        backToMainMenuButton.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+        return backToMainMenuButton;
+    }
+
+
+
+
 
     // the below method creates a tables that is inserted into a scroll view dynamically which is inserted into a linear layout
     // it also uses predefined strings with HTML markup which are converted into SpannableString objects
@@ -70,7 +95,7 @@ public class FishRecognisedActivity extends AppCompatActivity {
         LinearLayout linearLayout = new LinearLayout(con);
         linearLayout.setLayoutParams(linearLayoutInsideScrollView.getLayoutParams());
         linearLayout.setOrientation(LinearLayout.VERTICAL);
-        linearLayout.setBackground(getDrawable(R.drawable.layout_rounded_corners));
+        linearLayout.setBackground(getDrawable(R.drawable.layout_rounded_corners_white_15));
         // create the tablelayout
         TableLayout tableLayout = new TableLayout(con);
         tableLayout.setLayoutParams(linearLayoutParams);

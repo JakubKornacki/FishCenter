@@ -1,41 +1,39 @@
 package com.example.fishcenter;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class ForgotPasswordActivity extends AppCompatActivity {
 
-    private EditText editTextEmailAddressForgotPasswordActivity;
-    private Button submitButtonForgotPasswordActivity;
+    private EditText emailEditText;
+    private Button submitButton;
+   // private ImageButton goBackButton;
     private FirebaseAuth auth;
-
-
-
-
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_forgot_password);
-        editTextEmailAddressForgotPasswordActivity = findViewById(R.id.editTextEmailAddressForgotPasswordActivity);
-        submitButtonForgotPasswordActivity = findViewById(R.id.submitButtonForgotPasswordActivity);
-
+        emailEditText = findViewById(R.id.emailEditText);
+        submitButton = findViewById(R.id.submitButton);
+       // goBackButton = findViewById(R.id.goBackButton);
         auth = FirebaseAuth.getInstance();
-
-        submitButtonForgotPasswordActivity.setOnClickListener(view -> resetPasswordWithFirebase());
+        submitButton.setOnClickListener(view -> resetPasswordWithFirebase());
+        /*
+        goBackButton.setOnClickListener(view -> {
+            Intent backToLogin = new Intent(this, LoginActivity.class);
+            startActivity(backToLogin);
+        }); */
     }
 
     private boolean validateEmail(String email) {
@@ -57,7 +55,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 
         // display the error messages and return false, clear the error message
         if(errorMessageEmail.length() != 0) {
-            editTextEmailAddressForgotPasswordActivity.setError(errorMessageEmail.toString());
+            emailEditText.setError(errorMessageEmail.toString());
             return false;
         }
 
@@ -65,7 +63,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
     }
 
     private void resetPasswordWithFirebase() {
-        String email = editTextEmailAddressForgotPasswordActivity.getText().toString();
+        String email = emailEditText.getText().toString();
         boolean emailValidated = validateEmail(email);
 
         if(emailValidated) {
