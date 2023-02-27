@@ -130,12 +130,12 @@ public class FishImage {
         return imageFileSize;
     }
 
-    public byte[] getImageFileBytesArrayMD5() {
-        return imageFileBytesArrayMD5;
-    }
-
     public String getImageFileBytesArrayMD5EncodedBase64() {
         return imageFileBytesArrayMD5EncodedBase64;
+    }
+
+    public ContentResolver getContentResolver(){
+        return contentResolver;
     }
 
 

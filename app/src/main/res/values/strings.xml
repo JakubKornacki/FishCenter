@@ -16,5 +16,27 @@
     <string name="fishRecognition">Fish Recognition</string>
     <string name="map">Map</string>
     <string name="addImage">Add Image</string>
-    <string name="identifyFish">Identify Fish</string>
+    <string name="identify">Identify</string>
+    <string name="enterFishImageDescription">Click here to add your fish image!</string>
+    <string name="fishRecognitionActivityDescription">Select the fish image you want and click identify when you\'re ready! \n Tap on the image below to select an image! </string>
+    <string name="fishRecognizedResults">Results</string>
+    <string name="invalidRequest">Invalid request</string>
+    <string name="somethingWentWrong">Something went wrong...</string>
+    <string name="errorMessage">We were not able to process your request. Check if you have uploaded an fish image.</string>
+    <string name="latinName">&lt;b>Latin name:&lt;/b></string>
+    <string name="predictionAccuracy">&lt;b>Prediction accuracy:&lt;/b></string>
+    <string name="commonNames">&lt;b>Common names:&lt;/b></string>
+    <string name="distribution">&lt;b>Distribution:&lt;/b></string>
+    <string name="scales">&lt;b>Scales:&lt;/b></string>
+    <string name="saltWater">&lt;b>Salt water:&lt;/b></string>
+    <string name="freshWater">&lt;b>Fresh water:&lt;/b></string>
+    <string name="coloration">&lt;b>Coloration:&lt;/b></string>
+    <string name="feedingBehaviour">&lt;b>Feeding behaviour:&lt;/b></string>
+    <string name="healthWarnings">&lt;b>Health warnings:&lt;/b></string>
+    <string name="foodValue">&lt;b>Food value:&lt;/b></string>
+    <string name="similarSpecies">&lt;b>Similar species:&lt;/b></string>
+    <string name="environmentalDetails">&lt;b>Environmental details:&lt;/b></string>
+    <string name="progressBarText">Hang on while we identify your catch!</string>
+
+
 </resources>

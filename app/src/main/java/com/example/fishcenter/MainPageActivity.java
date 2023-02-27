@@ -2,6 +2,7 @@ package com.example.fishcenter;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.ImageButton;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,6 +19,7 @@ public class MainPageActivity extends AppCompatActivity {
     private ImageButton googleMapsButtonMainPageActivity;
 
     private FirebaseAuth mAuth;
+    private Button button;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,6 +39,12 @@ public class MainPageActivity extends AppCompatActivity {
             startActivity(mapActivity);
         });
 
+    }
+
+    // minimise the app when the back button is clicked on the main menu
+    @Override
+    public void onBackPressed() {
+        this.moveTaskToBack(true);
     }
 
 

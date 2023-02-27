@@ -57,6 +57,18 @@
                   android:screenOrientation="portrait">
         </activity>
 
+        <activity android:name=".FishRecognisedActivity"
+            android:parentActivityName=".FishRecognitionActivity"
+            android:label="@string/fishRecognizedResults"
+            android:screenOrientation="portrait">
+        </activity>
+
+        <activity android:name=".FishNotRecognisedOrOutOfAPICredits"
+            android:parentActivityName=".FishRecognitionActivity"
+            android:label="@string/invalidRequest"
+            android:screenOrientation="portrait">
+        </activity>
+
         <meta-data android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
 
