@@ -8,6 +8,7 @@
     tools:context=".RegisterActivity">
 
     <LinearLayout
+        android:id="@+id/linearLayoutBackground"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/graywithopacity45"
@@ -42,7 +43,7 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/baseline_phishing_128" />
+                    app:srcCompat="@drawable/baseline_phishing_128_white" />
             </LinearLayout>
 
 
@@ -60,6 +61,7 @@
                     android:layout_margin="15dp"
                     android:gravity="center"
                     android:text="@string/signUp"
+                    android:textColor="@color/black"
                     android:textSize="30dp" />
 
                 <LinearLayout
@@ -84,7 +86,7 @@
                         android:layout_height="wrap_content"
                         android:gravity="center_horizontal"
                         android:padding="10dp"
-                        android:src="@drawable/baseline_alternate_email_24" />
+                        android:src="@drawable/baseline_alternate_email_24_black" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -110,7 +112,7 @@
                         android:layout_height="wrap_content"
                         android:gravity="center_horizontal"
                         android:padding="10dp"
-                        android:src="@drawable/baseline_account_circle_24" />
+                        android:src="@drawable/baseline_account_circle_24_black" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -134,7 +136,7 @@
                         android:id="@+id/passwordVisibleImageButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:background="@null"
+                        android:background="@drawable/layout_background_rounded_corners_toggle_15_gray_opacity_70_to_transparent"
                         android:contentDescription="Show user plaintext or dotted password"
                         android:gravity="center_horizontal"
                         android:minWidth="48dp"
@@ -166,7 +168,7 @@
                         android:id="@+id/retypePasswordVisibleImageButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:background="@null"
+                        android:background="@drawable/layout_background_rounded_corners_toggle_15_gray_opacity_70_to_transparent"
                         android:contentDescription="Show user plaintext or dotted password"
                         android:gravity="center_horizontal"
                         android:minWidth="48dp"
@@ -174,15 +176,32 @@
                         android:src="@drawable/ic_password_visible_toggle_button" />
 
                 </LinearLayout>
+            <LinearLayout
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:orientation="horizontal">
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:paddingLeft="10dp"
+                    android:textColor="@color/black"
+                    android:text="@string/termsAndConditionsCheckBox">
+
+                </TextView>
 
                 <CheckBox
                     android:id="@+id/termsAndConditionCheckbox"
                     android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:layout_gravity="end"
-                    android:paddingRight="10dp"
-                    android:text="@string/termsAndConditionsCheckBox">
+                    android:layout_width="wrap_content">
                 </CheckBox>
+
+            </LinearLayout>
 
             </LinearLayout>
 
@@ -200,6 +219,29 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/linearLayoutIndeterminateProgressBar"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/graywithopacity75"
+        android:orientation="vertical"
+        android:visibility="invisible"
+        android:gravity="center"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ProgressBar
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:indeterminate="true"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </LinearLayout>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

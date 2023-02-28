@@ -8,16 +8,15 @@
     tools:context=".LoginActivity">
 
     <LinearLayout
+        android:id="@+id/linearLayoutBackground"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/graywithopacity45"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0">
+        app:layout_constraintTop_toTopOf="parent">
 
 
         <LinearLayout
@@ -42,7 +41,7 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/baseline_phishing_128" />
+                    app:srcCompat="@drawable/baseline_phishing_128_white" />
             </LinearLayout>
 
 
@@ -59,6 +58,7 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="15dp"
                     android:gravity="center"
+                    android:textColor="@color/black"
                     android:text="@string/appName"
                     android:textSize="30dp" />
 
@@ -85,7 +85,7 @@
                         android:layout_height="wrap_content"
                         android:gravity="center_horizontal"
                         android:padding="10dp"
-                        android:src="@drawable/baseline_alternate_email_24" />
+                        android:src="@drawable/baseline_alternate_email_24_black" />
                 </LinearLayout>
 
 
@@ -110,7 +110,7 @@
                         android:id="@+id/retypePasswordVisibleImageButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:background="@null"
+                        android:background="@drawable/layout_background_rounded_corners_toggle_15_gray_opacity_70_to_transparent"
                         android:contentDescription="Show user plaintext or dotted password"
                         android:gravity="center_horizontal"
                         android:minWidth="48dp"
@@ -120,23 +120,29 @@
                 </LinearLayout>
 
                 <LinearLayout
-                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
+                    android:layout_width="match_parent"
                     android:orientation="horizontal">
+
+                    <View
+                        android:layout_height="0dp"
+                        android:layout_width="0dp"
+                        android:layout_weight="1">
+
+                    </View>
 
                     <TextView
                         android:id="@+id/forgotPasswordTextView"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:gravity="end"
                         android:minHeight="48dp"
                         android:padding="10dp"
                         android:text="@string/forgotPassword"
                         android:textColor="@color/ordinaryButtonColor"
                         android:textStyle="bold"
-                        android:textSize="16dp"
-                        />
+                        android:background="@drawable/layout_background_rounded_corners_toggle_35_gray_opacity_30_to_transparent"
+                        android:textSize="16dp" />
                 </LinearLayout>
 
 
@@ -155,6 +161,31 @@
 
 
         </LinearLayout>
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:id="@+id/linearLayoutIndeterminateProgressBar"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/graywithopacity75"
+        android:orientation="vertical"
+        android:visibility="invisible"
+        android:gravity="center"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ProgressBar
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:indeterminate="true"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
     </LinearLayout>
 

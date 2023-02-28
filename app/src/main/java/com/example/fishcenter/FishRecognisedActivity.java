@@ -19,6 +19,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.text.HtmlCompat;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.target.Target;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -95,7 +96,7 @@ public class FishRecognisedActivity extends AppCompatActivity {
         LinearLayout linearLayout = new LinearLayout(con);
         linearLayout.setLayoutParams(linearLayoutInsideScrollView.getLayoutParams());
         linearLayout.setOrientation(LinearLayout.VERTICAL);
-        linearLayout.setBackground(getDrawable(R.drawable.layout_rounded_corners_white_15));
+        linearLayout.setBackground(getDrawable(R.drawable.layout_rounded_corners_white_15_opacity_55));
         // create the tablelayout
         TableLayout tableLayout = new TableLayout(con);
         tableLayout.setLayoutParams(linearLayoutParams);
@@ -111,6 +112,7 @@ public class FishRecognisedActivity extends AppCompatActivity {
         headerText.setLayoutParams(tableRowParams);
         headerText.setText(fish.getFishName());
         headerText.setGravity(View.TEXT_ALIGNMENT_GRAVITY);
+        headerText.setTextColor(ContextCompat.getColor(con, R.color.black));
         headerText.setTextSize(26);
         headerRow.addView(headerText);
 
@@ -123,8 +125,13 @@ public class FishRecognisedActivity extends AppCompatActivity {
         // create the image view with the fish image
         ImageView imageView = new ImageView(con);
         imageView.setLayoutParams(tableRowParams);
-        //https://stackoverflow.com/questions/3681714/bad-bitmap-error-when-setting-uri
-        Glide.with(con).load(fish.getMediaUri()).override(Target.SIZE_ORIGINAL).into(imageView);
+        // https://stackoverflow.com/questions/3681714/bad-bitmap-error-when-setting-uri
+        // use Glide to load the image into the image view with its uri and set the image rounded corners to
+        // https://bumptech.github.io/glide/doc/transformations.html
+        // have radius of 30 pixels use the Glide override method to keep the image its original size as otherwise it is displayed stretched
+        Glide.with(con).load(fish.getMediaUri()).transform(new RoundedCorners(30)).override(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL).into(imageView);
+        imageView.setBackground(getDrawable(R.drawable.image_round_corners_10));
+        imageView.setClipToOutline(true);
         imageRow.addView(imageView);
 
         // create the latin name row
@@ -137,6 +144,7 @@ public class FishRecognisedActivity extends AppCompatActivity {
         latinNameText.setLayoutParams(tableRowParams);
         SpannableStringBuilder latinSpanString = createSpannableString(R.string.latinName, fish.getLatinName());
         latinNameText.setText(latinSpanString);
+        latinNameText.setTextColor(ContextCompat.getColor(con, R.color.black));
         latinNameText.setTextSize(14);
         latinNameRow.addView(latinNameText);
 
@@ -150,6 +158,7 @@ public class FishRecognisedActivity extends AppCompatActivity {
         accuracyText.setLayoutParams(tableRowParams);
         SpannableStringBuilder predAccurSpanString = createSpannableString(R.string.predictionAccuracy, predAccurString(fish.getPredictionAccuracy()));
         accuracyText.setText(predAccurSpanString);
+        accuracyText.setTextColor(ContextCompat.getColor(con, R.color.black));
         accuracyText.setTextSize(14);
         accuracyRow.addView(accuracyText);
 
@@ -163,6 +172,7 @@ public class FishRecognisedActivity extends AppCompatActivity {
         commonNamesText.setLayoutParams(tableRowParams);
         SpannableStringBuilder commonNamesSpanString = createSpannableString(R.string.commonNames, fish.getCommonNames());
         commonNamesText.setText(commonNamesSpanString);
+        commonNamesText.setTextColor(ContextCompat.getColor(con, R.color.black));
         commonNamesText.setTextSize(14);
         commonNamesRow.addView(commonNamesText);
 
@@ -177,6 +187,7 @@ public class FishRecognisedActivity extends AppCompatActivity {
         SpannableStringBuilder distrSpanString = createSpannableString(R.string.distribution, fish.getDistribution());
         distributionText.setText(distrSpanString);
         distributionText.setTextSize(14);
+        distributionText.setTextColor(ContextCompat.getColor(con, R.color.black));
         distributionRow.addView(distributionText);
 
         // create the scales row
@@ -190,6 +201,7 @@ public class FishRecognisedActivity extends AppCompatActivity {
         Spanned scalesSpanString = HtmlCompat.fromHtml(getString(R.string.scales), HtmlCompat.FROM_HTML_MODE_LEGACY);
         scalesText.setText(scalesSpanString);
         scalesText.setTextSize(14);
+        scalesText.setTextColor(ContextCompat.getColor(con, R.color.black));
         scalesRow.addView(scalesText);
         // create the scales checkbox
         CheckBox scalesCheckBox = getCheckBox(con, fish.hasScales());
@@ -206,6 +218,7 @@ public class FishRecognisedActivity extends AppCompatActivity {
         Spanned saltWaterSpanString = HtmlCompat.fromHtml(getString(R.string.saltWater), HtmlCompat.FROM_HTML_MODE_LEGACY);
         saltWaterText.setText(saltWaterSpanString);
         saltWaterText.setTextSize(14);
+        saltWaterText.setTextColor(ContextCompat.getColor(con, R.color.black));
         saltWater.addView(saltWaterText);
         // create the salt water checkbox
         CheckBox saltWaterCheckBox = getCheckBox(con, fish.isSaltWater());
@@ -221,6 +234,7 @@ public class FishRecognisedActivity extends AppCompatActivity {
         freshWaterText.setLayoutParams(tableRowParams);
         Spanned freshWaterSpanString = HtmlCompat.fromHtml(getString(R.string.freshWater), HtmlCompat.FROM_HTML_MODE_LEGACY);
         freshWaterText.setText(freshWaterSpanString);
+        freshWaterText.setTextColor(ContextCompat.getColor(con, R.color.black));
         freshWaterText.setTextSize(14);
         freshWater.addView(freshWaterText);
         // create the fresh water checkbox
@@ -237,6 +251,7 @@ public class FishRecognisedActivity extends AppCompatActivity {
         colorationText.setLayoutParams(tableRowParams);
         SpannableStringBuilder colorationSpanString = createSpannableString(R.string.coloration, fish.getColoration());
         colorationText.setText(colorationSpanString);
+        colorationText.setTextColor(ContextCompat.getColor(con, R.color.black));
         colorationText.setTextSize(14);
         colorationRow.addView(colorationText);
 
@@ -250,6 +265,7 @@ public class FishRecognisedActivity extends AppCompatActivity {
         feedingBehaviourText.setLayoutParams(tableRowParams);
         SpannableStringBuilder feedingBehavSpanString = createSpannableString(R.string.feedingBehaviour, fish.getFeedingBehaviour());
         feedingBehaviourText.setText(feedingBehavSpanString);
+        feedingBehaviourText.setTextColor(ContextCompat.getColor(con, R.color.black));
         feedingBehaviourText.setTextSize(14);
         feedingBehaviourRow.addView(feedingBehaviourText);
 
@@ -263,6 +279,7 @@ public class FishRecognisedActivity extends AppCompatActivity {
         SpannableStringBuilder healthWarningsSpanString = createSpannableString(R.string.healthWarnings, fish.getFeedingBehaviour());
         healthWarningsText.setText(healthWarningsSpanString);
         healthWarningsText.setTextSize(14);
+        healthWarningsText.setTextColor(ContextCompat.getColor(con, R.color.black));
         healthWarningsRow.addView(healthWarningsText);
 
 
@@ -276,6 +293,7 @@ public class FishRecognisedActivity extends AppCompatActivity {
         SpannableStringBuilder foodValueSpanString = createSpannableString(R.string.foodValue, fish.getFoodValue());
         foodValueText.setText(foodValueSpanString);
         foodValueText.setTextSize(14);
+        foodValueText.setTextColor(ContextCompat.getColor(con, R.color.black));
         foodValueRow.addView(foodValueText);
 
 
@@ -289,6 +307,7 @@ public class FishRecognisedActivity extends AppCompatActivity {
         SpannableStringBuilder simSpeciesSpanString = createSpannableString(R.string.similarSpecies, fish.getSimilarSpecies());
         similarSpeciesText.setText(simSpeciesSpanString);
         similarSpeciesText.setTextSize(14);
+        similarSpeciesText.setTextColor(ContextCompat.getColor(con, R.color.black));
         similarSpeciesRow.addView(similarSpeciesText);
 
 
@@ -302,6 +321,7 @@ public class FishRecognisedActivity extends AppCompatActivity {
         SpannableStringBuilder environmentalDetSpanString = createSpannableString(R.string.environmentalDetails, fish.getEnvironmentDetail());
         environmentalsDetailText.setText(environmentalDetSpanString);
         environmentalsDetailText.setTextSize(14);
+        environmentalsDetailText.setTextColor(ContextCompat.getColor(con, R.color.black));
         environmentalDetailRow.addView(environmentalsDetailText);
 
         return linearLayout;

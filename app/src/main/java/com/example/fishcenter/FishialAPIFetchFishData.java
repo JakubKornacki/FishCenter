@@ -304,11 +304,9 @@ public class FishialAPIFetchFishData extends Thread {
 
             // there shouldn't be any response in this request other than an error
             if (http.getResponseCode() != 200) {
-                System.out.println("upload an image to the cloud");
+                System.out.println("Image upload to the cloud failed");
                 System.out.println(http.getResponseCode());
                 System.out.println(http.getResponseMessage());
-            } else {
-                System.out.println("Image uploaded");
             }
 
             // close the http connection

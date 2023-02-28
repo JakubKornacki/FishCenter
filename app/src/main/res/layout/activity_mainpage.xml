@@ -4,7 +4,18 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/gray">
+    android:background="@drawable/background4">
+
+    <LinearLayout
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:background="@color/graywithopacity45"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -23,8 +34,8 @@
             android:layout_width="0dp"
             android:layout_weight=".30"
             android:layout_height="match_parent"
-            android:background="@null"
-            app:srcCompat="@drawable/baseline_photo_camera_24" />
+            android:background="@drawable/layout_background_rounded_corners_toggle_35_gray_opacity_30_to_transparent"
+            app:srcCompat="@drawable/baseline_photo_camera_36_black" />
 
         <ImageButton
             android:id="@+id/googleMapsButton"
@@ -32,9 +43,8 @@
             android:layout_width="0dp"
             android:layout_weight=".30"
             android:layout_height="match_parent"
-            android:background="@null"
-            app:srcCompat="@drawable/baseline_fmd_good_24"/>
-
+            android:background="@drawable/layout_background_rounded_corners_toggle_35_gray_opacity_30_to_transparent"
+            app:srcCompat="@drawable/baseline_fmd_map_pointer_24_black"/>
     </LinearLayout>
 
 

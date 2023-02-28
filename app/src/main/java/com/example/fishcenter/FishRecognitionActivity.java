@@ -1,15 +1,18 @@
 package com.example.fishcenter;
 
 
+
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.PickVisualMediaRequest;
@@ -17,12 +20,8 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import org.json.JSONObject;
-
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 
 public class FishRecognitionActivity extends AppCompatActivity {
 
@@ -41,6 +40,8 @@ public class FishRecognitionActivity extends AppCompatActivity {
         fishImageLinearLayout = findViewById(R.id.fishImageLinearLayout);
         fishImageImageView = findViewById(R.id.fishImageImageView);
         linearLayoutIndeterminateProgressBar = findViewById(R.id.linearLayoutIndeterminateProgressBar);
+        // allow for the fish image to be clipped
+        fishImageImageView.setClipToOutline(true);
 
         fishImageLinearLayout.setOnClickListener(view -> {
             launchPhotoPicker();
@@ -52,9 +53,7 @@ public class FishRecognitionActivity extends AppCompatActivity {
                 Toast.makeText(this, "Add an image!", Toast.LENGTH_SHORT).show();
                 return;
             }
-            fishImageLinearLayout.setClickable(false);
-            identifyFishButton.setClickable(false);
-            linearLayoutIndeterminateProgressBar.setVisibility(View.VISIBLE);
+            showSpinner(true);
             FishImage fishImage = new FishImage(originalImageUri, getContentResolver());
             // start the new thread to fetch data about the fish
             FishialAPIFetchFishData fetchFishialRecognitionDataThread = new FishialAPIFetchFishData(fishImage, this);
@@ -64,50 +63,49 @@ public class FishRecognitionActivity extends AppCompatActivity {
             // it will also make the linear layout with the progress bar invisible
             // runOnUiThread is needed because only the thread that created the view hierarchy can modify the views
             // otherwise the Activity will crash and an exception will be raised
-            Thread hideSpinnerAndEnableClicking = new Thread() {
-                @Override
-                public void run() {
-                    super.run();
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                // if data has been fetched and the thread has finished
-                                while(!fetchFishialRecognitionDataThread.isAlive()) {
-                                    try {
-                                        fishImageLinearLayout.setClickable(true);
-                                        identifyFishButton.setClickable(true);
-                                        linearLayoutIndeterminateProgressBar.setVisibility(View.INVISIBLE);
-                                        Thread.sleep(200);
-                                    } catch (InterruptedException e) {
-                                        throw new RuntimeException(e);
-                                    }
-                                }
-                            }
-                        });
-                    }
-              };
-            hideSpinnerAndEnableClicking.start();
             });
 
 
         // set an event handler for ActivityResultLauncher<PickVisualMediaRequest> (Photo picker)
         // to pass in the uri of the selected image into the below lambda function
         // the image selected will then be displayed on the ui and a second reference to it will be kept for processing
+        // this is launched is invoked after the user selects a media item or closes the photo picker.
         pickMedia = registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), uri -> {
             if(uri != null) {
-                // Callback is invoked after the user selects a media item or closes the photo picker.
-                // uri of the original image that is not transformed and scaled
-                // will be used for fish recognition
+                // uri of the original image that is not transformed and scaled and will be used for fish recognition
                 originalImageUri = uri;
-                // image to be displayed on the user interface
-                fishImageImageView.setImageURI(uri);
+                // use Glide to load the image into the fish image view with its uri and set the image rounded corners to have radius of 100 pixels
+                Glide.with(getApplicationContext()).load(uri).transform(new RoundedCorners(100)).into(fishImageImageView);
                 fishImageImageView.requestLayout();
             } else {
-                fishImageImageView.setImageDrawable(getDrawable(R.drawable.baseline_image_24));
+                fishImageImageView.setImageDrawable(getDrawable(R.drawable.baseline_empty_image_360_gray));
                 fishImageImageView.requestLayout();
             }
         });
     }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        showSpinner(true);
+    }
+
+    protected void onResume() {
+        super.onResume();
+        showSpinner(false);
+    }
+    private void showSpinner(boolean flag) {
+        if(flag) {
+            fishImageLinearLayout.setClickable(false);
+            identifyFishButton.setClickable(false);
+            linearLayoutIndeterminateProgressBar.setVisibility(View.VISIBLE);
+        } else {
+            fishImageLinearLayout.setClickable(true);
+            identifyFishButton.setClickable(true);
+            linearLayoutIndeterminateProgressBar.setVisibility(View.INVISIBLE);
+        }
+    }
+
 
     // uses Android Photo Picker to get images from user's photo gallery which is a safe way of only loading
     // in the pictures that the user has selected. Run the Photo Picker in a mode which allows to select only one

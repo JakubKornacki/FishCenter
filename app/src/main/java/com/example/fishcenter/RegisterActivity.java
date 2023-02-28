@@ -8,6 +8,8 @@ import android.text.Spanned;
 import android.text.method.PasswordTransformationMethod;
 import android.text.style.ForegroundColorSpan;
 import android.view.Gravity;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -39,6 +41,8 @@ public class RegisterActivity extends AppCompatActivity {
     private CheckBox termsAndConditionCheckbox;
     private ImageButton passwordVisibleImageButton;
     private ImageButton retypePasswordVisibleImageButton;
+    private LinearLayout progressSpinnerLayout;
+    private LinearLayout linearLayoutBackground;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,28 +60,41 @@ public class RegisterActivity extends AppCompatActivity {
         retypePasswordVisibleImageButton = findViewById(R.id.retypePasswordVisibleImageButton);
         termsAndConditionCheckbox = findViewById(R.id.termsAndConditionCheckbox);
         mainContentLayout = findViewById(R.id.mainContentLayout);
-
+        progressSpinnerLayout = findViewById(R.id.linearLayoutIndeterminateProgressBar);
+        linearLayoutBackground =  findViewById(R.id.linearLayoutBackground);
         // get a span by parsing out the HTML so that the string can be displayed as bold
         Spanned span = HtmlCompat.fromHtml(getString(R.string.userAlreadyHasAnAccount), HtmlCompat.FROM_HTML_MODE_LEGACY);
         SpannableString spannableString = new SpannableString(span);
         //  Color in the "Register" portion of the text in the spannable string with purple color
+        spannableString.setSpan(new ForegroundColorSpan(getColor(R.color.black)), 0,25, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         spannableString.setSpan(new ForegroundColorSpan(getColor(R.color.ordinaryButtonColor)), 25,spannableString.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         // set up the text view
-        userAlreadyRegistered = new TextView(getApplicationContext());
+        // set layout parameter to be the parameters of the linear layout with main content
         LinearLayout.LayoutParams mainContentParams = new LinearLayout.LayoutParams(mainContentLayout.getLayoutParams());
+        // the text view to be added should be 40 pixels below the main content
         mainContentParams.setMargins(0,40,0,0);
-        userAlreadyRegistered.setLayoutParams(mainContentParams);
+        // linear layout to hold the text view which matches the layout params of main content
+        LinearLayout textLinearLayout = new LinearLayout(getApplicationContext());
+        textLinearLayout.setLayoutParams(mainContentParams);
+        textLinearLayout.setGravity(Gravity.CENTER);
+        LinearLayout.LayoutParams textLinearLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT);
+        mainContentLayout.addView(textLinearLayout);
+        // set up the text view
+        userAlreadyRegistered = new TextView(getApplicationContext());
+        userAlreadyRegistered.setLayoutParams(textLinearLayoutParams);
+        // define the text view appearance and position
         userAlreadyRegistered.setClickable(true);
-        userAlreadyRegistered.setGravity(Gravity.CENTER);
         userAlreadyRegistered.setMinWidth(48);
         userAlreadyRegistered.setText(spannableString);
         userAlreadyRegistered.setTextSize(16);
-        mainContentLayout.addView(userAlreadyRegistered);
+        userAlreadyRegistered.setBackground(getDrawable(R.drawable.layout_background_rounded_corners_toggle_10_gray_opacity_30_to_transparent));
+        textLinearLayout.addView(userAlreadyRegistered);
 
         // switch from login activity to the register activity when clicked on the "Don't have an account? Register" TextView on the login activity
         userAlreadyRegistered.setOnClickListener(view -> {
             Intent loginActivity = new Intent(getApplicationContext(), LoginActivity.class);
             startActivity(loginActivity);
+            removeErrorMessages();
         });
 
         signUpButton.setOnClickListener(view -> {
@@ -92,6 +109,44 @@ public class RegisterActivity extends AppCompatActivity {
             togglePasswordVisibilityButton(retypePasswordVisibleImageButton, retypePasswordEditText);
         });
 
+        // if the user click anywhere on the background linear layout which is anywhere on the screen apart from the top bar
+        // the focus from the edit texts should be cleared and the input keyboard should be hidden
+        linearLayoutBackground.setOnClickListener(view -> {
+            if(emailEditText.isFocused()) {
+                emailEditText.clearFocus();
+            } else if (passwordEditText.isFocused()) {
+                passwordEditText.clearFocus();
+            } else if (passwordEditText.isFocused()) {
+                passwordEditText.clearFocus();
+            } else if(retypePasswordEditText.isFocused()) {
+                retypePasswordEditText.clearFocus();
+            }
+            // get the input keyboard and hide soft hide input keyboard from the window
+            // https://stackoverflow.com/questions/1109022/how-to-close-hide-the-android-soft-keyboard-programmatically/15587937#15587937
+            InputMethodManager keyboard = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+            keyboard.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        });
+
+
+    }
+
+    private void removeErrorMessages() {
+        emailEditText.setError(null);
+        nicknameEditText.setError(null);
+        passwordEditText.setError(null);
+        retypePasswordEditText.setError(null);
+    }
+
+    protected void onStop() {
+        super.onStop();
+        showSpinner(true);
+        removeErrorMessages();
+    }
+
+    protected void onResume() {
+        super.onResume();
+        showSpinner(false);
+        removeErrorMessages();
     }
 
 
@@ -136,6 +191,7 @@ public class RegisterActivity extends AppCompatActivity {
         // if no error messages were appended to the StringBuilder then all tests have passed and true is returned
         if(errorMessagePassword.length() != 0) {
             passwordEditText.setError(errorMessagePassword.toString());
+            retypePasswordEditText.setError(errorMessagePassword.toString());
             errorMessagePassword.setLength(0);
             return false;
         }
@@ -194,9 +250,10 @@ public class RegisterActivity extends AppCompatActivity {
 
 
         if(emailValidated && passwordValidated && checkBoxTicked) {
+            showSpinner(true);
             // add a listener which is triggered once the registration process is complete
             mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                        @Override
+                @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
                                 // display a toast informing that registration was successful
@@ -213,26 +270,48 @@ public class RegisterActivity extends AppCompatActivity {
                     createErrorAlertDialog("Authentication error!", e.getMessage());
                 }
             });
-
-            }
-
+            showSpinner(false);
+        }
     }
 
+    private void showSpinner(boolean flag) {
+        if(flag) {
+            progressSpinnerLayout.setVisibility(View.VISIBLE);
+            emailEditText.setClickable(false);
+            nicknameEditText.setClickable(false);
+            passwordEditText.setClickable(false);
+            retypePasswordEditText.setClickable(false);
+            passwordVisibleImageButton.setClickable(false);
+            retypePasswordVisibleImageButton.setClickable(false);
+            userAlreadyRegistered.setClickable(false);
+            termsAndConditionCheckbox.setClickable(false);
+        } else {
+            progressSpinnerLayout.setVisibility(View.INVISIBLE);
+            emailEditText.setClickable(true);
+            nicknameEditText.setClickable(true);
+            passwordEditText.setClickable(true);
+            retypePasswordEditText.setClickable(true);
+            passwordVisibleImageButton.setClickable(true);
+            retypePasswordVisibleImageButton.setClickable(true);
+            userAlreadyRegistered.setClickable(true);
+            termsAndConditionCheckbox.setClickable(true);
+        }
+    }
 
     // utility method to an error alert dialog programmatically
     private void createErrorAlertDialog(String alertTitle, String alertMessage) {
         AlertDialog.Builder  alert = new AlertDialog.Builder(this);
         alert.setTitle(alertTitle);
         alert.setMessage(alertMessage);
-        alert.setIcon(R.drawable.baseline_error_outline_24);
+        alert.setIcon(R.drawable.baseline_error_outline_36_black);
         alert.show();
     }
 
     private void togglePasswordVisibilityButton(ImageButton imgBtn, EditText editTextPass) {
-        /* switch between the active and inactive state as defined in the ic_password_visible_toggle_button.xml file
-            this will switch the image of the button and will set the new transformation method of the EditText
-            if null, no transformation method is specified and the password appears as plaintext on the user screen
-            otherwise set a new password transformation method which makes the password appear as sequence of dots */
+        // switch between the active and inactive state as defined in the ic_password_visible_toggle_button.xml file
+        // this will switch the image of the button and will set the new transformation method of the EditText
+        // if null, no transformation method is specified and the password appears as plaintext on the user screen
+        // otherwise set a new password transformation method which makes the password appear as sequence of dots
         if (imgBtn.isActivated()) {
             imgBtn.setActivated(false);
             editTextPass.setTransformationMethod(null);
@@ -242,6 +321,8 @@ public class RegisterActivity extends AppCompatActivity {
             imgBtn.setActivated(true);
             editTextPass.setTransformationMethod(null);
         }
-
+        // set text pointer to the position at the end of text changing the transformation method sets it back to zero
+        int textLen = editTextPass.getText().length();
+        editTextPass.setSelection(textLen);
     }
 }

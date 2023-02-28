@@ -9,6 +9,7 @@
     <string name="forgotPassword">Forgot password?</string>
     <string name="userDoesNotHaveAnAccount">Don\'t have an account? &lt;b>Register&lt;/b></string>
     <string name="userAlreadyHasAnAccount">Already have an account? &lt;b>Log in&lt;/b></string>
+    <string name="userRemembersPassword">Do you remember your password? &lt;b>Log in&lt;/b></string>
     <string name="termsAndConditionsCheckBox">Accept our terms &amp; conditions</string>
     <string name="submit">Submit</string>
     <string name="forgotPasswordDescription">Enter your e-mail address below so that we can send you a password reset e-mail.</string>
@@ -35,7 +36,7 @@
     <string name="foodValue">&lt;b>Food value:&lt;/b></string>
     <string name="similarSpecies">&lt;b>Similar species:&lt;/b></string>
     <string name="environmentalDetails">&lt;b>Environmental details:&lt;/b></string>
-    <string name="progressBarText">Hang on while we identify your catch!</string>
+    <string name="waitUntilFishRecognised">Hang on while we identify your catch!</string>
     <string name="backToMainMenu">Back to main menu</string>
     <string name="nickname">Nickname</string>
 
