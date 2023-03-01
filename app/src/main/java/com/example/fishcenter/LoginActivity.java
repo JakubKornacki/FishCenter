@@ -3,7 +3,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.text.HtmlCompat;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Spannable;
@@ -19,14 +18,12 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -41,10 +38,12 @@ public class LoginActivity extends AppCompatActivity {
     private LinearLayout mainContentLayout;
     private LinearLayout linearLayoutBackground;
     private LinearLayout progressSpinnerLayout;
+    private InputMethodManager keyboard;
 
 
 
     // if the user is still authenticated then redirect him to the main page of the application
+
     @Override
     protected void onStart( ) {
         super.onStart();
@@ -57,14 +56,10 @@ public class LoginActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
         // get firebase auth instance
         mAuth = FirebaseAuth.getInstance();
-        // change the name of this view to "Sign In" from "Fish Center", way to do it found here https://stackoverflow.com/a/29455956 changing android:label in Android Manifest did not work.
-        getSupportActionBar().setTitle(R.string.signIn);
         // get references to different components visible on this activity such as editTexts and Buttons
         emailEditText = findViewById(R.id.emailEditText);
         passwordEditText = findViewById(R.id.retypePasswordEditText);
@@ -74,6 +69,9 @@ public class LoginActivity extends AppCompatActivity {
         mainContentLayout = findViewById(R.id.mainContentLayout);
         progressSpinnerLayout = findViewById(R.id.linearLayoutIndeterminateProgressBar);
         linearLayoutBackground = findViewById(R.id.linearLayoutBackground);
+        // https://stackoverflow.com/questions/1109022/how-to-close-hide-the-android-soft-keyboard-programmatically/15587937#15587937
+        // get the soft input keyboard from the context via the input_method_service service and hide it
+        keyboard = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
         // get a span by parsing out the HTML so that the string can be displayed as bold
         Spanned span = HtmlCompat.fromHtml(getString(R.string.userDoesNotHaveAnAccount), HtmlCompat.FROM_HTML_MODE_LEGACY);
         SpannableString spannableString = new SpannableString(span);
@@ -108,23 +106,17 @@ public class LoginActivity extends AppCompatActivity {
         userNotRegisteredText.setOnClickListener(view -> {
             Intent registerActivity = new Intent(getApplicationContext(), RegisterActivity.class);
             startActivity(registerActivity);
-            removeErrorMessages();
         });
 
         // toggle password visibility
-        passwordVisibleImageButton.setOnClickListener(view ->  {
-            togglePasswordVisibilityButton(passwordVisibleImageButton, passwordEditText);
-        });
+        passwordVisibleImageButton.setOnClickListener(view -> togglePasswordVisibilityButton(passwordVisibleImageButton, passwordEditText));
 
         // sign in button
-        signInButton.setOnClickListener(view -> {
-            signInWithFirebase();
-        });
+        signInButton.setOnClickListener(view -> signInWithFirebase());
 
         forgotPasswordTextView.setOnClickListener(view -> {
             Intent forgotPasswordActivity = new Intent(getApplicationContext(), ForgotPasswordActivity.class);
             startActivity(forgotPasswordActivity);
-            removeErrorMessages();
         });
 
         // if the user click anywhere on the background linear layout which is anywhere on the screen apart from the top bar
@@ -135,9 +127,6 @@ public class LoginActivity extends AppCompatActivity {
             } else if(passwordEditText.isFocused()) {
                 passwordEditText.clearFocus();
             }
-            // https://stackoverflow.com/questions/1109022/how-to-close-hide-the-android-soft-keyboard-programmatically/15587937#15587937
-            // get the soft input keyboard from the context via the input_method_service service and hide it
-            InputMethodManager keyboard = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
             keyboard.hideSoftInputFromWindow(view.getWindowToken(), 0);
         });
     }
@@ -147,16 +136,18 @@ public class LoginActivity extends AppCompatActivity {
         passwordEditText.setError(null);
     }
 
-    protected void onStop() {
-        super.onStop();
-        showSpinner(true);
-        removeErrorMessages();
-    }
 
+    // hide the error messages and spinners if were displayed when user decides to go back to this activity
     protected void onResume() {
         super.onResume();
         showSpinner(false);
         removeErrorMessages();
+        clearEditTexts();
+    }
+
+    private void clearEditTexts() {
+        emailEditText.setText(null);
+        passwordEditText.setText(null);
     }
 
     private boolean validateEmail(String email) {
@@ -164,17 +155,17 @@ public class LoginActivity extends AppCompatActivity {
 
         // make sure email is not empty
         if(email.isEmpty()) {
-            errorMessageEmail.append("* E-mail address cannot be empty!\n");
+            errorMessageEmail.append("E-mail address cannot be empty!\n");
         }
 
         // email length exceeded
         if(email.length() > 320) {
-            errorMessageEmail.append("* E-mail length cannot exceed 320 characters!\n");
+            errorMessageEmail.append("E-mail length cannot exceed 320 characters!\n");
         }
 
         // make sure email contains '.' and '@'
         if(email.indexOf('@') == -1 && email.indexOf('.') == -1) {
-            errorMessageEmail.append("* E-mail needs to contain '.' and '@'!\n");
+            errorMessageEmail.append("E-mail needs to contain '.' and '@'!");
         }
 
         // display error messages if there are any
@@ -189,7 +180,7 @@ public class LoginActivity extends AppCompatActivity {
         StringBuilder errorMessagePassword = new StringBuilder();
 
         if(password.isEmpty()) {
-            errorMessagePassword.append("* Password cannot be empty!\n");
+            errorMessagePassword.append("Password cannot be empty!");
         }
 
         // display error messages if there are any

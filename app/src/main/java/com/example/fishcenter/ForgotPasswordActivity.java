@@ -31,6 +31,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
     private LinearLayout mainContentLayout;
     private FirebaseAuth auth;
     private LinearLayout progressSpinnerLayout;
+    private InputMethodManager keyboard;
     private LinearLayout linearLayoutBackground;
 
     @Override
@@ -42,6 +43,9 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         progressSpinnerLayout = findViewById(R.id.linearLayoutIndeterminateProgressBar);
         mainContentLayout = findViewById(R.id.mainContentLayout);
         linearLayoutBackground = findViewById(R.id.linearLayoutBackground);
+        // https://stackoverflow.com/questions/1109022/how-to-close-hide-the-android-soft-keyboard-programmatically/15587937#15587937
+        // get the input keyboard and call the
+        keyboard = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
         // goBackButton = findViewById(R.id.goBackButton);
         auth = FirebaseAuth.getInstance();
 
@@ -78,7 +82,6 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         goBackToLoginText.setOnClickListener(view -> {
             Intent loginActivity = new Intent(getApplicationContext(), LoginActivity.class);
             startActivity(loginActivity);
-            removeErrorMessages();
         });
 
         // rest password button on click handler
@@ -89,9 +92,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
             if(emailEditText.isFocused()) {
                 emailEditText.clearFocus();
             }
-            // https://stackoverflow.com/questions/1109022/how-to-close-hide-the-android-soft-keyboard-programmatically/15587937#15587937
-            // get the input keyboard and call the hid soft input from window to hide the keyboard
-            InputMethodManager keyboard = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+            // //hide soft input from window to hide the keyboard
             keyboard.hideSoftInputFromWindow(view.getWindowToken(), 0);
         });
 
@@ -101,17 +102,17 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         StringBuilder errorMessageEmail = new StringBuilder();
         // make sure email is not empty
         if(email.isEmpty()) {
-            errorMessageEmail.append("* E-mail cannot be empty!\n");
+            errorMessageEmail.append("E-mail cannot be empty!\n");
         }
 
         // email length exceeded
         if(email.length() > 320) {
-            errorMessageEmail.append("* E-mail length cannot exceed 320 characters!\n");
+            errorMessageEmail.append("E-mail length cannot exceed 320 characters!\n");
         }
 
         // make sure email contains '.' and '@'
         if((email.indexOf('.') == -1 ) && email.indexOf('@') == -1 ) {
-            errorMessageEmail.append("* E-mail needs to contain '.' and '@'!");
+            errorMessageEmail.append("E-mail needs to contain '.' and '@'!");
         }
 
         // display the error messages and return false, clear the error message
@@ -150,17 +151,17 @@ public class ForgotPasswordActivity extends AppCompatActivity {
     }
 
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        showSpinner(true);
-        removeErrorMessages();
-    }
 
+    // hide the error messages and spinners if were displayed when user decides to go back to this activity
     protected void onResume() {
         super.onResume();
         showSpinner(false);
         removeErrorMessages();
+        clearEditTexts();
+    }
+
+    private void clearEditTexts() {
+        emailEditText.setText(null);
     }
 
     private void showSpinner(boolean flag) {

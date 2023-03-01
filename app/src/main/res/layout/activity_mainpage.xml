@@ -6,46 +6,177 @@
     android:layout_height="match_parent"
     android:background="@drawable/background4">
 
+
     <LinearLayout
-        android:layout_height="match_parent"
+        android:id="@+id/linearLayoutMainContent"
         android:layout_width="match_parent"
-        android:orientation="vertical"
+        android:layout_height="match_parent"
         android:background="@color/graywithopacity45"
+        android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/colorPrimary"
+            android:minHeight="?attr/actionBarSize"
+            android:theme="?attr/actionBarTheme">
+
+
+            <ImageButton
+                android:id="@+id/logoutImageButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/layout_background_rounded_corners_toggle_5_gray_opacity_25_to_transparent"
+                android:contentDescription="logs user out"
+                android:minWidth="48dp"
+                android:minHeight="48dp"
+                android:padding="5dp"
+                android:src="@drawable/baseline_logout_24_white"
+                tools:ignore="HardcodedText"></ImageButton>
+
+
+        </androidx.appcompat.widget.Toolbar>
+
+        <LinearLayout
+
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/edittextarea_rounded_corners_20_transparent"
+            android:layout_margin="15dp">
+
+
+        <LinearLayout
+            android:id="@+id/postParentLinearLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/postEditTextDummy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="text|textMultiLine"
+                android:hint="@string/tellUsWhatsOnYourMind"
+                android:minHeight="48dp"
+                android:padding="10dp"
+                android:layout_weight="1"
+                android:layout_marginLeft="15dp"
+                android:textColor="@color/black">
+            </EditText>
+            <ImageView
+                android:id="@+id/userImage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="48dp"
+                android:minHeight="48dp"
+                android:layout_marginRight="10dp"
+                android:background="@drawable/layout_background_rounded_corners_toggle_10_gray_opacity_50_to_transparent"
+                app:srcCompat="@drawable/baseline_image_search_36_black">
+            </ImageView>
+
+        </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/postLinearLayoutActual"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:orientation="horizontal">
+            <EditText
+                android:id="@+id/postEditTextActual"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="text|textMultiLine"
+                android:hint="@string/tellUsWhatsOnYourMind"
+                android:minHeight="48dp"
+                android:padding="10dp"
+                android:layout_weight="1"
+                android:maxLength="500"
+                android:layout_marginLeft="15dp"
+                android:textColor="@color/black">
+            </EditText>
+
+            <ImageButton
+                android:id="@+id/postSendImageButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:minWidth="48dp"
+                android:layout_gravity="end"
+                android:layout_marginRight="10dp"
+                android:background="@drawable/layout_background_rounded_corners_toggle_10_gray_opacity_50_to_transparent"
+                app:srcCompat="@drawable/baseline_post_sent_36_black">
+            </ImageButton>
+
+        </LinearLayout>
+        </LinearLayout>
+        <ScrollView
+            android:id="@+id/scrollView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:layout_marginBottom="60dp">
+
+            <LinearLayout
+                android:id="@+id/scrollViewLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="400dp"
+                    app:srcCompat="@drawable/baseline_empty_image_360_gray"></ImageView>
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="400dp"
+                    app:srcCompat="@drawable/baseline_empty_image_360_gray"></ImageView>
+
+
+            </LinearLayout>
+        </ScrollView>
+
+
     </LinearLayout>
+
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="60dp"
+        android:gravity="bottom"
         android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0">
+        app:layout_constraintBottom_toBottomOf="@+id/linearLayoutMainContent">
 
         <ImageButton
             android:id="@+id/fishRecognitionImageButton"
-            android:contentDescription=""
-            android:layout_width="0dp"
-            android:layout_weight=".30"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:background="@drawable/layout_background_rounded_corners_toggle_35_gray_opacity_30_to_transparent"
-            app:srcCompat="@drawable/baseline_photo_camera_36_black" />
+            android:layout_weight=".50"
+            android:background="@drawable/layout_background_rounded_corners_toggle_5_gray_opacity_30_to_transparent"
+            android:contentDescription="redirects user to fish recognition"
+            app:srcCompat="@drawable/baseline_photo_camera_36_black"
+            tools:ignore="HardcodedText" />
 
         <ImageButton
             android:id="@+id/googleMapsButton"
-            android:contentDescription=""
-            android:layout_width="0dp"
-            android:layout_weight=".30"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:background="@drawable/layout_background_rounded_corners_toggle_35_gray_opacity_30_to_transparent"
-            app:srcCompat="@drawable/baseline_fmd_map_pointer_24_black"/>
+            android:layout_weight=".50"
+            android:background="@drawable/layout_background_rounded_corners_toggle_5_gray_opacity_30_to_transparent"
+            android:contentDescription="redirects user to maps"
+            app:srcCompat="@drawable/baseline_fmd_map_pointer_24_black"
+            tools:ignore="HardcodedText" />
     </LinearLayout>
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

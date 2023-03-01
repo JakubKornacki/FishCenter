@@ -3,5 +3,4 @@
         <style name="purpleText" parent="TextAppearance.AppCompat">
             <item name="android:textColor">#8000ff</item>
         </style>
-
 </resources>

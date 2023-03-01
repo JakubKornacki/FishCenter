@@ -1,5 +1,7 @@
 package com.example.fishcenter;
 
+import static android.content.ContentValues.TAG;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Spannable;
@@ -7,6 +9,7 @@ import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.method.PasswordTransformationMethod;
 import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -25,6 +28,10 @@ import androidx.core.text.HtmlCompat;
 
 import com.google.android.gms.tasks.*;
 import com.google.firebase.auth.*;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
 
 
 public class RegisterActivity extends AppCompatActivity {
@@ -43,13 +50,16 @@ public class RegisterActivity extends AppCompatActivity {
     private ImageButton retypePasswordVisibleImageButton;
     private LinearLayout progressSpinnerLayout;
     private LinearLayout linearLayoutBackground;
+    private FirebaseFirestore fireStore;
+    private InputMethodManager keyboard;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
         // get firebase auth instance
         mAuth = FirebaseAuth.getInstance();
-
+        // get FireStore instance
+        fireStore = FirebaseFirestore.getInstance();
         // get reference to interactive components on the register activity
         signUpButton = findViewById(R.id.signUpButton);
         emailEditText = findViewById(R.id.emailEditText);
@@ -57,6 +67,9 @@ public class RegisterActivity extends AppCompatActivity {
         passwordEditText = findViewById(R.id.passwordEditText);
         passwordVisibleImageButton = findViewById(R.id.passwordVisibleImageButton);
         retypePasswordEditText = findViewById(R.id.retypePasswordEditText);
+        // get the input keyboard and hide soft hide input keyboard from the window
+        // https://stackoverflow.com/questions/1109022/how-to-close-hide-the-android-soft-keyboard-programmatically/15587937#15587937
+        keyboard = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
         retypePasswordVisibleImageButton = findViewById(R.id.retypePasswordVisibleImageButton);
         termsAndConditionCheckbox = findViewById(R.id.termsAndConditionCheckbox);
         mainContentLayout = findViewById(R.id.mainContentLayout);
@@ -94,20 +107,13 @@ public class RegisterActivity extends AppCompatActivity {
         userAlreadyRegistered.setOnClickListener(view -> {
             Intent loginActivity = new Intent(getApplicationContext(), LoginActivity.class);
             startActivity(loginActivity);
-            removeErrorMessages();
         });
 
-        signUpButton.setOnClickListener(view -> {
-            createUserWithFirebase();
-        });
+        signUpButton.setOnClickListener(view -> createUserWithFirebase());
 
-        passwordVisibleImageButton.setOnClickListener(view ->{
-            togglePasswordVisibilityButton(passwordVisibleImageButton, passwordEditText);
-        });
+        passwordVisibleImageButton.setOnClickListener(view -> togglePasswordVisibilityButton(passwordVisibleImageButton, passwordEditText));
 
-        retypePasswordVisibleImageButton.setOnClickListener(view ->{
-            togglePasswordVisibilityButton(retypePasswordVisibleImageButton, retypePasswordEditText);
-        });
+        retypePasswordVisibleImageButton.setOnClickListener(view -> togglePasswordVisibilityButton(retypePasswordVisibleImageButton, retypePasswordEditText));
 
         // if the user click anywhere on the background linear layout which is anywhere on the screen apart from the top bar
         // the focus from the edit texts should be cleared and the input keyboard should be hidden
@@ -121,9 +127,7 @@ public class RegisterActivity extends AppCompatActivity {
             } else if(retypePasswordEditText.isFocused()) {
                 retypePasswordEditText.clearFocus();
             }
-            // get the input keyboard and hide soft hide input keyboard from the window
-            // https://stackoverflow.com/questions/1109022/how-to-close-hide-the-android-soft-keyboard-programmatically/15587937#15587937
-            InputMethodManager keyboard = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+            // hide the keyboard
             keyboard.hideSoftInputFromWindow(view.getWindowToken(), 0);
         });
 
@@ -137,61 +141,63 @@ public class RegisterActivity extends AppCompatActivity {
         retypePasswordEditText.setError(null);
     }
 
-    protected void onStop() {
-        super.onStop();
-        showSpinner(true);
-        removeErrorMessages();
-    }
 
+    // hide the error messages and spinners if were displayed when user decides to go back to this activity
     protected void onResume() {
         super.onResume();
         showSpinner(false);
         removeErrorMessages();
+        clearEditTexts();
     }
 
+    private void clearEditTexts() {
+        emailEditText.setText(null);
+        nicknameEditText.setText(null);
+        passwordEditText.setText(null);
+        retypePasswordEditText.setText(null);
+    }
 
     private boolean validatePassword(String password, String passwordRetyped) {
         StringBuilder errorMessagePassword = new StringBuilder();
 
         // check if passwords are empty
         if(password.isEmpty() || passwordRetyped.isEmpty()) {
-            errorMessagePassword.append("* Password cannot be empty!\n");
+            errorMessagePassword.append("Passwords cannot be empty!\n");
         }
 
         // password length is less than 5 characters
         if(password.length() < 5) {
-            errorMessagePassword.append("* Password needs to have at least 5 or more characters!\n");
+            errorMessagePassword.append("Password needs to have at least 5 or more characters!\n");
         }
 
         // check if password contains at least 1 digit from (0 - 9)
         if(!password.matches(".*\\d+.*")) {
-            errorMessagePassword.append("* Specify at least 1 numeric character (0-9)!\n");
+            errorMessagePassword.append("Specify at least 1 numeric character (0-9)!\n");
         }
 
         // check if password contains at least 1 digits from special characters
         if(!password.matches(".*[$&+,:;=?@#|'<>.^*()%!-]+.*")) {
-            errorMessagePassword.append("* Specify at least 1 special character ($&+,:;=?@#|'<>.^*()%!-)!\n");
+            errorMessagePassword.append("Specify at least 1 special character ($&+,:;=?@#|'<>.^*()%!-)!\n");
         }
 
         // check if password contains at least 1 lowercase character
         if(!password.matches(".*[a-z]+.*")) {
-            errorMessagePassword.append("* Specify at least 1 lowercase character (a-z)!\n");
+            errorMessagePassword.append("Specify at least 1 lowercase character (a-z)!\n");
         }
 
         // check if password contains at least 1 uppercase character
         if(!password.matches(".*[A-Z]+.*")) {
-            errorMessagePassword.append("* Specify at least 1 1 uppercase letter (A-Z)!\n");
+            errorMessagePassword.append("Specify at least 1 1 uppercase letter (A-Z)!\n");
         }
 
         // passwords do not match and both are not empty
         if(!(password.equals(passwordRetyped)) && !(password.isEmpty() && passwordRetyped.isEmpty())) {
-            errorMessagePassword.append("* Passwords do not match!");
+            retypePasswordEditText.setError("Passwords need to match!");
         }
 
         // if no error messages were appended to the StringBuilder then all tests have passed and true is returned
         if(errorMessagePassword.length() != 0) {
             passwordEditText.setError(errorMessagePassword.toString());
-            retypePasswordEditText.setError(errorMessagePassword.toString());
             errorMessagePassword.setLength(0);
             return false;
         }
@@ -225,12 +231,29 @@ public class RegisterActivity extends AppCompatActivity {
         return true;
     }
 
+    private boolean validateNickname(String nickname) {
+        StringBuilder errorMessage = new StringBuilder();
+        if(nickname.length() < 5) {
+            errorMessage.append("Password needs to have at least 5 or more characters!\n");
+        }
 
-    private boolean verifyCheckBox() {
+        if(nickname.contains(" ")){
+            errorMessage.append("Nickname cannot contain spaces!");
+        }
+        if(errorMessage.length() != 0) {
+            nicknameEditText.setError(errorMessage);
+            return false;
+        }
+
+        return true;
+    }
+
+
+    private boolean validateCheckBox() {
         if(termsAndConditionCheckbox.isChecked()) {
             return true;
         } else {
-            Toast.makeText(RegisterActivity.this, "Accept our terms and conditions!", Toast.LENGTH_LONG).show();
+            Toast.makeText(RegisterActivity.this, "Accept terms and conditions!", Toast.LENGTH_LONG).show();
             return false;
         }
     }
@@ -238,18 +261,21 @@ public class RegisterActivity extends AppCompatActivity {
 
     private void createUserWithFirebase() {
         String email = emailEditText.getText().toString();
+        String nickname = nicknameEditText.getText().toString();
         String password = passwordEditText.getText().toString();
         String passwordReTyped = retypePasswordEditText.getText().toString();
 
         // check for email correctness
         boolean emailValidated = validateEmail(email);
+        // check if nickname is valid
+        boolean nicknameValidated = validateNickname(nickname);
         // check for password correctness
         boolean passwordValidated = validatePassword(password, passwordReTyped);
         // check if checkbox is ticked
-        boolean checkBoxTicked = verifyCheckBox();
+        boolean checkBoxTicked = validateCheckBox();
 
 
-        if(emailValidated && passwordValidated && checkBoxTicked) {
+        if(emailValidated && nicknameValidated && passwordValidated && checkBoxTicked) {
             showSpinner(true);
             // add a listener which is triggered once the registration process is complete
             mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -258,8 +284,8 @@ public class RegisterActivity extends AppCompatActivity {
                             if (task.isSuccessful()) {
                                 // display a toast informing that registration was successful
                                 Toast.makeText(RegisterActivity.this, "Account successfully created!", Toast.LENGTH_LONG).show();
-                                Intent mainPageActivity = new Intent(getApplicationContext(), MainPageActivity.class);
-                                startActivity(mainPageActivity);
+                                // create a userid-nickname pair in FireStore
+                                createUserIDNicknamePairFireStore(mAuth.getCurrentUser().getUid(), nickname);
                             }
                         }
                     });
@@ -267,12 +293,33 @@ public class RegisterActivity extends AppCompatActivity {
             mAuth.createUserWithEmailAndPassword(email, password).addOnFailureListener(this, new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
-                    createErrorAlertDialog("Authentication error!", e.getMessage());
+                    createErrorAlertDialog("Authentication error:", e.getMessage());
                 }
             });
-            showSpinner(false);
         }
     }
+
+    private void createUserIDNicknamePairFireStore(String uID, String nickName) {
+
+        HashMap<String,String> nicknameMap = new HashMap<>();
+        nicknameMap.put("nickname", nickName);
+        fireStore.collection("user-id-nickname-pair").document(uID).set(nicknameMap).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void unused) {
+                Toast.makeText(RegisterActivity.this, "User created in database!", Toast.LENGTH_SHORT).show();
+                // redirect user to the main page
+                Intent mainPageActivity = new Intent(getApplicationContext(), MainPageActivity.class);
+                startActivity(mainPageActivity);
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.e(TAG, e.getMessage());
+            }
+        });
+        showSpinner(false);
+    }
+
 
     private void showSpinner(boolean flag) {
         if(flag) {

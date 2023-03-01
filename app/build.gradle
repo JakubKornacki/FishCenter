@@ -2,14 +2,7 @@ plugins {
     id 'com.android.application'
     // Add the Google services Gradle plugin
     id 'com.google.gms.google-services'
-    id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
-}
-
-// https://guides.codepath.com/android/storing-secret-keys-in-android
-// following the tutorial from Guides.CodePath to safely store API keys
-def apikeyPropertiesFile = rootProject.file("apikey.properties")
-def apikeyProperties = new Properties()
-apikeyProperties.load(new FileInputStream(apikeyPropertiesFile))
+    id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'}
 
 android {
     namespace 'com.example.fishcenter'
@@ -21,10 +14,6 @@ android {
         targetSdk 33
         versionCode 1
         versionName "1.0"
-
-        buildConfigField("String", "FISHIAL_API_KEY", apikeyProperties['FISHIAL_API_KEY'])
-        buildConfigField("String", "FISHIAL_API_SECRET_KEY", apikeyProperties['FISHIAL_API_SECRET_KEY'])
-        buildConfigField("String", "MAPS_API_KEY", apikeyProperties['MAPS_API_KEY'])
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -48,6 +37,8 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.activity:activity:1.6.1'
 
+
+
     // Import the BoM for the Firebase platform
     implementation platform('com.google.firebase:firebase-bom:31.2.0')
 
@@ -57,6 +48,7 @@ dependencies {
 
 
     implementation 'com.google.android.gms:play-services-maps:18.1.0'
+    implementation 'com.google.firebase:firebase-firestore:24.1.1'
 
 
     testImplementation 'junit:junit:4.13.2'
@@ -67,14 +59,10 @@ dependencies {
     // Import the Firebase BoM
     implementation platform('com.google.firebase:firebase-bom:31.2.0')
 
-    // chainfire:libsuperuser to execute shell scripts in superuser mode
-
     // When using the BoM, don't specify versions in Firebase dependencies
     implementation 'com.google.firebase:firebase-analytics'
 
-    // GSON for easy handling of JSON objects
-    implementation 'com.github.google:GSON:1.7'
-
+    // glide for easy and fast working with images
     implementation 'com.github.bumptech.glide:glide:4.15.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.15.0'
 

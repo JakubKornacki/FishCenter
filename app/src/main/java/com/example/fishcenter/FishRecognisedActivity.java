@@ -130,7 +130,7 @@ public class FishRecognisedActivity extends AppCompatActivity {
         // https://bumptech.github.io/glide/doc/transformations.html
         // have radius of 30 pixels use the Glide override method to keep the image its original size as otherwise it is displayed stretched
         Glide.with(con).load(fish.getMediaUri()).transform(new RoundedCorners(30)).override(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL).into(imageView);
-        imageView.setBackground(getDrawable(R.drawable.image_round_corners_10));
+       // imageView.setBackground(getDrawable(R.drawable.image_round_corners_10));
         imageView.setClipToOutline(true);
         imageRow.addView(imageView);
 

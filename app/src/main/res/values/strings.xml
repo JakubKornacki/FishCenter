@@ -10,7 +10,7 @@
     <string name="userDoesNotHaveAnAccount">Don\'t have an account? &lt;b>Register&lt;/b></string>
     <string name="userAlreadyHasAnAccount">Already have an account? &lt;b>Log in&lt;/b></string>
     <string name="userRemembersPassword">Do you remember your password? &lt;b>Log in&lt;/b></string>
-    <string name="termsAndConditionsCheckBox">Accept our terms &amp; conditions</string>
+    <string name="termsAndConditionsCheckBox">Accept our Terms &amp; Conditions</string>
     <string name="submit">Submit</string>
     <string name="forgotPasswordDescription">Enter your e-mail address below so that we can send you a password reset e-mail.</string>
     <string name="fishRecognition">Fish Recognition</string>
@@ -39,5 +39,6 @@
     <string name="waitUntilFishRecognised">Hang on while we identify your catch!</string>
     <string name="backToMainMenu">Back to main menu</string>
     <string name="nickname">Nickname</string>
+    <string name="tellUsWhatsOnYourMind">What\'s on your mind?</string>
 
 </resources>
