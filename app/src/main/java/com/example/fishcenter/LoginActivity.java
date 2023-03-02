@@ -30,7 +30,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private EditText emailEditText;
     private EditText passwordEditText;
-    private Button signInButton;
+    private ImageButton signInButton;
     private ImageButton passwordVisibleImageButton;
     private TextView userNotRegisteredText;
     private FirebaseAuth mAuth;

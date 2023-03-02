@@ -40,7 +40,7 @@ public class RegisterActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private LinearLayout mainContentLayout;
     private TextView userAlreadyRegistered;
-    private Button signUpButton;
+    private ImageButton registerButton;
     private EditText emailEditText;
     private EditText nicknameEditText;
     private EditText passwordEditText;
@@ -61,7 +61,7 @@ public class RegisterActivity extends AppCompatActivity {
         // get FireStore instance
         fireStore = FirebaseFirestore.getInstance();
         // get reference to interactive components on the register activity
-        signUpButton = findViewById(R.id.signUpButton);
+        registerButton = findViewById(R.id.registerButton);
         emailEditText = findViewById(R.id.emailEditText);
         nicknameEditText = findViewById(R.id.nicknameEditText);
         passwordEditText = findViewById(R.id.passwordEditText);
@@ -109,7 +109,7 @@ public class RegisterActivity extends AppCompatActivity {
             startActivity(loginActivity);
         });
 
-        signUpButton.setOnClickListener(view -> createUserWithFirebase());
+        registerButton.setOnClickListener(view -> createUserWithFirebase());
 
         passwordVisibleImageButton.setOnClickListener(view -> togglePasswordVisibilityButton(passwordVisibleImageButton, passwordEditText));
 

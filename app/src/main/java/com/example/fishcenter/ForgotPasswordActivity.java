@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,7 +27,7 @@ import com.google.firebase.auth.FirebaseAuth;
 public class ForgotPasswordActivity extends AppCompatActivity {
 
     private EditText emailEditText;
-    private Button submitButton;
+    private ImageButton submitButton;
     private TextView goBackToLoginText;
     private LinearLayout mainContentLayout;
     private FirebaseAuth auth;

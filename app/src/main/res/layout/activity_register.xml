@@ -79,7 +79,8 @@
                         android:hint="@string/email"
                         android:inputType="textEmailAddress"
                         android:minHeight="48dp"
-                        android:paddingLeft="15dp"/>
+                        android:paddingLeft="15dp"
+                        tools:ignore="TouchTargetSizeCheck" />
 
                     <ImageView
                         android:layout_width="wrap_content"
@@ -104,7 +105,8 @@
                         android:hint="@string/nickname"
                         android:inputType="text"
                         android:minHeight="48dp"
-                        android:paddingLeft="15dp" />
+                        android:paddingLeft="15dp"
+                        tools:ignore="TouchTargetSizeCheck" />
 
 
                     <ImageView
@@ -130,7 +132,8 @@
                         android:hint="@string/password"
                         android:inputType="textPassword"
                         android:minHeight="48dp"
-                        android:paddingLeft="15dp" />
+                        android:paddingLeft="15dp"
+                        tools:ignore="TouchTargetSizeCheck" />
 
                     <ImageButton
                         android:id="@+id/passwordVisibleImageButton"
@@ -141,7 +144,8 @@
                         android:gravity="center_horizontal"
                         android:minWidth="48dp"
                         android:padding="10dp"
-                        android:src="@drawable/ic_password_visible_toggle_button" />
+                        android:src="@drawable/ic_password_visible_toggle_button"
+                        tools:ignore="TouchTargetSizeCheck" />
 
                 </LinearLayout>
 
@@ -162,7 +166,8 @@
                         android:hint="@string/retypePassword"
                         android:inputType="textPassword"
                         android:minHeight="48dp"
-                        android:paddingLeft="15dp" />
+                        android:paddingLeft="15dp"
+                        tools:ignore="TouchTargetSizeCheck" />
 
                     <ImageButton
                         android:id="@+id/retypePasswordVisibleImageButton"
@@ -173,7 +178,8 @@
                         android:gravity="center_horizontal"
                         android:minWidth="48dp"
                         android:padding="10dp"
-                        android:src="@drawable/ic_password_visible_toggle_button" />
+                        android:src="@drawable/ic_password_visible_toggle_button"
+                        tools:ignore="TouchTargetSizeCheck" />
 
                 </LinearLayout>
             <LinearLayout
@@ -204,17 +210,23 @@
             </LinearLayout>
 
             </LinearLayout>
-
-            <Button
-                android:id="@+id/signUpButton"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="20dp"
-                android:background="@color/ordinaryButtonColor"
-                android:minWidth="48dp"
-                android:text="@string/signUp"
-                android:textColor="@color/white"
-                android:textSize="20dp" />
+                android:background="@color/ordinaryButtonColor">
+
+
+                <ImageButton
+                    android:id="@+id/registerButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/layout_background_rounded_corners_toggle_5_gray_opacity_30_to_transparent"
+                    app:srcCompat="@drawable/baseline_how_to_reg_24_white"
+                    android:minHeight="48dp" />
+
+
+            </LinearLayout>
         </LinearLayout>
 
     </LinearLayout>

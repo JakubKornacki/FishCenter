@@ -29,46 +29,37 @@
         </activity>
 
         <activity android:name=".RegisterActivity"
-                  android:parentActivityName=".LoginActivity"
-                  android:label="@string/signUp"
                   android:screenOrientation="portrait">
         </activity>
 
         <activity android:name=".MainPageActivity"
-                  android:label="@string/appName"
-                  android:screenOrientation="portrait"
-                  android:windowSoftInputMode="adjustPan">
+                  android:screenOrientation="portrait">
         </activity>
 
         <activity android:name=".ForgotPasswordActivity"
-                  android:parentActivityName=".LoginActivity"
-                  android:label="@string/forgotPassword"
                   android:screenOrientation="portrait">
         </activity>
 
         <activity android:name=".FishRecognitionActivity"
-                  android:parentActivityName=".MainPageActivity"
-                  android:label="@string/fishRecognition"
                   android:screenOrientation="portrait">
         </activity>
 
         <activity android:name=".MapActivity"
-                  android:parentActivityName=".MainPageActivity"
-                  android:label="@string/map"
                   android:screenOrientation="portrait">
         </activity>
 
         <activity android:name=".FishRecognisedActivity"
-            android:parentActivityName=".FishRecognitionActivity"
-            android:label="@string/fishRecognizedResults"
             android:screenOrientation="portrait">
         </activity>
 
         <activity android:name=".FishNotRecognisedOrOutOfAPICredits"
-            android:parentActivityName=".FishRecognitionActivity"
-            android:label="@string/invalidRequest"
             android:screenOrientation="portrait">
         </activity>
+
+        <activity android:name=".CreatePost"
+            android:screenOrientation="portrait">
+        </activity>
+
 
         <meta-data android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />

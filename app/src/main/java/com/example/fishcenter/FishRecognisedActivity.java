@@ -9,6 +9,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
@@ -21,6 +22,8 @@ import androidx.core.text.HtmlCompat;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.target.Target;
+import com.google.firebase.auth.FirebaseAuth;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -28,10 +31,33 @@ public class FishRecognisedActivity extends AppCompatActivity {
     private ArrayList<Fish> fishes;
     private LinearLayout linearLayoutInsideScrollView;
     private Button backToMainMenuButton;
+    private ImageButton goBackImageButton;
+    private ImageButton logoutImageButton;
+    private FirebaseAuth mAuth;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fish_recognised);
+        goBackImageButton = findViewById(R.id.goBackImageButton);
+        logoutImageButton = findViewById(R.id.logoutImageButton);
+        mAuth = FirebaseAuth.getInstance();
+        goBackImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent mainActivity = new Intent(getApplicationContext(), MainPageActivity.class);
+                startActivity(mainActivity);
+            }
+        });
+
+        logoutImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mAuth.signOut();
+                Intent loginActivity = new Intent(getApplicationContext(), LoginActivity.class);
+                startActivity(loginActivity);
+            }
+        });
 
         // way of passing objects between activities using Intent with the help of serializable interface and Bundle
         // more references in the FishialAPIFetchFishData.java class
@@ -58,6 +84,8 @@ public class FishRecognisedActivity extends AppCompatActivity {
             Intent mainMenuActivity = new Intent(getApplicationContext(), MainPageActivity.class);
             startActivity(mainMenuActivity);
         });
+
+
 
     }
 

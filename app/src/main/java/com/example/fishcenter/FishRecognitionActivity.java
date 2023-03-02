@@ -2,6 +2,7 @@ package com.example.fishcenter;
 
 
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
@@ -11,6 +12,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -23,6 +25,7 @@ import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class FishRecognitionActivity extends AppCompatActivity {
 
@@ -33,6 +36,10 @@ public class FishRecognitionActivity extends AppCompatActivity {
     private ActivityResultLauncher<PickVisualMediaRequest> pickMedia;
     private LinearLayout linearLayoutIndeterminateProgressBar;
     private boolean imageSelected;
+    private ImageButton goBackImageButton;
+    private ImageButton logoutImageButton;
+    private FirebaseAuth mAuth;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,8 +48,28 @@ public class FishRecognitionActivity extends AppCompatActivity {
         fishImageLinearLayout = findViewById(R.id.fishImageLinearLayout);
         fishImageImageView = findViewById(R.id.fishImageImageView);
         linearLayoutIndeterminateProgressBar = findViewById(R.id.linearLayoutIndeterminateProgressBar);
+        goBackImageButton = findViewById(R.id.goBackImageButton);
+        logoutImageButton = findViewById(R.id.logoutImageButton);
+        mAuth = FirebaseAuth.getInstance();
         // allow for the fish image to be clipped
         fishImageImageView.setClipToOutline(true);
+
+        goBackImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent mainActivity = new Intent(getApplicationContext(), MainPageActivity.class);
+                startActivity(mainActivity);
+            }
+        });
+
+        logoutImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mAuth.signOut();
+                Intent loginActivity = new Intent(getApplicationContext(), LoginActivity.class);
+                startActivity(loginActivity);
+            }
+        });
 
         // if the linear layout area where the fish image will be located is clicked then launch the photo picker
         fishImageLinearLayout.setOnClickListener(view -> {
@@ -58,7 +85,7 @@ public class FishRecognitionActivity extends AppCompatActivity {
                 FishialAPIFetchFishData fetchFishialRecognitionDataThread = new FishialAPIFetchFishData(fishImage, this);
                 fetchFishialRecognitionDataThread.start();
             } else {
-                Toast.makeText(getBaseContext(), "Add an image!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getBaseContext(), "Cannot post an empty image!", Toast.LENGTH_SHORT).show();
                 return;
             }
 

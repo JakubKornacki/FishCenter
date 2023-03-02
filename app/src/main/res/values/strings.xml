@@ -18,9 +18,9 @@
     <string name="addImage">Add Image</string>
     <string name="identify">Identify</string>
     <string name="enterFishImageDescription">Click here to add your fish image!</string>
-    <string name="fishRecognitionActivityDescription">Select the fish image you want and click identify when you\'re ready! \n Tap on the image below to select an image! </string>
+    <string name="fishRecognitionActivityDescription">Tap on the image container below to select the fishes you want to identify!</string>
     <string name="fishRecognizedResults">Results</string>
-    <string name="invalidRequest">Invalid request</string>
+    <string name="invalidRequest">Invalid Request</string>
     <string name="somethingWentWrong">Something went wrong…</string>
     <string name="errorMessage">We were not able to process your request. Check if you have uploaded an fish image.</string>
     <string name="latinName">&lt;b>Latin name:&lt;/b></string>
@@ -40,5 +40,6 @@
     <string name="backToMainMenu">Back to main menu</string>
     <string name="nickname">Nickname</string>
     <string name="tellUsWhatsOnYourMind">What\'s on your mind?</string>
+    <string name="createPost">Post Creator</string>
 
 </resources>

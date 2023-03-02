@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:background="@drawable/background5">
 
 
@@ -15,6 +16,58 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/colorPrimary"
+            android:minHeight="?attr/actionBarSize"
+            android:theme="?attr/actionBarTheme">
+
+
+            <ImageButton
+                android:id="@+id/goBackImageButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:layout_marginEnd="10dp"
+                android:contentDescription="logs user out"
+                android:background="@drawable/layout_background_rounded_corners_toggle_5_gray_opacity_25_to_transparent"
+                android:minWidth="48dp"
+                android:minHeight="48dp"
+                android:padding="5dp"
+                android:src="@drawable/baseline_arrow_back_24_white"
+                tools:ignore="HardcodedText"></ImageButton>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:textSize="22dp"
+                android:text="@string/fishRecognizedResults">
+            </TextView>
+
+
+            <ImageButton
+                android:id="@+id/logoutImageButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/layout_background_rounded_corners_toggle_5_gray_opacity_25_to_transparent"
+                android:contentDescription="logs user out"
+                android:minWidth="48dp"
+                android:minHeight="48dp"
+                android:padding="5dp"
+                android:src="@drawable/baseline_logout_24_white"
+                tools:ignore="HardcodedText"></ImageButton>
+
+
+
+        </androidx.appcompat.widget.Toolbar>
+
+
+
 
     <ScrollView
         android:layout_width="match_parent"
