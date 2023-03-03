@@ -41,5 +41,6 @@
     <string name="nickname">Nickname</string>
     <string name="tellUsWhatsOnYourMind">What\'s on your mind?</string>
     <string name="createPost">Post Creator</string>
+    <string name="title">What\'s your post title?</string>
 
 </resources>

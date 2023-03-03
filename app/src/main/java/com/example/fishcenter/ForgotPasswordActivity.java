@@ -126,7 +126,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
     }
 
     private void resetPasswordWithFirebase() {
-        String email = emailEditText.getText().toString();
+        String email = emailEditText.getText().toString().trim();
         boolean emailValidated = validateEmail(email);
         if(emailValidated) {
             showSpinner(true);

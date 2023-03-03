@@ -25,7 +25,11 @@ import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
+import com.bumptech.glide.request.target.Target;
 import com.google.firebase.auth.FirebaseAuth;
+
+import java.util.Arrays;
+import java.util.HashSet;
 
 public class FishRecognitionActivity extends AppCompatActivity {
 
@@ -39,6 +43,8 @@ public class FishRecognitionActivity extends AppCompatActivity {
     private ImageButton goBackImageButton;
     private ImageButton logoutImageButton;
     private FirebaseAuth mAuth;
+    private HashSet<String> imageMimeTypes = new HashSet<>(Arrays.asList("image/jpg","image/jpeg","image/png","image/bmp", "image/avif"));
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -81,12 +87,16 @@ public class FishRecognitionActivity extends AppCompatActivity {
             if (imageSelected) {
                 showSpinner(true);
                 FishImage fishImage = new FishImage(originalImageUri, getContentResolver());
-                // start the new thread to fetch data about the fish
-                FishialAPIFetchFishData fetchFishialRecognitionDataThread = new FishialAPIFetchFishData(fishImage, this);
-                fetchFishialRecognitionDataThread.start();
+                if(imageMimeTypes.contains(fishImage.getImageFileMimeType())) {
+                    // start the new thread to fetch data about the fish
+                    FishialAPIFetchFishData fetchFishialRecognitionDataThread = new FishialAPIFetchFishData(fishImage, this);
+                    fetchFishialRecognitionDataThread.start();
+                } else {
+                    Toast.makeText(getBaseContext(), "Unsupported file format!", Toast.LENGTH_SHORT).show();
+                }
+
             } else {
                 Toast.makeText(getBaseContext(), "Cannot post an empty image!", Toast.LENGTH_SHORT).show();
-                return;
             }
 
             });
@@ -102,7 +112,7 @@ public class FishRecognitionActivity extends AppCompatActivity {
                 // uri of the original image that is not transformed and scaled and will be used for fish recognition
                 originalImageUri = uri;
                 // use Glide to load the image into the fish image view with its uri and set the image rounded corners to have radius of 100 pixels
-                Glide.with(getApplicationContext()).load(uri).transform(new RoundedCorners(100)).into(fishImageImageView);
+                Glide.with(getApplicationContext()).load(uri).override(Target.SIZE_ORIGINAL,Target.SIZE_ORIGINAL).into(fishImageImageView);
             } else {
                 imageSelected = false;
                 Glide.with(getApplicationContext()).load(getDrawable(R.drawable.baseline_empty_image_360_gray)).into(fishImageImageView);

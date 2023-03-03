@@ -194,7 +194,7 @@ public class LoginActivity extends AppCompatActivity {
 
 
     private void signInWithFirebase() {
-        String email = emailEditText.getText().toString();
+        String email = emailEditText.getText().toString().trim();
         String password = passwordEditText.getText().toString();
         boolean emailValidated = validateEmail(email);
         boolean passwordValidated = validatePassword(password);

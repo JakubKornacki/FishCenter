@@ -32,6 +32,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
+import java.util.Map;
 
 
 public class RegisterActivity extends AppCompatActivity {
@@ -260,8 +261,8 @@ public class RegisterActivity extends AppCompatActivity {
 
 
     private void createUserWithFirebase() {
-        String email = emailEditText.getText().toString();
-        String nickname = nicknameEditText.getText().toString();
+        String email = emailEditText.getText().toString().trim();
+        String nickname = nicknameEditText.getText().toString().trim();
         String password = passwordEditText.getText().toString();
         String passwordReTyped = retypePasswordEditText.getText().toString();
 
@@ -301,7 +302,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     private void createUserIDNicknamePairFireStore(String uID, String nickName) {
 
-        HashMap<String,String> nicknameMap = new HashMap<>();
+        Map<String, Object> nicknameMap = new HashMap<>();
         nicknameMap.put("nickname", nickName);
         fireStore.collection("user-id-nickname-pair").document(uID).set(nicknameMap).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override

@@ -13,4 +13,5 @@
     <color name="graywithopacity25">#40F2EBEB</color>
     <color name="ordinaryButtonColor">#7239f7</color>
     <color name="whitewithopacity55">#8CFFFFFF</color>
+    <color name="transparent">#00FFFFFF</color>
 </resources>
