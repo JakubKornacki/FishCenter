@@ -39,7 +39,7 @@
                 android:minWidth="48dp"
                 android:minHeight="48dp"
                 android:padding="5dp"
-                android:src="@drawable/baseline_arrow_back_24_white"
+                android:src="@drawable/ic_baseline_arrow_back_24_white"
                 tools:ignore="HardcodedText"></ImageButton>
 
             <TextView
@@ -62,7 +62,7 @@
                 android:minWidth="48dp"
                 android:minHeight="48dp"
                 android:padding="5dp"
-                android:src="@drawable/baseline_logout_24_white"
+                android:src="@drawable/ic_baseline_logout_24_white"
                 tools:ignore="HardcodedText"></ImageButton>
 
 
@@ -99,7 +99,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/baseline_question_mark_136_white" />
+                app:srcCompat="@drawable/ic_baseline_question_mark_136_white" />
 
             <TextView
                 android:id="@+id/textView2"
@@ -119,7 +119,7 @@
                 android:background="@color/ordinaryButtonColor"
                 android:contentDescription="This button redirects the user back to the fish recognition page"
                 android:minHeight="48dp"
-                app:srcCompat="@drawable/baseline_arrow_back_24_white" />
+                app:srcCompat="@drawable/ic_baseline_arrow_back_24_white" />
         </LinearLayout>
 
 

@@ -9,7 +9,6 @@ import android.text.style.ForegroundColorSpan;
 import android.view.Gravity;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -185,7 +184,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         AlertDialog.Builder  alert = new AlertDialog.Builder(this);
         alert.setTitle(alertTitle);
         alert.setMessage(alertMessage);
-        alert.setIcon(R.drawable.baseline_error_outline_36_black);
+        alert.setIcon(R.drawable.ic_baseline_error_outline_36_black);
         alert.show();
     }
 

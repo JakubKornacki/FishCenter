@@ -36,7 +36,7 @@
                 android:minWidth="48dp"
                 android:minHeight="48dp"
                 android:padding="5dp"
-                android:src="@drawable/baseline_arrow_back_24_white"
+                android:src="@drawable/ic_baseline_arrow_back_24_white"
                 tools:ignore="HardcodedText"></ImageButton>
 
             <TextView
@@ -59,7 +59,7 @@
                 android:minWidth="48dp"
                 android:minHeight="48dp"
                 android:padding="5dp"
-                android:src="@drawable/baseline_logout_24_white"
+                android:src="@drawable/ic_baseline_logout_24_white"
                 tools:ignore="HardcodedText"></ImageButton>
 
 

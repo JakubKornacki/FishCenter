@@ -31,12 +31,12 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="start"
                 android:layout_marginEnd="10dp"
-                android:background="@null"
-                android:contentDescription="logs user out"
+                android:contentDescription="user go back to main activity"
+                android:background="@drawable/layout_background_rounded_corners_toggle_5_gray_opacity_25_to_transparent"
                 android:minWidth="48dp"
                 android:minHeight="48dp"
                 android:padding="5dp"
-                android:src="@drawable/baseline_arrow_back_24_white"></ImageButton>
+                android:src="@drawable/ic_baseline_arrow_back_24_white"></ImageButton>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -58,7 +58,7 @@
                 android:minWidth="48dp"
                 android:minHeight="48dp"
                 android:padding="5dp"
-                android:src="@drawable/baseline_logout_24_white"
+                android:src="@drawable/ic_baseline_logout_24_white"
                 tools:ignore="HardcodedText"></ImageButton>
 
 
@@ -121,7 +121,7 @@
                 android:layout_gravity="center"
                 android:background="@drawable/layout_background_rounded_corners_toggle_5_gray_opacity_50_to_transparent"
                 android:layout_weight="1"
-                app:srcCompat="@drawable/baseline_empty_image_360_gray" />
+                app:srcCompat="@drawable/ic_baseline_empty_image_360_gray" />
 
         </LinearLayout>
 

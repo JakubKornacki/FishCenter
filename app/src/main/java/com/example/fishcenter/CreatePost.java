@@ -1,6 +1,8 @@
 package com.example.fishcenter;
 
 import static android.content.ContentValues.TAG;
+
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import android.content.Intent;
 import android.media.MediaPlayer;
@@ -31,11 +33,10 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 
 import com.google.firebase.Timestamp;
-import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.firestore.core.FirestoreClient;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
@@ -64,7 +65,7 @@ public class CreatePost extends AppCompatActivity {
    private MediaController mediaController;
    private FirebaseStorage firebaseStorage;
    private FirebaseAuth firebaseAuth;
-   private FirebaseFirestore fireStore;
+   private FirebaseFirestore firestore;
 
    private Uri uri;
    private HashSet<String> imageMimeTypes = new HashSet<>(Arrays.asList("image/jpg","image/jpeg","image/png"));
@@ -82,12 +83,12 @@ public class CreatePost extends AppCompatActivity {
         goBackImageButton = findViewById(R.id.goBackImageButton);
         sendPostImageButton = findViewById(R.id.sendPostImageButton);
         mediaController = new MediaController(this);
-        userGifImageView = findViewById(R.id.userGifImageView);
+        userGifImageView = findViewById(R.id.postGif);
         userVideoView = findViewById(R.id.userVideoView);
         postTitleEditText = findViewById(R.id.postTitleEditText);
         firebaseAuth = FirebaseAuth.getInstance();
         firebaseStorage = FirebaseStorage.getInstance();
-        fireStore = FirebaseFirestore.getInstance();
+        firestore = FirebaseFirestore.getInstance();
         keyboard = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
 
 
@@ -116,6 +117,7 @@ public class CreatePost extends AppCompatActivity {
                 }
             }
         });
+
 
         selectImage.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -157,13 +159,17 @@ public class CreatePost extends AppCompatActivity {
         linearLayoutBackground.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                keyboard.hideSoftInputFromWindow(view.getWindowToken(),0);
                 if(postEditText.isFocused()) {
                     postEditText.clearFocus();
-                    keyboard.hideSoftInputFromWindow(view.getWindowToken(),0);
+                }
+                if(postTitleEditText.isFocused()) {
+                    postTitleEditText.clearFocus();
                 }
                 if(mediaController.isShown()) {
                     mediaController.hide();
                 }
+
             }
         });
 
@@ -228,46 +234,93 @@ public class CreatePost extends AppCompatActivity {
     }
 
 
+
     private void createPost() {
-
-        // need to get user post number so that relationship between cloud storage and firstore for posts can be maintained
+        // need to get user post number so that relationship between cloud storage and firestore for posts can be maintained
         // will be used as the file name in cloud storage in path /postMedia/userID/1 ... n
-
-
-
-       fireStore.collection("user-id-nickname-pair").document(firebaseAuth.getUid()).collection("posts").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+        firestore.collection("users").document(firebaseAuth.getCurrentUser().getUid()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                int numUserPosts = task.getResult().size();
-                numUserPosts++;
-                // save media if selected
-                if(mediaSelected) {
-                    StorageReference storageRef = firebaseStorage.getReference();
-                    storageRef.child("/postMedia/" + firebaseAuth.getUid() + "/" + numUserPosts).putFile(uri);
-                }
-                // save post title and body despite having media
-
-                // create
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                String nickname = documentSnapshot.get("nickname").toString();
+                // create object to place into firestore
                 Map<String, Object> post = new HashMap<>();
                 Timestamp timestamp = Timestamp.now();
                 post.put("title", postTitle);
-                post.put("timestamp", timestamp);
                 post.put("body", postBody);
-                fireStore.collection("user-id-nickname-pair").document(firebaseAuth.getUid()).collection("posts").document(String.valueOf(numUserPosts)).set(post).addOnFailureListener(new OnFailureListener() {
+                post.put("timestamp", timestamp);
+                post.put("likes", 0);
+                post.put("userId", firebaseAuth.getCurrentUser().getUid());
+                post.put("nickname", nickname);
+
+                firestore.collection("posts").add(post).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                    @Override
+                    public void onSuccess(DocumentReference documentReference) {
+                        if(mediaSelected) {
+                            String uniquePostRef = documentReference.getId();
+                            StorageReference storageRef = firebaseStorage.getReference();
+                            storageRef.child("/postMedia/" + uniquePostRef + "/").putFile(uri);
+                        }
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.e(TAG, e.getMessage());
                     }
                 });
-
             }
-        }).addOnFailureListener(new OnFailureListener() {
-           @Override
-           public void onFailure(@NonNull Exception e) {
-               //Log.e(TAG, e.getMessage());
-           }
-       });
+        });
     }
+
+
+
+
+    /*
+    private void createPost() {
+        // need to get user post number so that relationship between cloud storage and firestore for posts can be maintained
+        // will be used as the file name in cloud storage in path /postMedia/userID/1 ... n
+        firestore.collection("users").document(firebaseAuth.getCurrentUser().getUid()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                String nickname = documentSnapshot.get("nickname").toString();
+                firestore.collection("users").document(firebaseAuth.getCurrentUser().getUid()).collection("posts").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        int numUserPosts = task.getResult().size();
+                        numUserPosts++;
+                        // save media if selected
+                        if(mediaSelected) {
+                            StorageReference storageRef = firebaseStorage.getReference();
+                            storageRef.child("/postMedia/" + firebaseAuth.getCurrentUser().getUid() + "/" + numUserPosts).putFile(uri);
+                        }
+                        // save post title and body despite having media
+
+                        // create
+                        Map<String, Object> post = new HashMap<>();
+                        Timestamp timestamp = Timestamp.now();
+                        post.put("title", postTitle);
+                        post.put("body", postBody);
+                        post.put("timestamp", timestamp);
+                        post.put("likes", 0);
+                        post.put("userId", firebaseAuth.getCurrentUser().getUid());
+                        post.put("nickname", nickname);
+
+                        firestore.collection("users").document(firebaseAuth.getUid()).collection("posts").document(String.valueOf(numUserPosts)).set(post).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.e(TAG, e.getMessage());
+                            }
+                        });
+
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e(TAG, e.getMessage());
+                    }
+                });
+            }
+        });
+    } */
 
     private void launchPhotoPicker () {
         // Launch the photo picker and allow the user to choose only images.

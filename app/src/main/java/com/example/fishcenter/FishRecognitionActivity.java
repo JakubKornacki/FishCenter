@@ -3,11 +3,6 @@ package com.example.fishcenter;
 
 
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
@@ -21,10 +16,8 @@ import androidx.activity.result.PickVisualMediaRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.target.Target;
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -43,6 +36,8 @@ public class FishRecognitionActivity extends AppCompatActivity {
     private ImageButton goBackImageButton;
     private ImageButton logoutImageButton;
     private FirebaseAuth mAuth;
+    private boolean imageBeingFetched;
+
     private HashSet<String> imageMimeTypes = new HashSet<>(Arrays.asList("image/jpg","image/jpeg","image/png","image/bmp", "image/avif"));
 
 
@@ -63,17 +58,21 @@ public class FishRecognitionActivity extends AppCompatActivity {
         goBackImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent mainActivity = new Intent(getApplicationContext(), MainPageActivity.class);
-                startActivity(mainActivity);
+                if(!imageBeingFetched) {
+                    Intent mainActivity = new Intent(getApplicationContext(), MainPageActivity.class);
+                    startActivity(mainActivity);
+                }
             }
         });
 
         logoutImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mAuth.signOut();
-                Intent loginActivity = new Intent(getApplicationContext(), LoginActivity.class);
-                startActivity(loginActivity);
+                if(!imageBeingFetched) {
+                    mAuth.signOut();
+                    Intent loginActivity = new Intent(getApplicationContext(), LoginActivity.class);
+                    startActivity(loginActivity);
+                }
             }
         });
 
@@ -83,14 +82,17 @@ public class FishRecognitionActivity extends AppCompatActivity {
         });
 
         identifyFishButton.setOnClickListener(view -> {
+            imageBeingFetched = false;
             // if the user has not selected an image create a toast that explains the error
             if (imageSelected) {
-                showSpinner(true);
                 FishImage fishImage = new FishImage(originalImageUri, getContentResolver());
                 if(imageMimeTypes.contains(fishImage.getImageFileMimeType())) {
+                    imageBeingFetched = true;
+                    showSpinner(true);
                     // start the new thread to fetch data about the fish
                     FishialAPIFetchFishData fetchFishialRecognitionDataThread = new FishialAPIFetchFishData(fishImage, this);
                     fetchFishialRecognitionDataThread.start();
+
                 } else {
                     Toast.makeText(getBaseContext(), "Unsupported file format!", Toast.LENGTH_SHORT).show();
                 }
@@ -98,7 +100,6 @@ public class FishRecognitionActivity extends AppCompatActivity {
             } else {
                 Toast.makeText(getBaseContext(), "Cannot post an empty image!", Toast.LENGTH_SHORT).show();
             }
-
             });
 
 
@@ -115,7 +116,7 @@ public class FishRecognitionActivity extends AppCompatActivity {
                 Glide.with(getApplicationContext()).load(uri).override(Target.SIZE_ORIGINAL,Target.SIZE_ORIGINAL).into(fishImageImageView);
             } else {
                 imageSelected = false;
-                Glide.with(getApplicationContext()).load(getDrawable(R.drawable.baseline_empty_image_360_gray)).into(fishImageImageView);
+                Glide.with(getApplicationContext()).load(getDrawable(R.drawable.ic_baseline_empty_image_360_gray)).into(fishImageImageView);
             }
         });
     }

@@ -2,7 +2,10 @@ package com.example.fishcenter;
 
 import static android.content.ContentValues.TAG;
 
+import android.content.ContentResolver;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -13,7 +16,6 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -28,8 +30,9 @@ import androidx.core.text.HtmlCompat;
 
 import com.google.android.gms.tasks.*;
 import com.google.firebase.auth.*;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,7 +41,7 @@ import java.util.Map;
 public class RegisterActivity extends AppCompatActivity {
 
     // firebase authentication object instance
-    private FirebaseAuth mAuth;
+    private FirebaseAuth firebaseAuth;
     private LinearLayout mainContentLayout;
     private TextView userAlreadyRegistered;
     private ImageButton registerButton;
@@ -51,16 +54,20 @@ public class RegisterActivity extends AppCompatActivity {
     private ImageButton retypePasswordVisibleImageButton;
     private LinearLayout progressSpinnerLayout;
     private LinearLayout linearLayoutBackground;
-    private FirebaseFirestore fireStore;
+    private FirebaseFirestore firestore;
     private InputMethodManager keyboard;
+    private FirebaseStorage firebaseStorage;
+    private Uri defaultProfilePicture;
+    private ContentResolver contResolver;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
         // get firebase auth instance
-        mAuth = FirebaseAuth.getInstance();
+        firebaseAuth = FirebaseAuth.getInstance();
         // get FireStore instance
-        fireStore = FirebaseFirestore.getInstance();
+        firestore = FirebaseFirestore.getInstance();
+        firebaseStorage = FirebaseStorage.getInstance();
         // get reference to interactive components on the register activity
         registerButton = findViewById(R.id.registerButton);
         emailEditText = findViewById(R.id.emailEditText);
@@ -103,6 +110,9 @@ public class RegisterActivity extends AppCompatActivity {
         userAlreadyRegistered.setTextSize(16);
         userAlreadyRegistered.setBackground(getDrawable(R.drawable.layout_background_rounded_corners_toggle_10_gray_opacity_30_to_transparent));
         textLinearLayout.addView(userAlreadyRegistered);
+        int profilePicId = R.drawable.img_profile_pic_white_default_foreground;
+        defaultProfilePicture = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + getResources().getResourcePackageName(profilePicId) + "/" + getResources().getResourceTypeName(profilePicId) + "/" + getResources().getResourceEntryName(profilePicId));
+
 
         // switch from login activity to the register activity when clicked on the "Don't have an account? Register" TextView on the login activity
         userAlreadyRegistered.setOnClickListener(view -> {
@@ -279,19 +289,17 @@ public class RegisterActivity extends AppCompatActivity {
         if(emailValidated && nicknameValidated && passwordValidated && checkBoxTicked) {
             showSpinner(true);
             // add a listener which is triggered once the registration process is complete
-            mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+            firebaseAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                 @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
-                                // display a toast informing that registration was successful
-                                Toast.makeText(RegisterActivity.this, "Account successfully created!", Toast.LENGTH_LONG).show();
                                 // create a userid-nickname pair in FireStore
-                                createUserIDNicknamePairFireStore(mAuth.getCurrentUser().getUid(), nickname);
+                                createUserIDNicknamePairFireStore(firebaseAuth.getCurrentUser().getUid(), nickname);
                             }
                         }
                     });
             // add an listener which should be triggered if something went wrong with the registration process, for example, a user with this email already exists
-            mAuth.createUserWithEmailAndPassword(email, password).addOnFailureListener(this, new OnFailureListener() {
+            firebaseAuth.createUserWithEmailAndPassword(email, password).addOnFailureListener(this, new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
                     createErrorAlertDialog("Authentication error:", e.getMessage());
@@ -301,13 +309,13 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void createUserIDNicknamePairFireStore(String uID, String nickName) {
-
-        Map<String, Object> nicknameMap = new HashMap<>();
-        nicknameMap.put("nickname", nickName);
-        fireStore.collection("user-id-nickname-pair").document(uID).set(nicknameMap).addOnSuccessListener(new OnSuccessListener<Void>() {
+        Map<String, Object> nickname = new HashMap<>();
+        nickname.put("nickname", nickName);
+        firestore.collection("users").document(uID).set(nickname).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void unused) {
-                Toast.makeText(RegisterActivity.this, "User created in database!", Toast.LENGTH_SHORT).show();
+                StorageReference storageRef = firebaseStorage.getReference();
+                storageRef.child("/profilePictures/" + firebaseAuth.getCurrentUser().getUid() + "/").putFile(defaultProfilePicture);
                 // redirect user to the main page
                 Intent mainPageActivity = new Intent(getApplicationContext(), MainPageActivity.class);
                 startActivity(mainPageActivity);
@@ -351,7 +359,7 @@ public class RegisterActivity extends AppCompatActivity {
         AlertDialog.Builder  alert = new AlertDialog.Builder(this);
         alert.setTitle(alertTitle);
         alert.setMessage(alertMessage);
-        alert.setIcon(R.drawable.baseline_error_outline_36_black);
+        alert.setIcon(R.drawable.ic_baseline_error_outline_36_black);
         alert.show();
     }
 
