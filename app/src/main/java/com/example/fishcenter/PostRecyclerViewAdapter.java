@@ -6,9 +6,10 @@ import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.MediaController;
 import android.widget.TextView;
+import android.widget.VideoView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -23,15 +24,14 @@ import java.util.HashSet;
 import pl.droidsonroids.gif.GifImageView;
 
 public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerViewAdapter.PostViewHolder> {
-    private ContentResolver contResolver;
     private Context con;
     private ArrayList<PostModel> posts;
-    private HashSet<String> imageMimeTypes = new HashSet<>(Arrays.asList("image/jpg","image/jpeg","image/png"));
+    private MediaController mediaController;
+    private HashSet<String> imageMimeTypes = new HashSet<>(Arrays.asList("image/jpg","image/jpeg","image/png","image/gif"));
     private HashSet<String> videoMimeTypes = new HashSet<>(Arrays.asList("video/3gp","video/mov","video/avi","video/wmv","video/mp4","video/mpeg"));
     public PostRecyclerViewAdapter(Context con, ArrayList<PostModel> posts) {
         this.con = con;
         this.posts = posts;
-        this.contResolver = contResolver;
     }
 
     @NonNull
@@ -39,7 +39,7 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
     public PostViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(con);
         View view = inflater.inflate(R.layout.post, parent, false);
-        return new PostRecyclerViewAdapter.PostViewHolder(view);
+        return new PostRecyclerViewAdapter.PostViewHolder(view, con);
     }
 
     @Override
@@ -51,19 +51,26 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
         holder.datePosted.setText(posts.get(position).getDatePosted());
         holder.postTitle.setText(posts.get(position).getTitle());
         Uri uri = posts.get(position).getMedia();
-
+        String mimeType = posts.get(position).getMimeType();
         if(uri != null) {
+            if(imageMimeTypes.contains(mimeType)) {
+                Glide.with(con).load(uri).thumbnail().transform(new RoundedCorners(30)).into(holder.postImageAndGif);
+                holder.postImageAndGif.setVisibility(View.VISIBLE);
+                holder.postVideo.setVisibility(View.GONE);
+            } else if (videoMimeTypes.contains(mimeType)) {
+                holder.postVideo.setVideoURI(uri);
+                holder.postVideo.setVisibility(View.VISIBLE);
+                holder.postImageAndGif.setVisibility(View.GONE);
 
-               //Glide.with(con).load(uri).transform(new RoundedCorners(10)).into(holder.postImage);
 
-           Glide.with(con).load(uri).thumbnail().transform(new RoundedCorners(10)).into(holder.postImageAndGif);
-
-
-           // Glide.with(con).asGif().load(uri).transform(new RoundedCorners(10)).into(holder.postGif);
-
+               // mediaController = new MediaController(con);
+                //mediaController.setAnchorView(holder.postVideo);
+                //holder.postVideo.setMediaController(mediaController);
+            }
         }
+        holder.likesButton.setImageResource(R.drawable.ic_baseline_thumb_up_24_white);
         holder.postBody.setText(posts.get(position).getBody());
-       // String likes = "Likes: " + posts.get(position).getNumLikes();
+        String likes = "Likes: " + posts.get(position).getNumLikes();
         //holder.postLikes.setText(likes);
     }
 
@@ -80,22 +87,22 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
         private TextView datePosted;
         private TextView postTitle;
         private ImageView postImageAndGif;
-        private GifImageView postGif;
-        private ImageView postVideoThumbnail;
+        private VideoView postVideo;
         private TextView postBody;
-        private ImageButton likesButton;
+        private ImageView likesButton;
         private TextView postLikes;
 
-        public PostViewHolder(@NonNull View itemView) {
+
+        public PostViewHolder(@NonNull View itemView, Context con) {
             super(itemView);
             userProfilePicture = itemView.findViewById(R.id.userProfilePicture);
             userNickname = itemView.findViewById(R.id.userNickname);
             datePosted = itemView.findViewById(R.id.datePosted);
             postTitle = itemView.findViewById(R.id.postTitle);
-            postGif = itemView.findViewById(R.id.postGif);
             postImageAndGif = itemView.findViewById(R.id.imageAndGifView);
+            postVideo = itemView.findViewById(R.id.postVideo);
             postBody = itemView.findViewById(R.id.postBody);
-            //likesButton = itemView.findViewById(R.id.likesButton);
+            likesButton = itemView.findViewById(R.id.likesButton);
             //postLikes = itemView.findViewById(R.id.postLikes);
         }
     }

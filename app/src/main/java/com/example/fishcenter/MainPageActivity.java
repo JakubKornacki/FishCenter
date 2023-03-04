@@ -23,8 +23,8 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.AggregateQuerySnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
@@ -33,6 +33,7 @@ import com.google.firebase.storage.StorageReference;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 
 
@@ -51,7 +52,7 @@ public class MainPageActivity extends AppCompatActivity {
     private RecyclerView postsRecyclerView;
     private PostRecyclerViewAdapter adapter;
     private int postsCount = -1;
-    private boolean threadFlag = false;
+    private boolean postDataFetched = false;
     private LinearLayout linearLayoutIndeterminateProgressBar;
     private LinearLayout linearLayoutNoPostsToLoad;
     @Override
@@ -78,27 +79,35 @@ public class MainPageActivity extends AppCompatActivity {
         getPosts();
 
         floatingActionButton.setOnClickListener(view -> {
-            Intent createPost = new Intent(getApplicationContext(), CreatePost.class);
-            startActivity(createPost);
+            if(postDataFetched) {
+                Intent createPost = new Intent(getApplicationContext(), CreatePost.class);
+                startActivity(createPost);
+            }
         });
 
         logoutImageButton.setOnClickListener(view -> {
-            firebaseAuth.signOut();
-            Intent loginActivity = new Intent(getApplicationContext(), LoginActivity.class);
-            startActivity(loginActivity);
+            if(postDataFetched) {
+                firebaseAuth.signOut();
+                Intent loginActivity = new Intent(getApplicationContext(), LoginActivity.class);
+                startActivity(loginActivity);
+            }
         });
 
         fishRecognitionImageButton.setOnClickListener(view -> {
-            Intent fishRecognitionActivity = new Intent(getApplicationContext(), FishRecognitionActivity.class);
-            startActivity(fishRecognitionActivity);
+            if(postDataFetched) {
+                Intent fishRecognitionActivity = new Intent(getApplicationContext(), FishRecognitionActivity.class);
+                startActivity(fishRecognitionActivity);
+            }
         });
 
         googleMapsButton.setOnClickListener(view -> {
-            Intent mapActivity = new Intent(getApplicationContext(), MapActivity.class);
-            startActivity(mapActivity);
+            if(postDataFetched) {
+                Intent mapActivity = new Intent(getApplicationContext(), MapActivity.class);
+                startActivity(mapActivity);
+            }
         });
 
-
+        // get the number of posts so that the thread waitForPostData knows how much posts are in firestore
         firestore.collection("posts").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
@@ -112,7 +121,7 @@ public class MainPageActivity extends AppCompatActivity {
         @Override
         public void run() {
             super.run();
-            while(threadFlag != true) {
+            while(postDataFetched != true) {
 
                 runOnUiThread(new Runnable() {
                     @Override
@@ -120,19 +129,24 @@ public class MainPageActivity extends AppCompatActivity {
                        if (postsCount == 0) {
                            // TODO: add no posts view
                            linearLayoutNoPostsToLoad.setVisibility(View.VISIBLE);
-                           threadFlag = true;
+                           postDataFetched = true;
                        }
                        if (postsCount == posts.size()) {
-                           linearLayoutNoPostsToLoad.setVisibility(View.GONE);
-                           // create the adapter with post date and attach it to the recycler view
+                           // hide the timeout view with the spinner
+                           linearLayoutNoPostsToLoad.setVisibility(View.GONE);      // sort the posts based on timestamp, firestore is meant to sort them but it is not consistent
+                           // maybe they are fetched in the correct order but the posts are added to the array at different
+                           // in a different order since the wait time for some posts in callbacks is shorter than for others
+                           // for example, no media for one post and 10 mb video for the other post
+                           Collections.sort(posts, new TimestampComparator());
+                            //create the adapter with post date and attach it to the recycler view
                            adapter = new PostRecyclerViewAdapter(getApplicationContext(), posts);
                            postsRecyclerView.setAdapter(adapter);
                            postsRecyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
-                           threadFlag = true;
+                           postDataFetched = true;
                        }
                     }
                 });
-                if(threadFlag) {
+                if(postDataFetched) {
                     linearLayoutIndeterminateProgressBar.setVisibility(View.GONE);
                 }
             }
@@ -156,7 +170,7 @@ public class MainPageActivity extends AppCompatActivity {
 
     private void getPosts() {
         // get all posts from firestore ordering based on timestamp
-        firestore.collection("posts").orderBy("timestamp").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+        firestore.collection("posts").orderBy("timestamp", Query.Direction.ASCENDING).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if (task.isSuccessful()) {
@@ -171,17 +185,20 @@ public class MainPageActivity extends AppCompatActivity {
                         String postUploadDate = dateFormatter.format(firestoreTimestamp);
                         String likes = post.get("likes").toString();
                         String userId = post.get("userId").toString();
+                        String mimeType = post.get("mimeType").toString();
                         // get media from firestore cloud if exists then create an PostModel object  with media otherwise set media to null
                         StorageReference storageRefMedia = firebaseStorage.getReference().child("/postMedia/" + post.getId());
                         storageRefMedia.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                             @Override
-                            public void onSuccess(Uri uriMedia) {
+                            public void onSuccess(Uri uri) {
                                 // the post had media associated with it and profile picture is fetched below
-                                StorageReference storageRedProfPic = firebaseStorage.getReference().child("/profilePictures/" + userId + "/");
-                                storageRedProfPic.getBytes(Long.MAX_VALUE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                                Uri uriMedia = uri;
+                                StorageReference storageRefProfPic = firebaseStorage.getReference().child("/profilePictures/" + userId + "/");
+                                storageRefProfPic.getBytes(Long.MAX_VALUE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
                                     @Override
                                     public void onSuccess(byte[] photoBytes) {
-                                        PostModel post = new PostModel(getApplicationContext(), title, body, photoBytes, nickname, postUploadDate, likes, uriMedia);
+                                        // add on the media, profile picture and metadata along with standard post components
+                                        PostModel post = new PostModel(getApplicationContext(), title, body, photoBytes, nickname, postUploadDate, likes, uriMedia, mimeType);
                                         posts.add(post);
                                     }
                                 });
@@ -194,7 +211,8 @@ public class MainPageActivity extends AppCompatActivity {
                                 storageRedProfPic.getBytes(Long.MAX_VALUE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
                                     @Override
                                     public void onSuccess(byte[] photoBytes) {
-                                        PostModel post = new PostModel(getApplicationContext(), title, body, photoBytes, nickname, postUploadDate, likes, null);
+                                        // there is no metadata since there is no media, add the standard components of a post
+                                        PostModel post = new PostModel(getApplicationContext(), title, body, photoBytes, nickname, postUploadDate, likes, null, null);
                                         posts.add(post);
                                     }
                                 });
@@ -211,79 +229,5 @@ public class MainPageActivity extends AppCompatActivity {
             }
         });
     }
-
-
-
-    /*
-    private void getPosts() {
-        firestore.collection("users").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if(task.isSuccessful()) {
-                    // get the top document which is has the user name and a sub-collection posts
-                    for (QueryDocumentSnapshot user : task.getResult()) {
-                        CollectionReference posts = user.getReference().collection("posts");
-                        String nickname = (String) user.get("nickname");
-                        // get all posts for this user
-                        posts.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                            @Override
-                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                for (QueryDocumentSnapshot posts : task.getResult()) {
-                                    String title = (String) posts.get("title");
-                                    String body = (String) posts.get("body");
-                                    Timestamp timestamp = (Timestamp) posts.get("timestamp");
-                                    String likes = posts.get("likes").toString();
-                                    String userId = posts.get("userId").toString();
-
-                                    // need to get firebase storage too check if user posted media with this post by matching post id's for this user
-                                    StorageReference storageRefMedia = firebaseStorage.getReference().child("/postMedia/" + userId + "/" + posts.getId());
-                                    // check if the user has posted any media with this post
-                                    storageRefMedia.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                        @Override
-                                        public void onSuccess(Uri uri) {
-                                            PostModel temp = new PostModel(getApplicationContext(), title, body, null, nickname, timestamp, likes, uri, userId);
-                                            StorageReference storageRedProfPic = firebaseStorage.getReference().child("/profilePictures/" + userId + "/");
-                                            storageRedProfPic.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                                @Override
-                                                public void onSuccess(Uri uri) {
-                                                    temp.setProfilePhoto(uri);
-                                                    userPosts.add(temp);
-                                                }
-                                            });
-                                        }
-                                    }).addOnFailureListener(new OnFailureListener() {
-                                        @Override
-                                        public void onFailure(@NonNull Exception e) {
-                                            PostModel temp = new PostModel(getApplicationContext(), title, body, null, nickname, timestamp, likes, null, userId);
-                                            StorageReference storageRedProfPic = firebaseStorage.getReference().child("/profilePictures/" + userId + "/");
-                                            storageRedProfPic.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                                @Override
-                                                public void onSuccess(Uri uri) {
-                                                    temp.setProfilePhoto(uri);
-                                                    userPosts.add(temp);
-                                                }
-                                            });
-                                        }
-                                    });
-
-
-                                }
-                            }
-                        }).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Log.e(TAG, e.getMessage());
-                            }
-                        });
-                    }
-                }
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.e(TAG, e.getMessage());
-            }
-        });
-
-    } */
 }
+

@@ -38,6 +38,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.Arrays;
@@ -189,7 +190,7 @@ public class CreatePost extends AppCompatActivity {
                 } else if (videoMimeTypes.contains(mimeType)) {
                     userVideoView.setVisibility(View.VISIBLE);
                     userVideoView.setVideoURI(uri);
-                    mediaController.setAnchorView(userImageView);
+                    mediaController.setAnchorView(userVideoView);
                     userVideoView.setMediaController(mediaController);
                 } else if(mimeType.equals("image/gif")){
                     // https://github.com/koral--/android-gif-drawable
@@ -245,12 +246,14 @@ public class CreatePost extends AppCompatActivity {
                 // create object to place into firestore
                 Map<String, Object> post = new HashMap<>();
                 Timestamp timestamp = Timestamp.now();
+                String mimeType = extractFileMimeType(uri);
                 post.put("title", postTitle);
                 post.put("body", postBody);
                 post.put("timestamp", timestamp);
                 post.put("likes", 0);
                 post.put("userId", firebaseAuth.getCurrentUser().getUid());
                 post.put("nickname", nickname);
+                post.put("mimeType", mimeType);
 
                 firestore.collection("posts").add(post).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                     @Override
@@ -271,56 +274,6 @@ public class CreatePost extends AppCompatActivity {
         });
     }
 
-
-
-
-    /*
-    private void createPost() {
-        // need to get user post number so that relationship between cloud storage and firestore for posts can be maintained
-        // will be used as the file name in cloud storage in path /postMedia/userID/1 ... n
-        firestore.collection("users").document(firebaseAuth.getCurrentUser().getUid()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                String nickname = documentSnapshot.get("nickname").toString();
-                firestore.collection("users").document(firebaseAuth.getCurrentUser().getUid()).collection("posts").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        int numUserPosts = task.getResult().size();
-                        numUserPosts++;
-                        // save media if selected
-                        if(mediaSelected) {
-                            StorageReference storageRef = firebaseStorage.getReference();
-                            storageRef.child("/postMedia/" + firebaseAuth.getCurrentUser().getUid() + "/" + numUserPosts).putFile(uri);
-                        }
-                        // save post title and body despite having media
-
-                        // create
-                        Map<String, Object> post = new HashMap<>();
-                        Timestamp timestamp = Timestamp.now();
-                        post.put("title", postTitle);
-                        post.put("body", postBody);
-                        post.put("timestamp", timestamp);
-                        post.put("likes", 0);
-                        post.put("userId", firebaseAuth.getCurrentUser().getUid());
-                        post.put("nickname", nickname);
-
-                        firestore.collection("users").document(firebaseAuth.getUid()).collection("posts").document(String.valueOf(numUserPosts)).set(post).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Log.e(TAG, e.getMessage());
-                            }
-                        });
-
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.e(TAG, e.getMessage());
-                    }
-                });
-            }
-        });
-    } */
 
     private void launchPhotoPicker () {
         // Launch the photo picker and allow the user to choose only images.

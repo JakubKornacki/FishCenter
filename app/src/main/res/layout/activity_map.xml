@@ -57,8 +57,6 @@
             android:src="@drawable/ic_baseline_logout_24_white"
             tools:ignore="HardcodedText"></ImageButton>
 
-
-
     </androidx.appcompat.widget.Toolbar>
 
 

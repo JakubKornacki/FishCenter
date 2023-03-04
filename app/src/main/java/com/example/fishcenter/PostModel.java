@@ -16,6 +16,7 @@ public class PostModel extends RecyclerView {
     private String postUploadDate;
     private String numLikes;
     private Uri media;
+    private String mimeType;
 
 
     public PostModel(@NonNull Context context) {
@@ -30,7 +31,7 @@ public class PostModel extends RecyclerView {
         super(context, attrs, defStyleAttr);
     }
 
-    public PostModel(@NonNull Context context, String title, String body, byte[] profilePhoto, String nickname, String postUploadDate, String numLikes, Uri media) {
+    public PostModel(@NonNull Context context, String title, String body, byte[] profilePhoto, String nickname, String postUploadDate, String numLikes, Uri media, String mimeType) {
         super(context);
         this.title = title;
         this.body = body;
@@ -39,9 +40,10 @@ public class PostModel extends RecyclerView {
         this.postUploadDate = postUploadDate;
         this.numLikes = numLikes;
         this.media = media;
+        this.mimeType = mimeType;
     }
 
-    public PostModel(@NonNull Context context, @Nullable AttributeSet attrs, String title, String body, byte[] profilePhoto, String postUploadDate, String nickname, String numLikes, Uri media) {
+    public PostModel(@NonNull Context context, @Nullable AttributeSet attrs, String title, String body, byte[] profilePhoto, String postUploadDate, String nickname, String numLikes, Uri media, String mimeType) {
         super(context, attrs);
         this.title = title;
         this.body = body;
@@ -50,9 +52,10 @@ public class PostModel extends RecyclerView {
         this.postUploadDate = postUploadDate;
         this.numLikes = numLikes;
         this.media = media;
+        this.mimeType = mimeType;
     }
 
-    public PostModel(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, String title, String body, byte[] profilePhoto, String nickname, String postUploadDate, String numLikes, Uri media) {
+    public PostModel(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, String title, String body, byte[] profilePhoto, String nickname, String postUploadDate, String numLikes, Uri media, String mimeType) {
         super(context, attrs, defStyleAttr);
         this.title = title;
         this.body = body;
@@ -61,8 +64,12 @@ public class PostModel extends RecyclerView {
         this.postUploadDate = postUploadDate;
         this.numLikes = numLikes;
         this.media = media;
+        this.mimeType = mimeType;
     }
 
+    public String getMimeType() {
+        return mimeType;
+    }
     public String getTitle() {
         return title;
     }
