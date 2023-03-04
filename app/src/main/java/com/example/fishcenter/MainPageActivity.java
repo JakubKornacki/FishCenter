@@ -178,10 +178,10 @@ public class MainPageActivity extends AppCompatActivity {
                             public void onSuccess(Uri uriMedia) {
                                 // the post had media associated with it and profile picture is fetched below
                                 StorageReference storageRedProfPic = firebaseStorage.getReference().child("/profilePictures/" + userId + "/");
-                                storageRedProfPic.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                storageRedProfPic.getBytes(Long.MAX_VALUE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
                                     @Override
-                                    public void onSuccess(Uri uriPhoto) {
-                                        PostModel post = new PostModel(getApplicationContext(), title, body, uriPhoto, nickname, postUploadDate, likes, uriMedia);
+                                    public void onSuccess(byte[] photoBytes) {
+                                        PostModel post = new PostModel(getApplicationContext(), title, body, photoBytes, nickname, postUploadDate, likes, uriMedia);
                                         posts.add(post);
                                     }
                                 });
@@ -191,10 +191,10 @@ public class MainPageActivity extends AppCompatActivity {
                             public void onFailure(@NonNull Exception e) {
                                 // the post did not have any media associated with it and profile picture is fetched below
                                 StorageReference storageRedProfPic = firebaseStorage.getReference().child("/profilePictures/" + userId + "/");
-                                storageRedProfPic.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                storageRedProfPic.getBytes(Long.MAX_VALUE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
                                     @Override
-                                    public void onSuccess(Uri uriPhoto) {
-                                        PostModel post = new PostModel(getApplicationContext(), title, body, uriPhoto, nickname, postUploadDate, likes, null);
+                                    public void onSuccess(byte[] photoBytes) {
+                                        PostModel post = new PostModel(getApplicationContext(), title, body, photoBytes, nickname, postUploadDate, likes, null);
                                         posts.add(post);
                                     }
                                 });

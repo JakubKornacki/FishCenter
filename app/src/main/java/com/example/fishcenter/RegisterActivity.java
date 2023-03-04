@@ -4,7 +4,6 @@ import static android.content.ContentValues.TAG;
 
 import android.content.ContentResolver;
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Spannable;
@@ -58,7 +57,6 @@ public class RegisterActivity extends AppCompatActivity {
     private InputMethodManager keyboard;
     private FirebaseStorage firebaseStorage;
     private Uri defaultProfilePicture;
-    private ContentResolver contResolver;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -110,7 +108,7 @@ public class RegisterActivity extends AppCompatActivity {
         userAlreadyRegistered.setTextSize(16);
         userAlreadyRegistered.setBackground(getDrawable(R.drawable.layout_background_rounded_corners_toggle_10_gray_opacity_30_to_transparent));
         textLinearLayout.addView(userAlreadyRegistered);
-        int profilePicId = R.drawable.img_profile_pic_white_default_foreground;
+        int profilePicId = R.mipmap.img_profile_pic_white_default_round;
         defaultProfilePicture = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + getResources().getResourcePackageName(profilePicId) + "/" + getResources().getResourceTypeName(profilePicId) + "/" + getResources().getResourceEntryName(profilePicId));
 
 

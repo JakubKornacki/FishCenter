@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 public class PostModel extends RecyclerView {
     private String title;
     private String body;
-    private Uri profilePhoto;
+    private byte[] profilePhoto;
     private String nickname;
     private String postUploadDate;
     private String numLikes;
@@ -30,7 +30,7 @@ public class PostModel extends RecyclerView {
         super(context, attrs, defStyleAttr);
     }
 
-    public PostModel(@NonNull Context context, String title, String body, Uri profilePhoto, String nickname, String postUploadDate, String numLikes, Uri media) {
+    public PostModel(@NonNull Context context, String title, String body, byte[] profilePhoto, String nickname, String postUploadDate, String numLikes, Uri media) {
         super(context);
         this.title = title;
         this.body = body;
@@ -41,7 +41,7 @@ public class PostModel extends RecyclerView {
         this.media = media;
     }
 
-    public PostModel(@NonNull Context context, @Nullable AttributeSet attrs, String title, String body, Uri profilePhoto, String postUploadDate, String nickname, String numLikes, Uri media) {
+    public PostModel(@NonNull Context context, @Nullable AttributeSet attrs, String title, String body, byte[] profilePhoto, String postUploadDate, String nickname, String numLikes, Uri media) {
         super(context, attrs);
         this.title = title;
         this.body = body;
@@ -52,7 +52,7 @@ public class PostModel extends RecyclerView {
         this.media = media;
     }
 
-    public PostModel(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, String title, String body, Uri profilePhoto, String nickname, String postUploadDate, String numLikes, Uri media) {
+    public PostModel(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, String title, String body, byte[] profilePhoto, String nickname, String postUploadDate, String numLikes, Uri media) {
         super(context, attrs, defStyleAttr);
         this.title = title;
         this.body = body;
@@ -71,7 +71,7 @@ public class PostModel extends RecyclerView {
         return body;
     }
 
-    public Uri getProfilePhoto() {
+    public byte[] getProfilePhoto() {
         return profilePhoto;
     }
 

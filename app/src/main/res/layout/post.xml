@@ -12,7 +12,7 @@
         app:cardCornerRadius="10dp"
         android:layout_marginStart="15dp"
         android:layout_marginEnd="15dp"
-        android:layout_marginBottom="10dp"
+        android:layout_marginBottom="15dp"
         app:cardBackgroundColor="@color/graywithopacity45"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -21,35 +21,27 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-
-            <TextView
-                android:id="@+id/postLikes"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:text="0"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/constraintLayout"
-                app:layout_constraintTop_toTopOf="@+id/constraintLayout" />
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="9dp"
+            android:layout_marginStart="9dp"
+            android:layout_marginEnd="9dp">
 
             <TextView
                 android:id="@+id/userNickname"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
                 android:text="Nickname"
-                android:textStyle="bold"
-                android:layout_marginTop="5dp"
-                android:layout_marginStart="10dp"
                 android:textSize="16sp"
+                android:textStyle="bold"
                 app:layout_constraintStart_toEndOf="@+id/userProfilePicture"
-                app:layout_constraintTop_toTopOf="@+id/userProfilePicture" />
+                app:layout_constraintTop_toTopOf="parent" />
 
             <ImageView
                 android:id="@+id/userProfilePicture"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="9dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:srcCompat="@tools:sample/avatars" />
@@ -58,81 +50,59 @@
                 android:id="@+id/datePosted"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="12sp"
                 android:layout_marginTop="10dp"
                 android:text="TimeStamp"
+                android:textSize="12sp"
                 app:layout_constraintStart_toStartOf="@+id/userNickname"
                 app:layout_constraintTop_toBottomOf="@+id/userNickname" />
 
             <TextView
                 android:id="@+id/postTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="67dp"
+                android:layout_height="22dp"
                 android:text="PostTitle"
-                android:textStyle="bold"
+                android:textAlignment="center"
                 android:textSize="16sp"
-                android:layout_marginTop="5dp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toTopOf="@+id/postBody"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/userProfilePicture" />
+                app:layout_constraintStart_toStartOf="parent" />
 
             <ImageView
                 android:id="@+id/postImage"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/postTitle" />
+                app:layout_constraintTop_toBottomOf="@+id/postBody" />
 
 
-            <pl.droidsonroids.gif.GifImageView
-                android:id="@+id/postGif"
+            <ImageView
+                android:id="@+id/imageAndGifView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="9dp"
+                android:layout_marginRight="9dp"
+                android:adjustViewBounds="true"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/postTitle" />
-
-            <VideoView
-                android:id="@+id/postVideo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/postTitle" />
+                app:layout_constraintTop_toBottomOf="@+id/postBody" />
 
             <TextView
                 android:id="@+id/postBody"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
+                android:layout_marginStart="9dp"
+                android:layout_marginEnd="9dp"
+                android:textAlignment="center"
                 android:text="This is text This is text This is text This is text This is text This is text This is textThis is text"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/postTitle"></TextView>
+                app:layout_constraintTop_toBottomOf="@+id/userProfilePicture">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/constraintLayout"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@color/ordinaryButtonColor"
-                android:minWidth="48dp"
-                android:minHeight="48dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/postBody">
+            </TextView>
 
-                <ImageButton
-                    android:id="@+id/likesButton"
-                    android:layout_width="100dp"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/layout_background_rounded_corners_toggle_5_gray_opacity_30_to_transparent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/ic_baseline_thumb_up_24_white" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 

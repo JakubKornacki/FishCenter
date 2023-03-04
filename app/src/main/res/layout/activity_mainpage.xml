@@ -127,17 +127,18 @@
         android:id="@+id/linearLayoutIndeterminateProgressBar"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/graywithopacity75"
+        android:background="@color/white"
         android:orientation="vertical"
         android:visibility="invisible"
         android:gravity="center"
+        android:layout_marginBottom="60dp"
+        android:layout_marginTop="56dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
         <TextView
-            android:id="@+id/textView3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="20dp"
