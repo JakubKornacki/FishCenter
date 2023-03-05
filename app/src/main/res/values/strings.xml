@@ -43,8 +43,7 @@
     <string name="createPost">Post Creator</string>
     <string name="title">What\'s your post title?</string>
     <string name="waitForPosts">Hang on while we load posts!</string>
-    <string name="noPostsToLoad">Hang on while we load posts!</string>
-
-
+    <string name="noPostsToLoad">There are no posts to display!</string>
+    <string name="waitForVideo">Hang on while we load your video!</string>
 
 </resources>

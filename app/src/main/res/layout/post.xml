@@ -112,8 +112,8 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="parent"/>
 
-            <VideoView
-                android:id="@+id/postVideo"
+            <ImageView
+                android:id="@+id/postVideoThumbnail"
                 android:layout_width="340dp"
                 android:layout_height="340dp"
                 android:adjustViewBounds="true"
@@ -124,7 +124,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="parent">
-            </VideoView>
+            </ImageView>
             </LinearLayout>
             <LinearLayout
                 android:layout_width="wrap_content"

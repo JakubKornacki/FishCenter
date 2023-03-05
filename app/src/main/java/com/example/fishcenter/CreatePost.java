@@ -41,6 +41,9 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -73,6 +76,7 @@ public class CreatePost extends AppCompatActivity {
    private HashSet<String> videoMimeTypes = new HashSet<>(Arrays.asList("video/3gp","video/mov","video/avi","video/wmv","video/mp4","video/mpeg"));
    private String postBody;
    private String postTitle;
+   private PostModel newPost;
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -91,7 +95,6 @@ public class CreatePost extends AppCompatActivity {
         firebaseStorage = FirebaseStorage.getInstance();
         firestore = FirebaseFirestore.getInstance();
         keyboard = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-
 
         goBackImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -234,8 +237,6 @@ public class CreatePost extends AppCompatActivity {
         return true;
     }
 
-
-
     private void createPost() {
         // need to get user post number so that relationship between cloud storage and firestore for posts can be maintained
         // will be used as the file name in cloud storage in path /postMedia/userID/1 ... n
@@ -246,7 +247,10 @@ public class CreatePost extends AppCompatActivity {
                 // create object to place into firestore
                 Map<String, Object> post = new HashMap<>();
                 Timestamp timestamp = Timestamp.now();
-                String mimeType = extractFileMimeType(uri);
+                String mimeType = null;
+                if(uri != null) {
+                    mimeType = extractFileMimeType(uri);
+                }
                 post.put("title", postTitle);
                 post.put("body", postBody);
                 post.put("timestamp", timestamp);
@@ -258,29 +262,24 @@ public class CreatePost extends AppCompatActivity {
                 firestore.collection("posts").add(post).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                     @Override
                     public void onSuccess(DocumentReference documentReference) {
+                        String uniquePostRef = documentReference.getId();
                         if(mediaSelected) {
-                            String uniquePostRef = documentReference.getId();
                             StorageReference storageRef = firebaseStorage.getReference();
                             storageRef.child("/postMedia/" + uniquePostRef + "/").putFile(uri);
                         }
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.e(TAG, e.getMessage());
+                        // put in the unique post
+                        post.put("postId", uniquePostRef);
+                        firestore.collection("posts").document(uniquePostRef).update(post);
                     }
                 });
             }
         });
     }
 
-
     private void launchPhotoPicker () {
         // Launch the photo picker and allow the user to choose only images.
         // although the compiler complains about passing an invalid type to the setMediaType method the Photo Picker works fine and the application runs without crashing
         pickMedia.launch(new PickVisualMediaRequest.Builder().setMediaType(ActivityResultContracts.PickVisualMedia.ImageAndVideo.INSTANCE).build());
     }
-
-
 
 }

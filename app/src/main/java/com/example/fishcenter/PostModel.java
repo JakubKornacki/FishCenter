@@ -8,7 +8,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class PostModel extends RecyclerView {
+import java.io.Serializable;
+import java.util.ArrayList;
+
+public class PostModel extends RecyclerView implements Serializable {
     private String title;
     private String body;
     private byte[] profilePhoto;
@@ -17,7 +20,9 @@ public class PostModel extends RecyclerView {
     private String numLikes;
     private Uri media;
     private String mimeType;
-
+    private String uniquePostRef;
+    private String userId;
+    private ArrayList<String> postLikedBy;
 
     public PostModel(@NonNull Context context) {
         super(context);
@@ -31,7 +36,7 @@ public class PostModel extends RecyclerView {
         super(context, attrs, defStyleAttr);
     }
 
-    public PostModel(@NonNull Context context, String title, String body, byte[] profilePhoto, String nickname, String postUploadDate, String numLikes, Uri media, String mimeType) {
+    public PostModel(@NonNull Context context, String title, String body, byte[] profilePhoto, String nickname, String postUploadDate, String numLikes, Uri media, String mimeType, String uniquePostRef, String userId, ArrayList<String> postLikedBy) {
         super(context);
         this.title = title;
         this.body = body;
@@ -41,9 +46,11 @@ public class PostModel extends RecyclerView {
         this.numLikes = numLikes;
         this.media = media;
         this.mimeType = mimeType;
+        this.uniquePostRef = uniquePostRef;
+        this.userId = userId;
     }
 
-    public PostModel(@NonNull Context context, @Nullable AttributeSet attrs, String title, String body, byte[] profilePhoto, String postUploadDate, String nickname, String numLikes, Uri media, String mimeType) {
+    public PostModel(@NonNull Context context, @Nullable AttributeSet attrs, String title, String body, byte[] profilePhoto, String postUploadDate, String nickname, String numLikes, Uri media, String mimeType, String uniquePostRef, String userId, ArrayList<String> postLikedBy) {
         super(context, attrs);
         this.title = title;
         this.body = body;
@@ -53,9 +60,11 @@ public class PostModel extends RecyclerView {
         this.numLikes = numLikes;
         this.media = media;
         this.mimeType = mimeType;
+        this.uniquePostRef = uniquePostRef;
+        this.userId = userId;
     }
 
-    public PostModel(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, String title, String body, byte[] profilePhoto, String nickname, String postUploadDate, String numLikes, Uri media, String mimeType) {
+    public PostModel(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, String title, String body, byte[] profilePhoto, String nickname, String postUploadDate, String numLikes, Uri media, String mimeType, String uniquePostRef, String userId, ArrayList<String> postLikedBy) {
         super(context, attrs, defStyleAttr);
         this.title = title;
         this.body = body;
@@ -65,6 +74,24 @@ public class PostModel extends RecyclerView {
         this.numLikes = numLikes;
         this.media = media;
         this.mimeType = mimeType;
+        this.uniquePostRef = uniquePostRef;
+        this.userId = userId;
+    }
+
+    public ArrayList<String> getPostLikedBy() {
+        return postLikedBy;
+    }
+
+    public void setPostLikedBy(ArrayList<String> postLikedBy) {
+        this.postLikedBy = postLikedBy;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public String getUniquePostRef() {
+        return uniquePostRef;
     }
 
     public String getMimeType() {
@@ -97,4 +124,9 @@ public class PostModel extends RecyclerView {
     public Uri getMedia() {
         return media;
     }
+
+    public void setNumLikes(int numLikes) {
+        this.numLikes = String.valueOf(numLikes);
+    }
+
 }

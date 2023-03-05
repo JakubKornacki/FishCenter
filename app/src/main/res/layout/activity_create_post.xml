@@ -129,10 +129,11 @@
 
                 <ImageView
                     android:id="@+id/userImageView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="340dp"
+                    android:layout_height="340dp"
                     android:adjustViewBounds="true"
-                    android:maxHeight="300dp"
+                    android:maxWidth="340dp"
+                    android:maxHeight="340dp"
                     android:visibility="gone"
                     app:layout_constraintTop_toTopOf="parent">
 
@@ -140,19 +141,20 @@
 
                 <pl.droidsonroids.gif.GifImageView
                     android:id="@+id/postGif"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="340dp"
+                    android:layout_height="340dp"
                     android:adjustViewBounds="true"
-                    android:maxHeight="300dp"
+                    android:maxWidth="340dp"
+                    android:maxHeight="340dp"
                     android:visibility="gone"
                     app:layout_constraintTop_toTopOf="parent"/>
                 <VideoView
                     android:id="@+id/userVideoView"
-                    android:layout_width="230dp"
-                    android:layout_height="230dp"
-                    android:maxHeight="230dp"
-                    android:maxWidth="230dp"
+                    android:layout_width="340dp"
+                    android:layout_height="340dp"
                     android:adjustViewBounds="true"
+                    android:maxWidth="340dp"
+                    android:maxHeight="340dp"
                     android:visibility="gone"
                     app:layout_constraintTop_toTopOf="parent">
                 </VideoView>

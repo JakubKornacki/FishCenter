@@ -1,37 +1,35 @@
 package com.example.fishcenter;
 
-import android.content.ContentResolver;
+
 import android.content.Context;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.MediaController;
 import android.widget.TextView;
 import android.widget.VideoView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 
-import pl.droidsonroids.gif.GifImageView;
 
 public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerViewAdapter.PostViewHolder> {
     private Context con;
     private ArrayList<PostModel> posts;
-    private MediaController mediaController;
+    private OnClickListener listener;
+
     private HashSet<String> imageMimeTypes = new HashSet<>(Arrays.asList("image/jpg","image/jpeg","image/png","image/gif"));
     private HashSet<String> videoMimeTypes = new HashSet<>(Arrays.asList("video/3gp","video/mov","video/avi","video/wmv","video/mp4","video/mpeg"));
-    public PostRecyclerViewAdapter(Context con, ArrayList<PostModel> posts) {
+    public PostRecyclerViewAdapter(Context con, ArrayList<PostModel> posts, OnClickListener listener) {
         this.con = con;
         this.posts = posts;
+        this.listener = listener;
     }
 
     @NonNull
@@ -39,12 +37,11 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
     public PostViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(con);
         View view = inflater.inflate(R.layout.post, parent, false);
-        return new PostRecyclerViewAdapter.PostViewHolder(view, con);
+        return new PostRecyclerViewAdapter.PostViewHolder(view, listener);
     }
 
     @Override
     public void onBindViewHolder(@NonNull PostViewHolder holder, int position) {
-        System.out.println();
         byte[] photoBytes = posts.get(position).getProfilePhoto();
         Glide.with(con).asBitmap().load(photoBytes).placeholder(R.drawable.ic_baseline_person_128_white).transform(new RoundedCorners(10)).into(holder.userProfilePicture);
         holder.userNickname.setText(posts.get(position).getNickname());
@@ -54,24 +51,18 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
         String mimeType = posts.get(position).getMimeType();
         if(uri != null) {
             if(imageMimeTypes.contains(mimeType)) {
-                Glide.with(con).load(uri).thumbnail().transform(new RoundedCorners(30)).into(holder.postImageAndGif);
+                Glide.with(con).load(uri).transform(new RoundedCorners(30)).into(holder.postImageAndGif);
                 holder.postImageAndGif.setVisibility(View.VISIBLE);
-                holder.postVideo.setVisibility(View.GONE);
+                holder.postVideoThumbnail.setVisibility(View.GONE);
             } else if (videoMimeTypes.contains(mimeType)) {
-                holder.postVideo.setVideoURI(uri);
-                holder.postVideo.setVisibility(View.VISIBLE);
+                Glide.with(con).load(uri).transform(new RoundedCorners(30)).into(holder.postVideoThumbnail);
+                holder.postVideoThumbnail.setVisibility(View.VISIBLE);
                 holder.postImageAndGif.setVisibility(View.GONE);
-
-
-               // mediaController = new MediaController(con);
-                //mediaController.setAnchorView(holder.postVideo);
-                //holder.postVideo.setMediaController(mediaController);
             }
         }
         holder.likesButton.setImageResource(R.drawable.ic_baseline_thumb_up_24_white);
         holder.postBody.setText(posts.get(position).getBody());
-        String likes = "Likes: " + posts.get(position).getNumLikes();
-        //holder.postLikes.setText(likes);
+        holder.postLikes.setText(posts.get(position).getNumLikes());
     }
 
 
@@ -81,30 +72,50 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
         return posts.size();
     }
 
-    public static class PostViewHolder extends RecyclerView.ViewHolder {
+
+
+
+    public class PostViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private ImageView userProfilePicture;
         private TextView userNickname;
         private TextView datePosted;
         private TextView postTitle;
         private ImageView postImageAndGif;
-        private VideoView postVideo;
+        private ImageView postVideoThumbnail;
         private TextView postBody;
         private ImageView likesButton;
         private TextView postLikes;
+        private OnClickListener listener;
 
 
-        public PostViewHolder(@NonNull View itemView, Context con) {
+        public PostViewHolder(@NonNull View itemView, OnClickListener listener) {
             super(itemView);
             userProfilePicture = itemView.findViewById(R.id.userProfilePicture);
             userNickname = itemView.findViewById(R.id.userNickname);
             datePosted = itemView.findViewById(R.id.datePosted);
             postTitle = itemView.findViewById(R.id.postTitle);
             postImageAndGif = itemView.findViewById(R.id.imageAndGifView);
-            postVideo = itemView.findViewById(R.id.postVideo);
+            postVideoThumbnail = itemView.findViewById(R.id.postVideoThumbnail);
             postBody = itemView.findViewById(R.id.postBody);
             likesButton = itemView.findViewById(R.id.likesButton);
-            //postLikes = itemView.findViewById(R.id.postLikes);
+            postLikes = itemView.findViewById(R.id.postLikes);
+            // reference to the MainPageActivity class in which the on-clicks will be handled
+            this.listener = listener;
+            // listen for on-click the video thumbnail and likes button
+            postVideoThumbnail.setOnClickListener(this);
+            likesButton.setOnClickListener(this);
         }
+        @Override
+        public void onClick(View view) {
+            int position = getAdapterPosition();
+            // if the view clicked is an image
+            if(view.getId() == R.id.postVideoThumbnail) {
+                listener.onClickVideoThumbnail(position);
+            } else if(view.getId() == R.id.likesButton) {
+                listener.onClickLikeButton(position);
+            }
+        }
+
     }
 
 }

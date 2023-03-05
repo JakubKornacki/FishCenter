@@ -104,7 +104,7 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight=".50"
-            android:background="@drawable/layout_background_rounded_corners_toggle_5_gray_opacity_30_to_transparent"
+            android:background="@null"
             android:contentDescription="redirects user to fish recognition"
             app:srcCompat="@drawable/ic_baseline_camera_alt_24_white"
             tools:ignore="HardcodedText" />
@@ -120,6 +120,31 @@
             tools:ignore="HardcodedText" />
     </LinearLayout>
     </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLayoutNoPostsToLoad"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="60dp"
+        android:layout_marginTop="56dp"
+        android:visibility="invisible"
+        android:gravity="center"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/layout_rounded_corners_white_15_opacity_55"
+            android:textStyle="bold"
+            android:textSize="20sp"
+            android:padding="30dp"
+            android:text="@string/noPostsToLoad">
+        </TextView>
+</LinearLayout>
 
 
 
@@ -159,29 +184,8 @@
 
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/linearLayoutNoPostsToLoad"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/graywithopacity75"
-        android:orientation="vertical"
-        android:visibility="invisible"
-        android:gravity="center"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
 
-        <TextView
-            android:id="@+id/textView3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="20dp"
-            android:text="@string/waitForPosts"
-            android:textStyle="bold"
-            android:textColor="@color/black"
-            android:textSize="18sp"/>
-    </LinearLayout>
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
