@@ -33,9 +33,6 @@ public class LoginActivity extends AppCompatActivity {
     private ImageButton passwordVisibleImageButton;
     private TextView userNotRegisteredText;
     private FirebaseAuth mAuth;
-    private TextView forgotPasswordTextView;
-    private LinearLayout mainContentLayout;
-    private LinearLayout linearLayoutBackground;
     private LinearLayout progressSpinnerLayout;
     private InputMethodManager keyboard;
 
@@ -64,10 +61,10 @@ public class LoginActivity extends AppCompatActivity {
         passwordEditText = findViewById(R.id.retypePasswordEditText);
         signInButton = findViewById(R.id.signInButton);
         passwordVisibleImageButton = findViewById(R.id.retypePasswordVisibleImageButton);
-        forgotPasswordTextView = findViewById(R.id.forgotPasswordTextView);
-        mainContentLayout = findViewById(R.id.mainContentLayout);
+        TextView forgotPasswordTextView = findViewById(R.id.forgotPasswordTextView);
+        LinearLayout mainContentLayout = findViewById(R.id.mainContentLayout);
         progressSpinnerLayout = findViewById(R.id.linearLayoutIndeterminateProgressBar);
-        linearLayoutBackground = findViewById(R.id.linearLayoutBackground);
+        LinearLayout linearLayoutBackground = findViewById(R.id.linearLayoutBackground);
         // https://stackoverflow.com/questions/1109022/how-to-close-hide-the-android-soft-keyboard-programmatically/15587937#15587937
         // get the soft input keyboard from the context via the input_method_service service and hide it
         keyboard = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);

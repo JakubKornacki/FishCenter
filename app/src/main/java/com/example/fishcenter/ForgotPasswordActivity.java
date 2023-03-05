@@ -80,8 +80,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 
         // switch from login activity to the register activity when clicked on the "Don't have an account? Register" TextView on the login activity
         goBackToLoginText.setOnClickListener(view -> {
-            Intent loginActivity = new Intent(getApplicationContext(), LoginActivity.class);
-            startActivity(loginActivity);
+            finish();
         });
 
         // rest password button on click handler

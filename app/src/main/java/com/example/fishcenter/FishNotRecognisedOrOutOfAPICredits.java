@@ -29,14 +29,7 @@ public class FishNotRecognisedOrOutOfAPICredits extends AppCompatActivity {
         goBackButtonToFishRecognition.setOnClickListener(view -> {
             Intent fishRecognitionIntent = new Intent(this, FishRecognitionActivity.class);
             startActivity(fishRecognitionIntent);
-        });
-
-        goBackImageButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent mainActivity = new Intent(getApplicationContext(), MainPageActivity.class);
-                startActivity(mainActivity);
-            }
+            finish();
         });
 
         logoutImageButton.setOnClickListener(new View.OnClickListener() {
@@ -45,6 +38,7 @@ public class FishNotRecognisedOrOutOfAPICredits extends AppCompatActivity {
                 mAuth.signOut();
                 Intent loginActivity = new Intent(getApplicationContext(), LoginActivity.class);
                 startActivity(loginActivity);
+                finish();
             }
         });
     }

@@ -41,9 +41,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     // firebase authentication object instance
     private FirebaseAuth firebaseAuth;
-    private LinearLayout mainContentLayout;
     private TextView userAlreadyRegistered;
-    private ImageButton registerButton;
     private EditText emailEditText;
     private EditText nicknameEditText;
     private EditText passwordEditText;
@@ -52,7 +50,6 @@ public class RegisterActivity extends AppCompatActivity {
     private ImageButton passwordVisibleImageButton;
     private ImageButton retypePasswordVisibleImageButton;
     private LinearLayout progressSpinnerLayout;
-    private LinearLayout linearLayoutBackground;
     private FirebaseFirestore firestore;
     private InputMethodManager keyboard;
     private FirebaseStorage firebaseStorage;
@@ -67,7 +64,7 @@ public class RegisterActivity extends AppCompatActivity {
         firestore = FirebaseFirestore.getInstance();
         firebaseStorage = FirebaseStorage.getInstance();
         // get reference to interactive components on the register activity
-        registerButton = findViewById(R.id.registerButton);
+        ImageButton registerButton = findViewById(R.id.registerButton);
         emailEditText = findViewById(R.id.emailEditText);
         nicknameEditText = findViewById(R.id.nicknameEditText);
         passwordEditText = findViewById(R.id.passwordEditText);
@@ -78,9 +75,9 @@ public class RegisterActivity extends AppCompatActivity {
         keyboard = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
         retypePasswordVisibleImageButton = findViewById(R.id.retypePasswordVisibleImageButton);
         termsAndConditionCheckbox = findViewById(R.id.termsAndConditionCheckbox);
-        mainContentLayout = findViewById(R.id.mainContentLayout);
+        LinearLayout mainContentLayout = findViewById(R.id.mainContentLayout);
         progressSpinnerLayout = findViewById(R.id.linearLayoutIndeterminateProgressBar);
-        linearLayoutBackground =  findViewById(R.id.linearLayoutBackground);
+        LinearLayout linearLayoutBackground = findViewById(R.id.linearLayoutBackground);
         // get a span by parsing out the HTML so that the string can be displayed as bold
         Spanned span = HtmlCompat.fromHtml(getString(R.string.userAlreadyHasAnAccount), HtmlCompat.FROM_HTML_MODE_LEGACY);
         SpannableString spannableString = new SpannableString(span);
@@ -114,8 +111,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         // switch from login activity to the register activity when clicked on the "Don't have an account? Register" TextView on the login activity
         userAlreadyRegistered.setOnClickListener(view -> {
-            Intent loginActivity = new Intent(getApplicationContext(), LoginActivity.class);
-            startActivity(loginActivity);
+            finish();
         });
 
         registerButton.setOnClickListener(view -> createUserWithFirebase());
@@ -301,6 +297,7 @@ public class RegisterActivity extends AppCompatActivity {
                 @Override
                 public void onFailure(@NonNull Exception e) {
                     createErrorAlertDialog("Authentication error:", e.getMessage());
+                    showSpinner(true);
                 }
             });
         }
@@ -317,11 +314,6 @@ public class RegisterActivity extends AppCompatActivity {
                 // redirect user to the main page
                 Intent mainPageActivity = new Intent(getApplicationContext(), MainPageActivity.class);
                 startActivity(mainPageActivity);
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.e(TAG, e.getMessage());
             }
         });
         showSpinner(false);

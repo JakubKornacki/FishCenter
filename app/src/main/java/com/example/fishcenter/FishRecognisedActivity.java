@@ -45,8 +45,7 @@ public class FishRecognisedActivity extends AppCompatActivity {
         goBackImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent mainActivity = new Intent(getApplicationContext(), MainPageActivity.class);
-                startActivity(mainActivity);
+                finish();
             }
         });
 
@@ -82,6 +81,12 @@ public class FishRecognisedActivity extends AppCompatActivity {
 
         backToMainMenuButton.setOnClickListener(view ->  {
             Intent mainMenuActivity = new Intent(getApplicationContext(), MainPageActivity.class);
+            // if a main activity already exists in the activity stack then bring back that activity
+            // with all its existing data to the user and clear also remove all activities from the stack
+            // between the main activity and this activity inclusive, with the activity between being the
+            // fish recognition activity this avoids reloading of the main activity to fetch new posts
+            // need to chain flags like this since each call to set flags overwrites the previous flag
+            mainMenuActivity.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             startActivity(mainMenuActivity);
         });
 
@@ -269,12 +274,12 @@ public class FishRecognisedActivity extends AppCompatActivity {
         CheckBox freshWaterCheckBox = getCheckBox(con, fish.isFreshWater());
         freshWater.addView(freshWaterCheckBox);
 
-
+        // create coloration row
         TableRow colorationRow = new TableRow(con);
         colorationRow.setLayoutParams(tabLayoutParams);
         colorationRow.setPadding(20,10,0,15);
         tableLayout.addView(colorationRow);
-        // create the fish name text view
+        // create the coloration text view
         TextView colorationText = new TextView(con);
         colorationText.setLayoutParams(tableRowParams);
         SpannableStringBuilder colorationSpanString = createSpannableString(R.string.coloration, fish.getColoration());
@@ -283,12 +288,12 @@ public class FishRecognisedActivity extends AppCompatActivity {
         colorationText.setTextSize(14);
         colorationRow.addView(colorationText);
 
-
+        // create the feeding behaviour row
         TableRow feedingBehaviourRow = new TableRow(con);
         feedingBehaviourRow.setLayoutParams(tabLayoutParams);
         feedingBehaviourRow.setPadding(20,10,0,15);
         tableLayout.addView(feedingBehaviourRow);
-        // create the fish name text view
+        // create the feeding behaviour text view
         TextView feedingBehaviourText = new TextView(con);
         feedingBehaviourText.setLayoutParams(tableRowParams);
         SpannableStringBuilder feedingBehavSpanString = createSpannableString(R.string.feedingBehaviour, fish.getFeedingBehaviour());
@@ -297,25 +302,26 @@ public class FishRecognisedActivity extends AppCompatActivity {
         feedingBehaviourText.setTextSize(14);
         feedingBehaviourRow.addView(feedingBehaviourText);
 
+        // create the health warning row
         TableRow healthWarningsRow = new TableRow(con);
         healthWarningsRow.setLayoutParams(tabLayoutParams);
         healthWarningsRow.setPadding(20,10,0,15);
         tableLayout.addView(healthWarningsRow);
-        // create the fish name text view
+        // create the health warning text view
         TextView healthWarningsText = new TextView(con);
         healthWarningsText.setLayoutParams(tableRowParams);
-        SpannableStringBuilder healthWarningsSpanString = createSpannableString(R.string.healthWarnings, fish.getFeedingBehaviour());
+        SpannableStringBuilder healthWarningsSpanString = createSpannableString(R.string.healthWarnings, fish.getHealthWarnings());
         healthWarningsText.setText(healthWarningsSpanString);
         healthWarningsText.setTextSize(14);
         healthWarningsText.setTextColor(ContextCompat.getColor(con, R.color.black));
         healthWarningsRow.addView(healthWarningsText);
 
-
+        // create the food value row
         TableRow foodValueRow = new TableRow(con);
         foodValueRow.setLayoutParams(tabLayoutParams);
         foodValueRow.setPadding(20,10,0,15);
         tableLayout.addView(foodValueRow);
-        // create the fish name text view
+        // create the food value text view
         TextView foodValueText = new TextView(con);
         foodValueText.setLayoutParams(tableRowParams);
         SpannableStringBuilder foodValueSpanString = createSpannableString(R.string.foodValue, fish.getFoodValue());

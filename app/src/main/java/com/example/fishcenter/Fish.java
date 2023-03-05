@@ -5,21 +5,21 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public class Fish implements Serializable {
-    private String latinName;
-    private float predictionAccuracy;
-    private String fishName;
-    private String mediaUri;
-    private String[] commonNames;
-    private String distribution;
-    private boolean scales;
-    private boolean saltWater;
-    private boolean freshWater;
-    private String coloration;
-    private String feedingBehaviour;
-    private String healthWarnings;
-    private String foodValue;
-    private String[] similarSpecies;
-    private String environmentDetail;
+    private final String latinName;
+    private final float predictionAccuracy;
+    private final String fishName;
+    private final String mediaUri;
+    private final String[] commonNames;
+    private final String distribution;
+    private final boolean scales;
+    private final boolean saltWater;
+    private final boolean freshWater;
+    private final String coloration;
+    private final String feedingBehaviour;
+    private final String healthWarnings;
+    private final String foodValue;
+    private final String[] similarSpecies;
+    private final String environmentDetail;
 
     public Fish (String latinName, float predictionAccuracy, String fishName, String mediaUri, String[] commonNames, String distribution, boolean scales, boolean saltWater, boolean freshWater, String coloration, String feedingBehaviour, String healthWarnings, String foodValue, String[] similarSpecies, String environmentDetail) {
         this.latinName = latinName;

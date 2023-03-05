@@ -46,8 +46,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         goBackImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent mainActivity = new Intent(getApplicationContext(), MainPageActivity.class);
-                startActivity(mainActivity);
+                finish();
             }
         });
 
@@ -57,6 +56,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 mAuth.signOut();
                 Intent loginActivity = new Intent(getApplicationContext(), LoginActivity.class);
                 startActivity(loginActivity);
+                finish();
             }
         });
 

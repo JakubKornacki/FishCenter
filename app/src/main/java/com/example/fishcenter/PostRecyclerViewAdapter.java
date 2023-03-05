@@ -47,17 +47,19 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
         holder.userNickname.setText(posts.get(position).getNickname());
         holder.datePosted.setText(posts.get(position).getDatePosted());
         holder.postTitle.setText(posts.get(position).getTitle());
-        Uri uri = posts.get(position).getMedia();
-        String mimeType = posts.get(position).getMimeType();
-        if(uri != null) {
-            if(imageMimeTypes.contains(mimeType)) {
-                Glide.with(con).load(uri).transform(new RoundedCorners(30)).into(holder.postImageAndGif);
-                holder.postImageAndGif.setVisibility(View.VISIBLE);
-                holder.postVideoThumbnail.setVisibility(View.GONE);
-            } else if (videoMimeTypes.contains(mimeType)) {
-                Glide.with(con).load(uri).transform(new RoundedCorners(30)).into(holder.postVideoThumbnail);
-                holder.postVideoThumbnail.setVisibility(View.VISIBLE);
-                holder.postImageAndGif.setVisibility(View.GONE);
+        if(posts.get(position).getMedia() != null) {
+            Uri uri = Uri.parse(posts.get(position).getMedia());
+            String mimeType = posts.get(position).getMimeType();
+            if(uri != null) {
+                if(imageMimeTypes.contains(mimeType)) {
+                    Glide.with(con).load(uri).transform(new RoundedCorners(30)).into(holder.postImageAndGif);
+                    holder.postImageAndGif.setVisibility(View.VISIBLE);
+                    holder.postVideoThumbnail.setVisibility(View.GONE);
+                } else if (videoMimeTypes.contains(mimeType)) {
+                    Glide.with(con).load(uri).transform(new RoundedCorners(30)).into(holder.postVideoThumbnail);
+                    holder.postVideoThumbnail.setVisibility(View.VISIBLE);
+                    holder.postImageAndGif.setVisibility(View.GONE);
+                }
             }
         }
         holder.likesButton.setImageResource(R.drawable.ic_baseline_thumb_up_24_white);

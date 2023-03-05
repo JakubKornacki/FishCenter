@@ -51,8 +51,7 @@ public class PlayVideoActivity extends AppCompatActivity {
         goBackImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent backToMainMenu = new Intent(getApplicationContext(), MainPageActivity.class);
-                startActivity(backToMainMenu);
+                finish();
             }
         });
 
@@ -63,6 +62,7 @@ public class PlayVideoActivity extends AppCompatActivity {
                 firebaseAuth.signOut();
                 Intent goBackToLogin = new Intent(getApplicationContext(), LoginActivity.class);
                 startActivity(goBackToLogin);
+                finish();
             }
         });
 

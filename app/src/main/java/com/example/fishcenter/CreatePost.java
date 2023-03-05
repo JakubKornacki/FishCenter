@@ -1,14 +1,10 @@
 package com.example.fishcenter;
 
-import static android.content.ContentValues.TAG;
-
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.FirebaseAuth;
+import android.app.Activity;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
@@ -22,28 +18,22 @@ import android.widget.VideoView;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.PickVisualMediaRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.Task;
-
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.Timestamp;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -53,54 +43,57 @@ import pl.droidsonroids.gif.GifImageView;
 
 public class CreatePost extends AppCompatActivity {
 
-   private ImageView selectImage;
-   private ImageView userImageView;
+    private ImageView userImageView;
    private boolean mediaSelected;
 
    private EditText postEditText;
    private EditText postTitleEditText;
-   private LinearLayout linearLayoutBackground;
-   private ActivityResultLauncher<PickVisualMediaRequest> pickMedia;
+    private ActivityResultLauncher<PickVisualMediaRequest> pickMedia;
    private InputMethodManager keyboard;
-   private ImageButton goBackImageButton;
-   private ImageButton sendPostImageButton;
-   private GifImageView userGifImageView;
+    private GifImageView userGifImageView;
    private VideoView userVideoView;
    private MediaController mediaController;
    private FirebaseStorage firebaseStorage;
-   private FirebaseAuth firebaseAuth;
+   private final FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
    private FirebaseFirestore firestore;
 
    private Uri uri;
-   private HashSet<String> imageMimeTypes = new HashSet<>(Arrays.asList("image/jpg","image/jpeg","image/png"));
-   private HashSet<String> videoMimeTypes = new HashSet<>(Arrays.asList("video/3gp","video/mov","video/avi","video/wmv","video/mp4","video/mpeg"));
+   private final HashSet<String> imageMimeTypes = new HashSet<>(Arrays.asList("image/jpg","image/jpeg","image/png"));
+   private final HashSet<String> videoMimeTypes = new HashSet<>(Arrays.asList("video/3gp","video/mov","video/avi","video/wmv","video/mp4","video/mpeg"));
    private String postBody;
    private String postTitle;
+   private byte[] userProfilePicture;
+   private final String currentUserId = firebaseAuth.getCurrentUser().getUid();
+
+   private String userNickname;
+   private String mimeType;
    private PostModel newPost;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_post);
-        linearLayoutBackground = findViewById(R.id.linearLayoutBackground);
-        selectImage = findViewById(R.id.selectImage);
+        LinearLayout linearLayoutBackground = findViewById(R.id.linearLayoutBackground);
+        ImageView selectImage = findViewById(R.id.selectImage);
         userImageView = findViewById(R.id.userImageView);
         postEditText = findViewById(R.id.postEditText);
-        goBackImageButton = findViewById(R.id.goBackImageButton);
-        sendPostImageButton = findViewById(R.id.sendPostImageButton);
+        ImageButton goBackImageButton = findViewById(R.id.goBackImageButton);
+        ImageButton sendPostImageButton = findViewById(R.id.sendPostImageButton);
         mediaController = new MediaController(this);
         userGifImageView = findViewById(R.id.postGif);
         userVideoView = findViewById(R.id.userVideoView);
         postTitleEditText = findViewById(R.id.postTitleEditText);
-        firebaseAuth = FirebaseAuth.getInstance();
         firebaseStorage = FirebaseStorage.getInstance();
         firestore = FirebaseFirestore.getInstance();
         keyboard = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
 
+        // extract the user profile picture passed in from the main activity used to create the new post
+        userProfilePicture = (byte[]) getIntent().getExtras().getSerializable("profilePicture");
+        userNickname = getIntent().getExtras().getString("userNickname");
         goBackImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent mainActivity = new Intent(getApplicationContext(), MainPageActivity.class);
-                startActivity(mainActivity);
+               finish();
             }
         });
 
@@ -114,10 +107,7 @@ public class CreatePost extends AppCompatActivity {
                 boolean postTitleValidated = postTitleValidated(postTitle);
                 // post needs to have body and title other media is optional
                 if (postValidated && postTitleValidated) {
-                    createPost();
-                    // go back to main page
-                    Intent mainPage = new Intent(getApplicationContext(), MainPageActivity.class);
-                    startActivity(mainPage);
+                    savePostInBackend();
                 }
             }
         });
@@ -129,7 +119,6 @@ public class CreatePost extends AppCompatActivity {
                 launchPhotoPicker();
             }
         });
-
 
         // listen for the video to be loaded and ready to play
         userVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
@@ -185,6 +174,7 @@ public class CreatePost extends AppCompatActivity {
                 userGifImageView.setVisibility(View.GONE);
                 userVideoView.setVisibility(View.GONE);
                 this.uri = null;
+                this.mimeType = null;
                 if(imageMimeTypes.contains(mimeType)) {
                     // load the image from the uri into the image view using glide
                     // Glide helps round off the corners and load the gif from the uri into the GifImageView and ensuring it is not bigger than 360x360 pixels
@@ -207,6 +197,7 @@ public class CreatePost extends AppCompatActivity {
                     return;
                 }
                 this.uri = uri;
+                this.mimeType = extractFileMimeType(uri);
                 mediaSelected = true;
             } else {
                 mediaSelected = false;
@@ -215,8 +206,18 @@ public class CreatePost extends AppCompatActivity {
 
     }
 
+    private void startMainActivity(LocalPost localPost) {
+        Intent mainPage = new Intent();
+        setResult(Activity.RESULT_OK, mainPage);
+        mainPage.putExtra("localPost", localPost);
+        finish();
+    }
+
 
     private String extractFileMimeType(Uri file) {
+        if(file == null) {
+            return null;
+        }
         return getContentResolver().getType(file);
     }
 
@@ -237,41 +238,43 @@ public class CreatePost extends AppCompatActivity {
         return true;
     }
 
-    private void createPost() {
-        // need to get user post number so that relationship between cloud storage and firestore for posts can be maintained
-        // will be used as the file name in cloud storage in path /postMedia/userID/1 ... n
-        firestore.collection("users").document(firebaseAuth.getCurrentUser().getUid()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+    private void savePostInBackend() {
+        // mark the timestamp at the beginning of creating a post
+        Map<String, Object> post = new HashMap<>();
+        Timestamp timestamp = Timestamp.now();
+        DateFormat dateFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+        String postUploadDate = dateFormatter.format(timestamp.toDate());
+        String mimeType = null;
+        if(uri != null) {
+            mimeType = extractFileMimeType(uri);
+        }
+        post.put("title", postTitle);
+        post.put("body", postBody);
+        post.put("timestamp", timestamp);
+        post.put("likes", 0);
+        post.put("userId", currentUserId);
+        post.put("nickname", userNickname);
+        post.put("mimeType", mimeType);
+        firestore.collection("posts").add(post).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
             @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                String nickname = documentSnapshot.get("nickname").toString();
-                // create object to place into firestore
-                Map<String, Object> post = new HashMap<>();
-                Timestamp timestamp = Timestamp.now();
+            public void onSuccess(DocumentReference documentReference) {
+                String uniquePostRef = documentReference.getId();
                 String mimeType = null;
                 if(uri != null) {
                     mimeType = extractFileMimeType(uri);
                 }
-                post.put("title", postTitle);
-                post.put("body", postBody);
-                post.put("timestamp", timestamp);
-                post.put("likes", 0);
-                post.put("userId", firebaseAuth.getCurrentUser().getUid());
-                post.put("nickname", nickname);
-                post.put("mimeType", mimeType);
-
-                firestore.collection("posts").add(post).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                    @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        String uniquePostRef = documentReference.getId();
-                        if(mediaSelected) {
-                            StorageReference storageRef = firebaseStorage.getReference();
-                            storageRef.child("/postMedia/" + uniquePostRef + "/").putFile(uri);
-                        }
-                        // put in the unique post
-                        post.put("postId", uniquePostRef);
-                        firestore.collection("posts").document(uniquePostRef).update(post);
-                    }
-                });
+                //  public PostModel(@NonNull Context context, String title, String body, byte[] profilePhoto, String nickname, String postUploadDate, String numLikes, String media, String mimeType, String uniquePostRef, String userId, ArrayList<String> postLikedBy) {
+                //
+                // update firebase storage
+                if(mediaSelected) {
+                    StorageReference storageRef = firebaseStorage.getReference();
+                    storageRef.child("/postMedia/" + uniquePostRef + "/").putFile(uri);
+                }
+                // put in the unique post to firestore
+                post.put("postId", uniquePostRef);
+                firestore.collection("posts").document(uniquePostRef).update(post);
+                LocalPost localPost = new LocalPost(postTitle, postBody, userProfilePicture, userNickname, postUploadDate, "0", String.valueOf(uri), mimeType, uniquePostRef, currentUserId, null);
+                startMainActivity(localPost);
             }
         });
     }

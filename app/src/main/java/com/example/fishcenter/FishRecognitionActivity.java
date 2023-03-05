@@ -59,8 +59,7 @@ public class FishRecognitionActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if(!imageBeingFetched) {
-                    Intent mainActivity = new Intent(getApplicationContext(), MainPageActivity.class);
-                    startActivity(mainActivity);
+                    finish();
                 }
             }
         });
@@ -92,11 +91,9 @@ public class FishRecognitionActivity extends AppCompatActivity {
                     // start the new thread to fetch data about the fish
                     FishialAPIFetchFishData fetchFishialRecognitionDataThread = new FishialAPIFetchFishData(fishImage, this);
                     fetchFishialRecognitionDataThread.start();
-
                 } else {
                     Toast.makeText(getBaseContext(), "Unsupported file format!", Toast.LENGTH_SHORT).show();
                 }
-
             } else {
                 Toast.makeText(getBaseContext(), "Cannot post an empty image!", Toast.LENGTH_SHORT).show();
             }
@@ -121,12 +118,6 @@ public class FishRecognitionActivity extends AppCompatActivity {
         });
     }
 
-
-    // thread that check if the Fishial requests have been completed every 200 milliseconds
-    // requires a the runOnUiThread with new Runnable object that will set the identify button and image view clickable
-    // it will also make the linear layout with the progress bar invisible
-    // runOnUiThread is needed because only the thread that created the view hierarchy can modify the views
-    // otherwise the Activity will crash and an exception will be raised
     private void showSpinner(boolean flag) {
         if(flag) {
             fishImageLinearLayout.setClickable(false);
