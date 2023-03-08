@@ -1,7 +1,5 @@
 package com.example.fishcenter;
 
-import static android.content.ContentValues.TAG;
-
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.net.Uri;
@@ -11,7 +9,6 @@ import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.method.PasswordTransformationMethod;
 import android.text.style.ForegroundColorSpan;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -103,7 +100,7 @@ public class RegisterActivity extends AppCompatActivity {
         userAlreadyRegistered.setMinWidth(48);
         userAlreadyRegistered.setText(spannableString);
         userAlreadyRegistered.setTextSize(16);
-        userAlreadyRegistered.setBackground(getDrawable(R.drawable.layout_background_rounded_corners_toggle_10_gray_opacity_30_to_transparent));
+        userAlreadyRegistered.setBackground(getDrawable(R.drawable.background_rounded_corners_toggle_10_gray_opacity_30_to_transparent));
         textLinearLayout.addView(userAlreadyRegistered);
         int profilePicId = R.mipmap.img_profile_pic_white_default_round;
         defaultProfilePicture = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + getResources().getResourcePackageName(profilePicId) + "/" + getResources().getResourceTypeName(profilePicId) + "/" + getResources().getResourceEntryName(profilePicId));

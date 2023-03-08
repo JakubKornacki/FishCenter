@@ -14,7 +14,7 @@ android {
         targetSdk 33
         versionCode 1
         versionName "1.0"
-
+        vectorDrawables.useSupportLibrary = true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -51,12 +51,13 @@ dependencies {
     // When using the BoM, don't specify versions in Firebase dependencies
     implementation 'com.google.firebase:firebase-analytics'
 
-
     // DroidsOnRoids for displaying gifs in the application
     implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.25'
 
     // Google Maps
     implementation 'com.google.android.gms:play-services-maps:18.1.0'
+    // utilities for google maps, will use ClusterItem interface to define items that can be clustered on a map
+    implementation 'com.google.maps.android:android-maps-utils:2.3.0'
 
 
     // Glide for easy handling of images
@@ -67,5 +68,11 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+
+    // ROOM for storing an object relational mapping representations of weather stations
+    // to store fishing location data locally instead of loading it all from firestore
+    def room_version = "2.5.0"
+    implementation "androidx.room:room-runtime:$room_version"
+    annotationProcessor "androidx.room:room-compiler:$room_version"
 }
 

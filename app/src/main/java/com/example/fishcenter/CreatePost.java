@@ -263,8 +263,6 @@ public class CreatePost extends AppCompatActivity {
                 if(uri != null) {
                     mimeType = extractFileMimeType(uri);
                 }
-                //  public PostModel(@NonNull Context context, String title, String body, byte[] profilePhoto, String nickname, String postUploadDate, String numLikes, String media, String mimeType, String uniquePostRef, String userId, ArrayList<String> postLikedBy) {
-                //
                 // update firebase storage
                 if(mediaSelected) {
                     StorageReference storageRef = firebaseStorage.getReference();

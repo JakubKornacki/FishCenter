@@ -129,7 +129,7 @@ public class FishRecognisedActivity extends AppCompatActivity {
         LinearLayout linearLayout = new LinearLayout(con);
         linearLayout.setLayoutParams(linearLayoutInsideScrollView.getLayoutParams());
         linearLayout.setOrientation(LinearLayout.VERTICAL);
-        linearLayout.setBackground(getDrawable(R.drawable.layout_rounded_corners_white_15_opacity_55));
+        linearLayout.setBackground(getDrawable(R.drawable.rounded_corners_white_15_opacity_55));
         // create the tablelayout
         TableLayout tableLayout = new TableLayout(con);
         tableLayout.setLayoutParams(linearLayoutParams);

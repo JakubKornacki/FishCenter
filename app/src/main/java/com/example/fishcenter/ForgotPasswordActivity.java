@@ -1,6 +1,5 @@
 package com.example.fishcenter;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -75,7 +74,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         goBackToLoginText.setMinWidth(48);
         goBackToLoginText.setText(spannableString);
         goBackToLoginText.setTextSize(16);
-        goBackToLoginText.setBackground(getDrawable(R.drawable.layout_background_rounded_corners_toggle_10_gray_opacity_30_to_transparent));
+        goBackToLoginText.setBackground(getDrawable(R.drawable.background_rounded_corners_toggle_10_gray_opacity_30_to_transparent));
         textLinearLayout.addView(goBackToLoginText);
 
         // switch from login activity to the register activity when clicked on the "Don't have an account? Register" TextView on the login activity

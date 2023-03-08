@@ -52,7 +52,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_margin="20dp"
-                android:background="@drawable/layout_rounded_corners_gray_25_opacity_45"
+                android:background="@drawable/rounded_corners_gray_25_opacity_45"
                 android:orientation="vertical">
 
                 <TextView
@@ -139,7 +139,7 @@
                         android:id="@+id/passwordVisibleImageButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/layout_background_rounded_corners_toggle_15_gray_opacity_70_to_transparent"
+                        android:background="@drawable/background_rounded_corners_toggle_15_gray_opacity_70_to_transparent"
                         android:contentDescription="Show user plaintext or dotted password"
                         android:gravity="center_horizontal"
                         android:minWidth="48dp"
@@ -173,7 +173,7 @@
                         android:id="@+id/retypePasswordVisibleImageButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/layout_background_rounded_corners_toggle_15_gray_opacity_70_to_transparent"
+                        android:background="@drawable/background_rounded_corners_toggle_15_gray_opacity_70_to_transparent"
                         android:contentDescription="Show user plaintext or dotted password"
                         android:gravity="center_horizontal"
                         android:minWidth="48dp"
@@ -221,7 +221,7 @@
                     android:id="@+id/registerButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/layout_background_rounded_corners_toggle_5_gray_opacity_30_to_transparent"
+                    android:background="@drawable/background_rounded_corners_toggle_5_gray_opacity_30_to_transparent"
                     app:srcCompat="@drawable/ic_baseline_how_to_reg_24_white"
                     android:minHeight="48dp" />
 

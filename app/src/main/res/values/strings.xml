@@ -45,5 +45,6 @@
     <string name="waitForPosts">Hang on while we load posts!</string>
     <string name="noPostsToLoad">There are no posts to display!</string>
     <string name="waitForVideo">Hang on while we load your video!</string>
+    <string name="waitForMapSetup">Hang on while we lay out your map!\nThis may take a while on the first launch!</string>
 
 </resources>

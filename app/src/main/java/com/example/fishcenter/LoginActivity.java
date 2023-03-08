@@ -36,10 +36,7 @@ public class LoginActivity extends AppCompatActivity {
     private LinearLayout progressSpinnerLayout;
     private InputMethodManager keyboard;
 
-
-
     // if the user is still authenticated then redirect him to the main page of the application
-
     @Override
     protected void onStart( ) {
         super.onStart();
@@ -94,7 +91,7 @@ public class LoginActivity extends AppCompatActivity {
         userNotRegisteredText.setText(spannableString);
         userNotRegisteredText.setTextSize(16);
         // need a slightly higher opacity value here in comparison to other two text view in forgot password and register since the background is too bright
-        userNotRegisteredText.setBackground(getDrawable(R.drawable.layout_background_rounded_corners_toggle_10_gray_opacity_40_to_transparent));
+        userNotRegisteredText.setBackground(getDrawable(R.drawable.background_rounded_corners_toggle_10_gray_opacity_40_to_transparent));
         textLinearLayout.addView(userNotRegisteredText);
 
 
