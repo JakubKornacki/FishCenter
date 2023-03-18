@@ -6,8 +6,6 @@ import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Update;
 
-import com.google.android.gms.maps.model.LatLng;
-
 import java.util.List;
 
 @Dao
@@ -22,5 +20,5 @@ public interface FishingLocationDao {
     void deleteFishingLocation(FishingLocation fishingLocation);
 
     @Query("SELECT * FROM FishingLocation WHERE lat  == :latToCheck AND lng == :lngToCheck")
-    FishingLocation findWeatherStationByLatLng(double latToCheck, double lngToCheck);
+    FishingLocation findFishingLocationByLatLng(double latToCheck, double lngToCheck);
 }
