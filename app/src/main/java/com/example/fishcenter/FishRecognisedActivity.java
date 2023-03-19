@@ -33,7 +33,7 @@ public class FishRecognisedActivity extends AppCompatActivity {
     private Button backToMainMenuButton;
     private ImageButton goBackImageButton;
     private ImageButton logoutImageButton;
-    private FirebaseAuth mAuth;
+    private FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -41,7 +41,6 @@ public class FishRecognisedActivity extends AppCompatActivity {
         setContentView(R.layout.activity_fish_recognised);
         goBackImageButton = findViewById(R.id.goBackImageButton);
         logoutImageButton = findViewById(R.id.logoutImageButton);
-        mAuth = FirebaseAuth.getInstance();
         goBackImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -52,7 +51,7 @@ public class FishRecognisedActivity extends AppCompatActivity {
         logoutImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mAuth.signOut();
+                firebaseAuth.signOut();
                 Intent loginActivity = new Intent(getApplicationContext(), LoginActivity.class);
                 startActivity(loginActivity);
             }
@@ -72,7 +71,7 @@ public class FishRecognisedActivity extends AppCompatActivity {
         for(int i = 0; i < fishes.size(); i++) {
             Fish fish = fishes.get(i);
             if(fishesDisplayed.add(fish)) {
-                LinearLayout table = drawTable(fishes.get(i));
+                LinearLayout table = drawResultsTable(fishes.get(i));
                 linearLayoutInsideScrollView.addView(table);
             }
         }
@@ -89,9 +88,6 @@ public class FishRecognisedActivity extends AppCompatActivity {
             mainMenuActivity.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             startActivity(mainMenuActivity);
         });
-
-
-
     }
 
     private Button createBackToMainMenuButton() {
@@ -110,14 +106,11 @@ public class FishRecognisedActivity extends AppCompatActivity {
     }
 
 
-
-
-
     // the below method creates a tables that is inserted into a scroll view dynamically which is inserted into a linear layout
     // it also uses predefined strings with HTML markup which are converted into SpannableString objects
     // and inserted into the table row along with the fish data
     // https://developer.android.com/guide/topics/resources/string-resource
-    private LinearLayout drawTable(Fish fish) {
+    private LinearLayout drawResultsTable(Fish fish) {
         // reference data
         Context con = getApplicationContext();
         // child should inherits its parent layout params

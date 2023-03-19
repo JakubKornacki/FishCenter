@@ -95,16 +95,14 @@
 
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/floatingActionButton"
+            android:id="@+id/createPostButton"
             android:layout_width="54dp"
             android:layout_height="wrap_content"
-            android:clickable="true"
             app:backgroundTint="@color/ordinaryButtonColor"
             app:srcCompat="@drawable/ic_baseline_plus_48_white"
             app:tint="@color/white"
             android:elevation="0dp"
-            app:elevation="0dp"
-            tools:layout_editor_absoluteY="366dp" />
+            app:elevation="0dp" />
     </LinearLayout>
 
 
@@ -119,7 +117,7 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight=".50"
-            android:background="@null"
+            android:background="@drawable/background_rounded_corners_toggle_5_gray_opacity_30_to_transparent"
             android:contentDescription="redirects user to fish recognition"
             app:srcCompat="@drawable/ic_baseline_camera_alt_24_white"
             tools:ignore="HardcodedText" />
@@ -164,12 +162,12 @@
 
 
     <LinearLayout
-        android:id="@+id/linearLayoutIndeterminateProgressBar"
+        android:id="@+id/progressSpinnerLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/graywithopacity75"
         android:orientation="vertical"
-        android:visibility="invisible"
+        android:visibility="visible"
         android:gravity="center"
         android:layout_marginBottom="60dp"
         android:layout_marginTop="56dp"

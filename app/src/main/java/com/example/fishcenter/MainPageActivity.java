@@ -22,7 +22,6 @@ import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
@@ -39,28 +38,26 @@ import java.util.Map;
 
 
 public class MainPageActivity extends AppCompatActivity implements OnClickListener {
-
-    private ImageButton fishRecognitionImageButton;
-    private ImageButton googleMapsButton;
-    private ImageButton logoutImageButton;
-    private ImageButton reloadPostsButton;
     private final FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
     private final FirebaseStorage firebaseStorage = FirebaseStorage.getInstance();
     private final FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+
+    private ImageButton fishRecognitionButton;
+    private ImageButton googleMapsButton;
+    private ImageButton logoutImageButton;
+    private ImageButton reloadPostsButton;
     private ArrayList<PostModel> posts = new ArrayList<>();
     private RecyclerView postsRecyclerView;
     private PostRecyclerViewAdapter adapter;
+    private FloatingActionButton createPostButton;
 
-    private LinearLayout linearLayoutIndeterminateProgressBar;
-    private LinearLayout linearLayoutIndeterminateProgressBarToMaps;
+    private LinearLayout progressSpinnerLayout;
     private LinearLayout linearLayoutNoPostsToLoad;
     private String currentUserId = FirebaseAuth.getInstance().getUid();
-    private byte[] userProfilePic;
-    private String userNickname;
-    private int postsCount = -1;
+    private byte[] userProfilePic = null;
+    private String userNickname = null;
+    private int postsArrayListSize = -1;
     private boolean postDataFetched = false;
-    private boolean userProfilePictureFetched = false;
-    private boolean userNicknamePictureFetched = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,26 +65,22 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
         setContentView(R.layout.activity_mainpage);
         // https://developer.android.com/develop/ui/views/components/appbar/setting-up
         // need to find custom defined toolbar in the xml and replace the vanilla toolbar with it
-        FloatingActionButton floatingActionButton = findViewById(R.id.floatingActionButton);
-        fishRecognitionImageButton = findViewById(R.id.fishRecognitionImageButton);
-        googleMapsButton = findViewById(R.id.googleMapsButton);
-        logoutImageButton = findViewById(R.id.logoutImageButton);
-        reloadPostsButton = findViewById(R.id.reloadPostsButton);
         postsRecyclerView = findViewById(R.id.postsRecyclerView);
         linearLayoutNoPostsToLoad = findViewById(R.id.linearLayoutNoPostsToLoad);
-        linearLayoutIndeterminateProgressBar = findViewById(R.id.linearLayoutIndeterminateProgressBar);
-        linearLayoutIndeterminateProgressBarToMaps = findViewById(R.id.linearLayoutIndeterminateProgressBarToMaps);
+        progressSpinnerLayout = findViewById(R.id.progressSpinnerLayout);
+
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
-        linearLayoutIndeterminateProgressBar.setVisibility(View.VISIBLE);
-        getUserProfPicture();
-        getUserNickname();
-        getPostData();
-        waitForPostDataAndSetupRecyclerView();
 
-        floatingActionButton.setOnClickListener(view -> {
-            if(postDataFetched && userProfilePictureFetched && userNicknamePictureFetched) {
+        postsRecyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+        adapter = new PostRecyclerViewAdapter(getApplicationContext(), posts, MainPageActivity.this);
+        postsRecyclerView.setAdapter(adapter);
+
+        createPostButton = findViewById(R.id.createPostButton);
+        createPostButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
                 Intent createPost = new Intent(getApplicationContext(), CreatePost.class);
                 createPost.putExtra("profilePicture", userProfilePic);
                 createPost.putExtra("userNickname", userNickname);
@@ -95,8 +88,10 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
             }
         });
 
-        logoutImageButton.setOnClickListener(view -> {
-            if(postDataFetched && userProfilePictureFetched && userNicknamePictureFetched) {
+        logoutImageButton = findViewById(R.id.logoutImageButton);
+        logoutImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
                 firebaseAuth.signOut();
                 Intent loginActivity = new Intent(getApplicationContext(), LoginActivity.class);
                 startActivity(loginActivity);
@@ -104,47 +99,64 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
             }
         });
 
-        fishRecognitionImageButton.setOnClickListener(view -> {
-            if(postDataFetched && userProfilePictureFetched && userNicknamePictureFetched) {
+        fishRecognitionButton = findViewById(R.id.fishRecognitionImageButton);
+        fishRecognitionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
                 Intent fishRecognitionActivity = new Intent(getApplicationContext(), FishRecognitionActivity.class);
                 startActivity(fishRecognitionActivity);
             }
         });
 
-        googleMapsButton.setOnClickListener(view -> {
-            if(postDataFetched && userProfilePictureFetched && userNicknamePictureFetched) {
+        googleMapsButton = findViewById(R.id.googleMapsButton);
+        googleMapsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
                 Intent mapActivity = new Intent(getApplicationContext(), MapActivity.class);
                 startActivity(mapActivity);
             }
         });
 
-        reloadPostsButton.setOnClickListener(view -> {
-            if(postDataFetched && userProfilePictureFetched && userNicknamePictureFetched) {
-                linearLayoutIndeterminateProgressBar.setVisibility(View.VISIBLE);
-                posts.clear();
-                postsCount = -1;
+        reloadPostsButton = findViewById(R.id.reloadPostsButton);
+        reloadPostsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showSpinnerAndDisableComponents(true);
                 postDataFetched = false;
-                getPostData();
-                waitForPostDataAndSetupRecyclerView();
-                adapter.notifyDataSetChanged();
+                postsArrayListSize = -1;
+                posts.clear();
+                combinePostsFromFirestoreAndCloudStorage();
+                waitForDataFromFirebaseAndCloudStorage();
             }
         });
+        // get posts, nickname and user profile picture
+        showSpinnerAndDisableComponents(true);
+        getUserProfPictureFromCloudStorage();
+        getUserNicknameFromFirestore();
+        combinePostsFromFirestoreAndCloudStorage();
+        waitForDataFromFirebaseAndCloudStorage();
     }
 
-
-
-    public void setButtonsInteractiveBackgrounds(boolean flag) {
+    private void showSpinnerAndDisableComponents(boolean flag) {
+        reloadPostsButton.setClickable(!flag);
+        logoutImageButton.setClickable(!flag);
+        fishRecognitionButton.setClickable(!flag);
+        googleMapsButton.setClickable(!flag);
+        createPostButton.setClickable(!flag);
         if(flag) {
-            fishRecognitionImageButton.setBackground(getDrawable(R.drawable.background_rounded_corners_toggle_5_gray_opacity_30_to_transparent));
-            googleMapsButton.setBackground(getDrawable(R.drawable.background_rounded_corners_toggle_5_gray_opacity_30_to_transparent));
-            logoutImageButton.setBackground(getDrawable(R.drawable.background_rounded_corners_toggle_5_gray_opacity_25_to_transparent));
-        } else {
-            fishRecognitionImageButton.setBackground(null);
-            googleMapsButton.setBackground(null);
+            progressSpinnerLayout.setVisibility(View.VISIBLE);
+            reloadPostsButton.setBackground(null);
             logoutImageButton.setBackground(null);
+            fishRecognitionButton.setBackground(null);
+            googleMapsButton.setBackground(null);
+        } else {
+            progressSpinnerLayout.setVisibility(View.INVISIBLE);
+            reloadPostsButton.setBackground(getDrawable(R.drawable.background_rounded_corners_toggle_5_gray_opacity_25_to_transparent));
+            logoutImageButton.setBackground(getDrawable(R.drawable.background_rounded_corners_toggle_5_gray_opacity_25_to_transparent));
+            fishRecognitionButton.setBackground(getDrawable(R.drawable.background_rounded_corners_toggle_5_gray_opacity_30_to_transparent));
+            googleMapsButton.setBackground(getDrawable(R.drawable.background_rounded_corners_toggle_5_gray_opacity_30_to_transparent));
         }
     }
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -181,169 +193,152 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
         this.moveTaskToBack(true);
     }
 
-
-
     // handle on-clicks for videos
     @Override
     public void onClickVideoThumbnail(int position) {
         // switch to the play video activity and supply it with the uri of the video that should be displayed
         Intent videoActivity = new Intent(getApplicationContext(), PlayVideoActivity.class);
-        String videoUri = posts.get(position).getMedia().toString();
+        String videoUri = posts.get(position).getMedia();
         videoActivity.putExtra("video", videoUri);
         startActivity(videoActivity);
     }
 
     // handle on-clicks for like buttons
-
     @Override
     public void onClickLikeButton(int position) {
-        // local update
-        ArrayList<String> listOfUsers = posts.get(position).getPostLikedBy();
-        String currentUser = firebaseAuth.getCurrentUser().getUid();
-        if(listOfUsers == null) {
-            listOfUsers = new ArrayList<>(Arrays.asList(currentUser));
-        } else if (listOfUsers.contains(currentUser)) {
-            listOfUsers.remove(currentUser);
-        } else  {
-            listOfUsers.add(currentUser);
-        }
-        posts.get(position).setPostLikedBy(listOfUsers);
-        posts.get(position).setNumLikes(listOfUsers.size());
-        adapter.notifyDataSetChanged();
+        ArrayList<String> listOfUsers = updateLocalLikedByList(position);
+        updateFirestoreLikedByList(position, listOfUsers);
+        updateFirestoreNumLikes(position, listOfUsers);
+    }
 
-        // list of users
+    private void updateFirestoreNumLikes(int position, ArrayList<String> listOfUsers) {
         String uniquePostRef = posts.get(position).getUniquePostRef();
-        Map<String, Object> listOfUsersMap = new HashMap<>();
-        listOfUsersMap.put("likedBy", listOfUsers);
-        firestore.collection("posts").document(uniquePostRef).update(listOfUsersMap);
-
-        // num likes
         Map<String, Object> numLikesMap = new HashMap<>();
         numLikesMap.put("likes", listOfUsers.size());
         firestore.collection("posts").document(uniquePostRef).update(numLikesMap);
     }
 
+    private ArrayList<String> updateLocalLikedByList(int position) {
+        ArrayList<String> listOfUsers = posts.get(position).getPostLikedBy();
+        if (listOfUsers == null) {
+            listOfUsers = new ArrayList<>(Arrays.asList(currentUserId));
+        } else if (listOfUsers.contains(currentUserId)) {
+            listOfUsers.remove(currentUserId);
+        } else {
+            listOfUsers.add(currentUserId);
+        }
+        // local update
+        posts.get(position).setPostLikedBy(listOfUsers);
+        posts.get(position).setNumLikes(listOfUsers.size());
+        adapter.notifyDataSetChanged();
+        return listOfUsers;
+    }
+
+    private void updateFirestoreLikedByList(int position, ArrayList<String> listOfUsers) {
+        String uniquePostRef = posts.get(position).getUniquePostRef();
+        Map<String, Object> listOfUsersMap = new HashMap<>();
+        listOfUsersMap.put("likedBy", listOfUsers);
+        firestore.collection("posts").document(uniquePostRef).update(listOfUsersMap);
+    }
 
 
-
-    private void waitForPostDataAndSetupRecyclerView() {
+    private void waitForDataFromFirebaseAndCloudStorage() {
         new Thread() {
             @Override
             public void run() {
                 super.run();
-                while (!postDataFetched) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (postsCount == 0) {
-                                linearLayoutNoPostsToLoad.setVisibility(View.VISIBLE);
-                                linearLayoutIndeterminateProgressBar.setVisibility(View.GONE);
-                                setButtonsInteractiveBackgrounds(true);
-                                postDataFetched = true;
+                // sleep for 50 seconds if posts, user nickname and userprofile pic have not been fetched
+                while (!postDataFetched || userNickname == null || userProfilePic == null) {
+                    try {
+                        Thread.sleep(50);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (postsArrayListSize == 0) {
+                                    linearLayoutNoPostsToLoad.setVisibility(View.VISIBLE);
+                                    postsRecyclerView.setVisibility(View.GONE);
+                                    adapter.notifyDataSetChanged();
+                                    showSpinnerAndDisableComponents(false);
+                                    postDataFetched = true;
+                                } else if (postsArrayListSize == posts.size()) {
+                                    postsRecyclerView.setVisibility(View.VISIBLE);
+                                    linearLayoutNoPostsToLoad.setVisibility(View.GONE);
+                                    // sort the posts internally as posts are not fetched based on timestamp, most likely because of other async calls to cloud storage as well
+                                    Collections.sort(posts, new TimestampComparator());
+                                    //notify the adapter of data change
+                                    adapter.notifyDataSetChanged();
+                                    showSpinnerAndDisableComponents(false);
+                                    postDataFetched = true;
+                                }
                             }
-                            if (postsCount == posts.size()) {
-                                // sort the posts based on timestamp, firestore is meant to sort them but it is not consistent
-                                // maybe they are fetched in the correct order but the posts are added to the array at different
-                                // in a different order since the wait time for some posts in callbacks is shorter than for others
-                                // for example, no media for one post and 10 mb video for the other post
-                                Collections.sort(posts, new TimestampComparator());
-                                //create the adapter with post date and attach it to the recycler view and pass this class as the listener for on click methods in the for the recycle view
-                                adapter = new PostRecyclerViewAdapter(getApplicationContext(), posts, MainPageActivity.this);
-                                postsRecyclerView.setAdapter(adapter);
-                                // wait until the layout has been fully inflated and only then set the flag for data fetches
-                                // avoids layout being displayed with some parts no loaded (videos, etc)
-                                postsRecyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
-                                setButtonsInteractiveBackgrounds(true);
-                                postDataFetched = true;
-                                linearLayoutIndeterminateProgressBar.setVisibility(View.GONE);
-                            }
-                        }
-                    });
+                        });
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
         }.start();
     }
 
-    public void getUserNickname() {
-        new Thread() {
+    private void getUserNicknameFromFirestore() {
+        firestore.collection("users").document(currentUserId).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
-            public void run() {
-                super.run();
-                firestore.collection("users").document(currentUserId).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                    @Override
-                    public void onSuccess(DocumentSnapshot documentSnapshot) {
-                        userNickname = (String) documentSnapshot.get("nickname");
-                        userNicknamePictureFetched = true;
-                    }
-                });
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                userNickname = documentSnapshot.getString("nickname");
             }
-        }.start();
+        });
     }
 
-    public void getUserProfPicture() {
-        new Thread() {
+    private void getUserProfPictureFromCloudStorage() {
+        firebaseStorage.getReference("profilePictures/" + currentUserId + "/").getBytes(Integer.MAX_VALUE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
             @Override
-            public void run() {
-                super.run();
-                firestore.collection("users").document(currentUserId).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                    @Override
-                    public void onSuccess(DocumentSnapshot documentSnapshot) {
-                        userNickname = (String) documentSnapshot.get("nickname");
-                        userProfilePictureFetched = true;
-                    }
-                });
+            public void onSuccess(byte[] bytes) {
+                userProfilePic = bytes;
             }
-        }.start();
+        });
     }
 
-    public void getPostData() {
-        new Thread() {
+    public void combinePostsFromFirestoreAndCloudStorage() {
+        firestore.collection("posts").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
-            public void run() {
-                super.run();
-                // get all posts from firestore ordering based on timestamp
-                firestore.collection("posts").orderBy("timestamp", Query.Direction.ASCENDING).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                    @Override
-                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                        postsCount = queryDocumentSnapshots.size();
-                        // get all posts in firestore
-                        for (QueryDocumentSnapshot post : queryDocumentSnapshots) {
-                            String nickname = (String) post.get("nickname");
-                            String title = (String) post.get("title");
-                            String body = (String) post.get("body");
-                            // extract a readable date from the firebase timestamp
-                            Date firestoreTimestamp = ((Timestamp) post.get("timestamp")).toDate();
-                            DateFormat dateFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-                            String postUploadDate = dateFormatter.format(firestoreTimestamp);
-                            String likes = post.get("likes").toString();
-                            String userId = post.get("userId").toString();
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                postsArrayListSize = queryDocumentSnapshots.size();
+                // get all posts in firestore
+                for (QueryDocumentSnapshot post : queryDocumentSnapshots) {
+                    String nickname = post.getString("nickname");
+                    String title = post.getString("title");
+                    String body = post.getString("body");
+                    // extract a readable date from the firebase timestamp
+                    Date firestoreTimestamp = ((Timestamp) post.get("timestamp")).toDate();
+                    DateFormat dateFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+                    String postUploadDate = dateFormatter.format(firestoreTimestamp);
+                    // saved in firestore as number, need to be converted to string
+                    String likes = post.get("likes").toString();
+                    String userId = post.getString("userId");
+                    String uniquePostRef = post.getId();
+                    ArrayList<String> postLikedBy = (ArrayList<String>) post.get("likedBy");
+                    // get media from firestore cloud if exists then create an PostModel object  with media otherwise set media to null
+                    StorageReference storageRefMedia = firebaseStorage.getReference().child("/postMedia/" + post.getId());
+                    storageRefMedia.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                        @Override
+                        public void onSuccess(Uri uri) {
+                            // the post had media associated with it and profile picture is fetched below
+                            String uriMedia = String.valueOf(uri);
                             String mimeType = post.get("mimeType").toString();
-                            String uniquePostRef = post.getId();
-                            ArrayList<String> postLikedBy = (ArrayList<String>) post.get("likedBy");
-                            // get media from firestore cloud if exists then create an PostModel object  with media otherwise set media to null
-                            StorageReference storageRefMedia = firebaseStorage.getReference().child("/postMedia/" + post.getId());
-                            storageRefMedia.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                @Override
-                                public void onSuccess(Uri uri) {
-                                    // the post had media associated with it and profile picture is fetched below
-                                    String uriMedia = String.valueOf(uri);
-                                    // add on the media, profile picture and metadata along with standard post components
-                                    PostModel post = new PostModel(getApplicationContext(), title, body, userProfilePic, nickname, postUploadDate, likes, uriMedia, mimeType, uniquePostRef, userId, postLikedBy);
-                                    posts.add(post);
-                                }
-                            }).addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    // the post did not have any media associated with it and profile picture is fetched below
-                                    PostModel post = new PostModel(getApplicationContext(), title, body, userProfilePic, nickname, postUploadDate, likes, null, null, uniquePostRef, userId, postLikedBy);
-                                    posts.add(post);
-                                }
-                            });
+                            // add on the media, profile picture and metadata along with standard post components
+                            PostModel post = new PostModel(getApplicationContext(), title, body, userProfilePic, nickname, postUploadDate, likes, uriMedia, mimeType, uniquePostRef, userId, postLikedBy);
+                            posts.add(post);
                         }
-                    }
-                });
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            // the post did not have any media associated with it and profile picture is fetched below
+                            PostModel post = new PostModel(getApplicationContext(), title, body, userProfilePic, nickname, postUploadDate, likes, null, null, uniquePostRef, userId, postLikedBy);
+                            posts.add(post);
+                        }
+                    });
+                }
             }
-        }.start();
+        });
     }
 }
-

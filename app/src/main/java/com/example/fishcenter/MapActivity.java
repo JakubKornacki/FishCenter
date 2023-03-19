@@ -19,7 +19,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.room.Room;
 
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -35,7 +34,6 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -49,31 +47,29 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private ImageButton goBackImageButton;
     private ImageButton logoutImageButton;
 
-    private LinearLayout linearLayoutIndeterminateProgressBarToMaps;
+    private LinearLayout progressSpinnerLayout;
     private final FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
     private final FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
     private final String userId = firebaseAuth.getCurrentUser().getUid();
     private Toolbar toolbar;
-    //private ImageView getWeatherStations;
     private FishingLocationDatabase fishingLocationDatabase;
     private FishingLocationDao fishingLocationDao;
     private SupportMapFragment mapFragment;
     private CustomWeatherStationInfoWindowAdapter adapter;
-    private ImageView syncDatabasesButton;
+    private ImageView syncRoomWithFirestoreButton;
     private ArrayList<Marker> refMapMarkers = new ArrayList<>();
+    //private ImageView getWeatherStations;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
-        goBackImageButton = findViewById(R.id.goBackImageButton);
-        logoutImageButton = findViewById(R.id.logoutImageButton);
-        linearLayoutIndeterminateProgressBarToMaps = findViewById(R.id.linearLayoutIndeterminateProgressBarToMaps);
+        progressSpinnerLayout = findViewById(R.id.progressSpinnerLayout);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.mapFragment);
         mapFragment.getMapAsync(this);
         //getWeatherStations = findViewById(R.id.getWeatherStations);
-        syncDatabasesButton = findViewById(R.id.syncDatabasesButton);
+
         // need this as google maps overwrite the view and make the toolbar dis
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -81,6 +77,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
         fishingLocationDatabase = Room.databaseBuilder(getApplicationContext(), FishingLocationDatabase.class, "fishLocationDatabase").fallbackToDestructiveMigration().allowMainThreadQueries().build();
         fishingLocationDao =  fishingLocationDatabase.fishingLocationDao();
+
+        goBackImageButton = findViewById(R.id.goBackImageButton);
         goBackImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -88,6 +86,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             }
         });
 
+
+        logoutImageButton = findViewById(R.id.logoutImageButton);
         logoutImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -98,14 +98,16 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             }
         });
 
-        syncDatabasesButton.setOnClickListener(new View.OnClickListener() {
+        syncRoomWithFirestoreButton = findViewById(R.id.syncDatabasesButton);
+        syncRoomWithFirestoreButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 setMakersVisible(false);
-                syncDatabases();
-                setupMarkersFromROOMDatabase();
+                syncRoomWithFirestore();
+                setupMarkersFromRoom();
             }
         });
+
         /*
         getWeatherStations.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -118,6 +120,24 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     }
 
+    private void showSpinnerAndDisableComponents(boolean flag) {
+        syncRoomWithFirestoreButton.setClickable(!flag);
+        logoutImageButton.setClickable(!flag);
+        goBackImageButton.setClickable(!flag);
+        if(flag) {
+            progressSpinnerLayout.setVisibility(View.VISIBLE);
+            syncRoomWithFirestoreButton.setBackground(null);
+            goBackImageButton.setBackground(null);
+            logoutImageButton.setBackground(null);
+        } else {
+            progressSpinnerLayout.setVisibility(View.INVISIBLE);
+            syncRoomWithFirestoreButton.setBackground(getDrawable(R.drawable.background_rounded_corners_toggle_5_gray_opacity_25_to_transparent));
+            goBackImageButton.setBackground(getDrawable(R.drawable.background_rounded_corners_toggle_5_gray_opacity_25_to_transparent));
+            logoutImageButton.setBackground(getDrawable(R.drawable.background_rounded_corners_toggle_5_gray_opacity_25_to_transparent));
+        }
+    }
+
+
     @SuppressLint("PotentialBehaviorOverride")
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -126,27 +146,21 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         adapter = new CustomWeatherStationInfoWindowAdapter(getApplicationContext());
         googleMap.setInfoWindowAdapter(adapter);
         // setup markers that are in the user ROOM database
-        setupMarkersFromROOMDatabase();
+        setupMarkersFromRoom();
         googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(@NonNull Marker marker) {
                 adapter.setLocationName(marker.getTitle());
                 adapter.setLocationData(marker.getSnippet());
                 marker.showInfoWindow();
-                // update the camera to move to the center of the marker
-                float currentZoom = googleMap.getCameraPosition().zoom;
-                float currentTilt = googleMap.getCameraPosition().tilt;
-                float currentBearing = googleMap.getCameraPosition().bearing;
-                // define the new camera posistion and animate the camera to the new position
-                CameraPosition newCameraPosition = new CameraPosition(marker.getPosition(),currentZoom, currentTilt, currentBearing);
-                googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(newCameraPosition));
+                focusCameraOnMarker(marker, googleMap);
                 return true;
             }
         });
         googleMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
             @Override
             public void onMapLongClick(@NonNull LatLng latLng) {
-                addFishingLocation(latLng);
+                createNewFishingLocationAlertDialog(latLng);
             }
         });
 
@@ -167,6 +181,16 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         });
     }
 
+    private void focusCameraOnMarker(Marker marker, GoogleMap map) {
+        // update the camera to move to the center of the marker
+        float currentZoom = map.getCameraPosition().zoom;
+        float currentTilt = map.getCameraPosition().tilt;
+        float currentBearing = map.getCameraPosition().bearing;
+        // define the new camera position and animate the camera to the new position
+        CameraPosition newCameraPosition = new CameraPosition(marker.getPosition(),currentZoom, currentTilt, currentBearing);
+        map.animateCamera(CameraUpdateFactory.newCameraPosition(newCameraPosition));
+    }
+
     public void setMakersVisible(boolean flag) {
         if(flag) {
             for(Marker marker : refMapMarkers) {
@@ -179,10 +203,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         }
     }
 
-
-
-    public void setupMarkersFromROOMDatabase() {
-        linearLayoutIndeterminateProgressBarToMaps.setVisibility(View.VISIBLE);
+    public void setupMarkersFromRoom() {
+        showSpinnerAndDisableComponents(true);
         new Thread() {
             @Override
             public void run() {
@@ -196,34 +218,37 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                         // wait for thread to finish and get the data fetched
                         getTideData.join();
                         String data = getTideData.getTidesData();
-                        data += "\nThis location is rated: " + fishingLocation.overallRating + "\n";
-                        data += "\nPress on the window to rate the location!\n";
+                        data += "\nThis location is rated: " + fishingLocation.overallRating + "\n\nPress on the window to rate the location!\n";
                         markers.add(new MarkerOptions().title(fishingLocation.title).snippet(data).position(fishingLocation.getPosition()));
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
                 }
-                runOnUiThread(new Runnable() {
-                    // update the ui and hide the spinner
-                    @Override
-                    public void run() {
-                        for(int i = 0; i < markers.size(); i++) {
-                            MarkerOptions markerToAdd = markers.get(i);
-                            // if there is no marker with this position add the marker to the collection as this is a new marker
-                            // fetched after the database sync and it needs to be added into the list of markers that are displayed
-                            if(refMapMarkers.stream().noneMatch(marker -> marker.getPosition().equals(markerToAdd.getPosition()))) {
-                                Marker marker = googleMap.addMarker(markers.get(i));
-                                refMapMarkers.add(marker);
-                            }
-                        }
-                        linearLayoutIndeterminateProgressBarToMaps.setVisibility(View.GONE);
-                        setMakersVisible(true);
-                    }
-                });
+                createNewMarkersFromRoom(markers);
             }
         }.start();
     }
 
+    private void createNewMarkersFromRoom(ArrayList<MarkerOptions> markerOptions) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // update the ui and hide the spinner
+                for(int i = 0; i < markerOptions.size(); i++) {
+                    MarkerOptions markerToAdd = markerOptions.get(i);
+                    // if there is no marker with this position add the marker to the collection as this is a new marker
+                    // fetched after the database sync and it needs to be added into the list of markers that are displayed
+                    if(refMapMarkers.stream().noneMatch(marker -> marker.getPosition().equals(markerToAdd.getPosition()))) {
+                        Marker marker = googleMap.addMarker(markerOptions.get(i));
+                        refMapMarkers.add(marker);
+                    }
+                }
+                showSpinnerAndDisableComponents(false);
+                setMakersVisible(true);
+            }
+        });
+    }
+    
 
     private void reviewLocation(LatLng position) {
         AlertDialog.Builder reviewLocationDialogBuilder = new AlertDialog.Builder(MapActivity.this);
@@ -251,64 +276,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 float newUserRating = ratingBar.getRating();
                 // if the user has actually rated an location
                 if(newUserRating != 0.0) {
-                    // call to firebase to save the rating in the backend
-                    CollectionReference fishingLocations = firebaseFirestore.collection("fishingLocations");
-                    // find the fishing location based on latitude and longitude
-                    fishingLocations.whereEqualTo("latitude", position.latitude).whereEqualTo("longitude", position.longitude).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                        @Override
-                        public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                            String fishingLocationId = queryDocumentSnapshots.getDocuments().get(0).getId();
-                            fishingLocations.document(fishingLocationId).collection("ratings").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                                @Override
-                                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                                    Map<String, Object> ratingMap = new HashMap<>();
-                                    ratingMap.put("userId", userId);
-                                    ratingMap.put("rating", newUserRating);
-                                    // use the stream filter to find if the user has already liked this post and collect the document reference into a list of document snapshots
-                                    List<DocumentSnapshot> ratings = queryDocumentSnapshots.getDocuments().stream().filter(rating -> rating.get("userId").equals(userId)).collect(Collectors.toList());
-                                    // if the entry for this user exists update it
-                                    if(ratings.size() != 0) {
-                                        // there should only be one entry in the list per user
-                                        String ratingRef = ratings.get(0).getId();
-                                        fishingLocations.document(fishingLocationId).collection("ratings").document(ratingRef).update(ratingMap);
-                                        Toast.makeText(MapActivity.this, "We have updated your rating with " + newUserRating + "!", Toast.LENGTH_SHORT).show();
-                                    } else {
-                                        // the user did not like this location yet so create a new entry
-                                        fishingLocations.document(fishingLocationId).collection("ratings").add(ratingMap);
-                                        Toast.makeText(MapActivity.this, "We have received your rating of " + newUserRating + "!", Toast.LENGTH_SHORT).show();
-                                    }
-                                }
-                            });
-                        }
-                    });
-                    // save the entry in ROOM and update the corresponding object
-                    FishingLocation fishingLocation = fishingLocationDao.findFishingLocationByLatLng(position.latitude, position.longitude);
-                    double overallRating = 0;
-                    double currentUserRating = fishingLocation.getUserRating();
-                    ArrayList<Double> ratingsList = fishingLocation.getRatingsList();
-                    if(ratingsList == null) {
-                        ratingsList = new ArrayList<>();
-                    }
-                    // if the user has not rated the location before add the new rating
-                    if(currentUserRating == 0) {
-                        ratingsList.add((double) newUserRating);
-                    } else {
-                        // if the user rated the location before replace the rating
-                        ratingsList.remove(currentUserRating);
-                        ratingsList.add((double) newUserRating);
-                    }
-                    // recalculate the total rating
-                    for(int j = 0; j < ratingsList.size(); j++) {
-                        overallRating += ratingsList.get(j);
-                    }
-                    overallRating /= ratingsList.size();
-                    // update the entry in the ROOM database
-                    fishingLocation.setUserRating(newUserRating);
-                    fishingLocation.setOverallRating(overallRating);
-                    fishingLocationDao.updateFishingLocation(fishingLocation);
-                    // get the map marker in question and hide it, the list should only contain one element
-                    List<Marker> marker = refMapMarkers.stream().filter(markerOptions -> markerOptions.getPosition().equals(position)).collect(Collectors.toList());
-                    updateMarkerAfterRating(marker.get(0), overallRating);
+                    updateRatingInFirestore(position, newUserRating);
+                    updateRatingInRoom(position, newUserRating);
                 } else {
                     Toast.makeText(MapActivity.this, "Your rating was not saved! Please select a value!", Toast.LENGTH_SHORT).show();
                 }
@@ -317,8 +286,76 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         reviewLocationDialogBuilder.show();
     }
 
-    private void updateMarkerAfterRating(Marker marker, Double newOverallRating) {
-        LatLng position = marker.getPosition();
+
+    private void updateRatingInRoom(LatLng position, float newUserRating) {
+        // save the entry in ROOM and update the corresponding object
+        FishingLocation fishingLocation = fishingLocationDao.findFishingLocationByLatLng(position.latitude, position.longitude);
+        double overallRating = 0;
+        double currentUserRating = fishingLocation.getUserRating();
+        ArrayList<Double> ratingsList = fishingLocation.getRatingsList();
+        if(ratingsList == null) {
+            ratingsList = new ArrayList<>();
+        }
+        // if the user has not rated the location before add the new rating
+        if(currentUserRating == 0) {
+            ratingsList.add((double) newUserRating);
+        } else {
+            // if the user rated the location before replace the rating
+            ratingsList.remove(currentUserRating);
+            ratingsList.add((double) newUserRating);
+        }
+        // recalculate the total rating
+        for(int j = 0; j < ratingsList.size(); j++) {
+            overallRating += ratingsList.get(j);
+        }
+        overallRating /= ratingsList.size();
+        // update the entry in the ROOM database
+        fishingLocation.setUserRating(newUserRating);
+        fishingLocation.setOverallRating(overallRating);
+        fishingLocationDao.updateFishingLocation(fishingLocation);
+        // update the marker on the map
+        updateMarkerOnTheMap(position);
+    }
+
+    private void updateRatingInFirestore(LatLng position, float newUserRating){
+        // call to firebase to save the rating in the backend
+        CollectionReference fishingLocations = firebaseFirestore.collection("fishingLocations");
+        // find the fishing location based on latitude and longitude
+        fishingLocations.whereEqualTo("latitude", position.latitude).whereEqualTo("longitude", position.longitude).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            @Override
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                String fishingLocationId = queryDocumentSnapshots.getDocuments().get(0).getId();
+                fishingLocations.document(fishingLocationId).collection("ratings").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        Map<String, Object> ratingMap = new HashMap<>();
+                        ratingMap.put("userId", userId);
+                        ratingMap.put("rating", newUserRating);
+                        // use the stream filter to find if the user has already liked this post and collect the document reference into a list of document snapshots
+                        List<DocumentSnapshot> ratings = queryDocumentSnapshots.getDocuments().stream().filter(rating -> rating.get("userId").equals(userId)).collect(Collectors.toList());
+                        // if the entry for this user exists update it
+                        if(ratings.size() != 0) {
+                            // there should only be one entry in the list per user
+                            String ratingRef = ratings.get(0).getId();
+                            fishingLocations.document(fishingLocationId).collection("ratings").document(ratingRef).update(ratingMap);
+                            Toast.makeText(MapActivity.this, "We have updated your rating with " + newUserRating + "!", Toast.LENGTH_SHORT).show();
+                        } else {
+                            // the user did not like this location yet so create a new entry
+                            fishingLocations.document(fishingLocationId).collection("ratings").add(ratingMap);
+                            Toast.makeText(MapActivity.this, "We have received your rating of " + newUserRating + "!", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    private void updateMarkerOnTheMap(LatLng position) {
+        // get the reference to the marker in the list of markers
+        List<Marker> markerList = refMapMarkers.stream().filter(markerOptions -> markerOptions.getPosition().equals(position)).collect(Collectors.toList());
+        Marker markerToUpdate = markerList.get(0);
+        // load the marker entry from ROOM
+        FishingLocation fishingLocationOfMarker = fishingLocationDao.findFishingLocationByLatLng(position.latitude, position.longitude);
         OpenMeteoGetTidesData tidesDataThread = new OpenMeteoGetTidesData(getApplicationContext(), position.latitude, position.longitude);
         tidesDataThread.start();
         try {
@@ -327,20 +364,19 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             throw new RuntimeException(e);
         }
         String data = tidesDataThread.getTidesData();
-        data += "\nThis location is rated: " + newOverallRating + "\n";
-        data += "\nPress on the window to rate the location!\n";
-        marker.setSnippet(data);
-        adapter.setLocationName(marker.getTitle());
-        adapter.setLocationData(marker.getSnippet());
-        marker.showInfoWindow();
+        data += "\nThis location is rated: " + fishingLocationOfMarker.getOverallRating() + "\n\nPress on the window to rate the location!\n";
+        markerToUpdate.setSnippet(data);
+        adapter.setLocationName(markerToUpdate.getTitle());
+        adapter.setLocationData(markerToUpdate.getSnippet());
+        markerToUpdate.showInfoWindow();
     }
 
-    private void addFishingLocation(LatLng position) {
-        AlertDialog.Builder locationNameDialogBuilder = new AlertDialog.Builder(MapActivity.this);
-        locationNameDialogBuilder.setTitle("How would you like to call this location?");
+    private void createNewFishingLocationAlertDialog(LatLng position) {
+        AlertDialog.Builder newLocationBuilder = new AlertDialog.Builder(MapActivity.this);
+        newLocationBuilder.setTitle("How would you like to call this location?");
         EditText nameLocationText = new EditText(getApplicationContext());
-        locationNameDialogBuilder.setView(nameLocationText);
-        locationNameDialogBuilder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
+        newLocationBuilder.setView(nameLocationText);
+        newLocationBuilder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 // start a thread and wait for it to finish
@@ -353,43 +389,48 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 }
                 // if the marker is not on land then save it in firestore
                 if(tidesDataThread.getResponseCode() == 200) {
-                    String data = tidesDataThread.getTidesData();
-                    data += "\nThis location is rated: 0.0\n";
-                    data += "\nPress on the window to rate the location!\n";
-                    String userInput = nameLocationText.getText().toString();
-                    if(userInput.length() == 0 ) {
+                    String locationName = nameLocationText.getText().toString();
+                    if(locationName.isEmpty()) {
                         // overwrite the location name
-                        userInput = "Location with no name!";
-                        MarkerOptions markerOption = new MarkerOptions().position(position).title(userInput).snippet(data);
-                        Marker marker = googleMap.addMarker(markerOption);
-                        // add marker to reference ArrayList
-                        refMapMarkers.add(marker);
-                    } else {
-                        MarkerOptions markerOption = new MarkerOptions().position(position).title(userInput).snippet(data);
-                        Marker marker = googleMap.addMarker(markerOption);
-                        // add marker to reference ArrayList
-                        refMapMarkers.add(marker);
+                        locationName = "Location with no name!";
                     }
-                    // proceed to save a valid location in firestore
-                    Map<String, Object> fishingLocationMap = new HashMap<>();
-                    fishingLocationMap.put("name", userInput);
-                    fishingLocationMap.put("latitude", position.latitude);
-                    fishingLocationMap.put("longitude", position.longitude);
-                    firebaseFirestore.collection("fishingLocations").add(fishingLocationMap);
-                    // proceed to save a valid location in ROOM
-                    // snippet is left out intentionally, it needs to be defines because
-                    // of the interface but the snippet will be defined dynamically
-                    FishingLocation newFishingLocation = new FishingLocation(userInput, null, position, 0, 0, null);
-                    fishingLocationDao.addFishingLocation(newFishingLocation);
+                    String data = tidesDataThread.getTidesData();
+                    data += "\nThis location is rated: 0.0\n\nPress on the window to rate the location!\n";
+                    addMarkerToList(locationName, position, data);
+                    saveNewMarkerInFirestore(locationName, position);
+                    saveNewMarkerInRoomDatabase(locationName, position);
                 } else {
                     Toast.makeText(MapActivity.this, "Can't place a marker on land!", Toast.LENGTH_SHORT).show();
                 }
             }
         });
-        locationNameDialogBuilder.show();
+        newLocationBuilder.show();
     }
 
-    private void syncDatabases(){
+    private void addMarkerToList(String locationName, LatLng position, String data) {
+        MarkerOptions markerOption = new MarkerOptions().position(position).title(locationName).snippet(data);
+        Marker marker = googleMap.addMarker(markerOption);
+        // add marker to reference ArrayList
+        refMapMarkers.add(marker);
+    }
+    private void saveNewMarkerInRoomDatabase(String locationName, LatLng position) {
+        // proceed to save a valid location in ROOM
+        // snippet is left out intentionally, it needs to be defines because
+        // of the interface but the snippet will be defined dynamically
+        FishingLocation newFishingLocation = new FishingLocation(locationName, null, position, 0, 0, null);
+        fishingLocationDao.addFishingLocation(newFishingLocation);
+    }
+
+    private void saveNewMarkerInFirestore(String locationName, LatLng position) {
+        // proceed to save a valid location in firestore
+        Map<String, Object> fishingLocationMap = new HashMap<>();
+        fishingLocationMap.put("name", locationName);
+        fishingLocationMap.put("latitude", position.latitude);
+        fishingLocationMap.put("longitude", position.longitude);
+        firebaseFirestore.collection("fishingLocations").add(fishingLocationMap);
+    }
+
+    private void syncRoomWithFirestore() {
         // if true then the database needs to be setup first
         CollectionReference fishingLocations = firebaseFirestore.collection("fishingLocations");
         fishingLocations.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
@@ -419,6 +460,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                             if(overallRating != 0) {
                                 overallRating /= noOfRatings;
                             }
+                            // update the room database
                             if(fishingLocationDao.findFishingLocationByLatLng(lat, lng) == null) {
                                 fishingLocationDao.addFishingLocation(new FishingLocation(name, null, lat, lng, overallRating, userRating, ratingsList));
                             } else {

@@ -36,12 +36,9 @@ public class CustomWeatherStationInfoWindowAdapter implements GoogleMap.InfoWind
             locationName.setText(name);
         } else {
             locationName.setText("Location with no name!\n");
-
         }
         if(data != null) {
             locationData.setText(data);
-        } else {
-            locationData.setText("No data is available for this location!");
         }
         // if return null then contents of getInfoWindow are used to display the info window
         // view will be framed in standard google maps info window and will only replace the inner contents

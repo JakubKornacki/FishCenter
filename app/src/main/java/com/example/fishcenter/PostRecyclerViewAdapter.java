@@ -14,17 +14,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-
 
 public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerViewAdapter.PostViewHolder> {
     private Context con;
     private ArrayList<PostModel> posts;
     private OnClickListener listener;
 
-    private HashSet<String> imageMimeTypes = new HashSet<>(Arrays.asList("image/jpg","image/jpeg","image/png","image/gif"));
-    private HashSet<String> videoMimeTypes = new HashSet<>(Arrays.asList("video/3gp","video/mov","video/avi","video/wmv","video/mp4","video/mpeg"));
+
     public PostRecyclerViewAdapter(Context con, ArrayList<PostModel> posts, OnClickListener listener) {
         this.con = con;
         this.posts = posts;
@@ -50,11 +46,11 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
             Uri uri = Uri.parse(posts.get(position).getMedia());
             String mimeType = posts.get(position).getMimeType();
             if(uri != null) {
-                if(imageMimeTypes.contains(mimeType)) {
+                if(MediaUtilities.supportedImageMimeTypes.contains(mimeType)) {
                     Glide.with(con).load(uri).transform(new RoundedCorners(30)).into(holder.postImageAndGif);
                     holder.postImageAndGif.setVisibility(View.VISIBLE);
                     holder.postVideoThumbnail.setVisibility(View.GONE);
-                } else if (videoMimeTypes.contains(mimeType)) {
+                } else if (MediaUtilities.supportedVideoMimeTypes.contains(mimeType)) {
                     Glide.with(con).load(uri).transform(new RoundedCorners(30)).into(holder.postVideoThumbnail);
                     holder.postVideoThumbnail.setVisibility(View.VISIBLE);
                     holder.postImageAndGif.setVisibility(View.GONE);
@@ -72,9 +68,6 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
     public int getItemCount() {
         return posts.size();
     }
-
-
-
 
     public class PostViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private ImageView userProfilePicture;

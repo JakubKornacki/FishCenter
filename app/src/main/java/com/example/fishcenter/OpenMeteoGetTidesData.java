@@ -16,6 +16,13 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 
 public class OpenMeteoGetTidesData extends Thread {
+
+
+    // OpenMeteo Marine Weather API allows to get realtime marine information
+    // which is made available for use through the Open Meteo API thanks to
+    // DWD Deutscher Wetterdienst Wetter und Klima aus einer Hand
+    // https://open-meteo.com/en/docs/marine-weather-api
+    // https://www.dwd.de/EN/service/copyright/copyright_node.html
     private Context con;
     private double lat;
     private double lng;

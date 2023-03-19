@@ -1,6 +1,7 @@
 package com.example.fishcenter;
 
 import android.content.Intent;
+import android.media.Image;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
@@ -16,29 +17,22 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class PlayVideoActivity extends AppCompatActivity {
-    private VideoView videoView;
-    private MediaController mediaController;
-    private ImageButton goBackImageButton;
-    private ImageButton logoutImageButton;
-    private FirebaseAuth firebaseAuth;
-    private LinearLayout videoTimeoutSpinner;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_play_video);
         Uri videoUri = Uri.parse(getIntent().getExtras().getString("video"));
-        videoView = findViewById(R.id.videoView);
-        mediaController = new MediaController(PlayVideoActivity.this);
+        VideoView videoView = findViewById(R.id.videoView);
+        MediaController mediaController = new MediaController(PlayVideoActivity.this);
         videoView.setVideoURI(videoUri);
         videoView.setMediaController(mediaController);
         mediaController.setAnchorView(videoView);
-        goBackImageButton = findViewById(R.id.goBackImageButton);
-        logoutImageButton = findViewById(R.id.logoutImageButton);
-        videoTimeoutSpinner = findViewById(R.id.videoTimeoutSpinner);
-        firebaseAuth = FirebaseAuth.getInstance();
+        ImageButton goBackImageButton = findViewById(R.id.goBackImageButton);
+        ImageButton logoutImageButton = findViewById(R.id.logoutImageButton);
+        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+        LinearLayout videoTimeoutSpinner = findViewById(R.id.videoTimeoutSpinner);
         videoTimeoutSpinner.setVisibility(View.VISIBLE);
-
         videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mediaPlayer) {
@@ -47,14 +41,12 @@ public class PlayVideoActivity extends AppCompatActivity {
             }
         });
 
-
         goBackImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 finish();
             }
         });
-
 
         logoutImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -65,8 +57,5 @@ public class PlayVideoActivity extends AppCompatActivity {
                 finish();
             }
         });
-
-
-
     }
 }

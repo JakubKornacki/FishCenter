@@ -25,22 +25,20 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 public class LoginActivity extends AppCompatActivity {
-
-
+    private FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
     private EditText emailEditText;
     private EditText passwordEditText;
     private ImageButton signInButton;
     private ImageButton passwordVisibleImageButton;
-    private TextView userNotRegisteredText;
-    private FirebaseAuth mAuth;
     private LinearLayout progressSpinnerLayout;
-    private InputMethodManager keyboard;
-
+    private TextView forgotPasswordTextView;
+    private LinearLayout mainContentLayout;
+    private LinearLayout goToRegisterLayout;
     // if the user is still authenticated then redirect him to the main page of the application
     @Override
     protected void onStart( ) {
         super.onStart();
-        FirebaseUser currentUser = mAuth.getCurrentUser();
+        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
         if (currentUser != null) {
             Intent mainPageActivity = new Intent(getApplicationContext(), MainPageActivity.class);
             startActivity(mainPageActivity);
@@ -51,55 +49,17 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        // get firebase auth instance
-        mAuth = FirebaseAuth.getInstance();
         // get references to different components visible on this activity such as editTexts and Buttons
         emailEditText = findViewById(R.id.emailEditText);
         passwordEditText = findViewById(R.id.retypePasswordEditText);
         signInButton = findViewById(R.id.signInButton);
         passwordVisibleImageButton = findViewById(R.id.retypePasswordVisibleImageButton);
-        TextView forgotPasswordTextView = findViewById(R.id.forgotPasswordTextView);
-        LinearLayout mainContentLayout = findViewById(R.id.mainContentLayout);
-        progressSpinnerLayout = findViewById(R.id.linearLayoutIndeterminateProgressBar);
-        LinearLayout linearLayoutBackground = findViewById(R.id.linearLayoutBackground);
-        // https://stackoverflow.com/questions/1109022/how-to-close-hide-the-android-soft-keyboard-programmatically/15587937#15587937
-        // get the soft input keyboard from the context via the input_method_service service and hide it
-        keyboard = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-        // get a span by parsing out the HTML so that the string can be displayed as bold
-        Spanned span = HtmlCompat.fromHtml(getString(R.string.userDoesNotHaveAnAccount), HtmlCompat.FROM_HTML_MODE_LEGACY);
-        SpannableString spannableString = new SpannableString(span);
-        //  Color in the "Register" portion of the text in the spannable string with purple color
-        spannableString.setSpan(new ForegroundColorSpan(getColor(R.color.black)), 0,23, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        spannableString.setSpan(new ForegroundColorSpan(getColor(R.color.ordinaryButtonColor)), 23,spannableString.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        forgotPasswordTextView = findViewById(R.id.forgotPasswordTextView);
+        progressSpinnerLayout = findViewById(R.id.progressSpinnerLayout);
 
-        // give the text view the layout parameters of the main content linear layout
-        LinearLayout.LayoutParams mainContentParams = new LinearLayout.LayoutParams(mainContentLayout.getLayoutParams());
-        mainContentParams.setMargins(0,40,0,0);
-        // linear layout to hold the text view which matches the layout params of main content
-        LinearLayout textLinearLayout = new LinearLayout(getApplicationContext());
-        textLinearLayout.setLayoutParams(mainContentParams);
-        textLinearLayout.setGravity(Gravity.CENTER);
-        LinearLayout.LayoutParams textLinearLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT);
-        mainContentLayout.addView(textLinearLayout);
-        // set up the text view
-        userNotRegisteredText = new TextView(getApplicationContext());
-        userNotRegisteredText.setLayoutParams(textLinearLayoutParams);
-        // define what the text view can do, its appearance and position
-        userNotRegisteredText.setClickable(true);
-        userNotRegisteredText.setGravity(Gravity.CENTER);
-        userNotRegisteredText.setMinWidth(48);
-        userNotRegisteredText.setText(spannableString);
-        userNotRegisteredText.setTextSize(16);
-        // need a slightly higher opacity value here in comparison to other two text view in forgot password and register since the background is too bright
-        userNotRegisteredText.setBackground(getDrawable(R.drawable.background_rounded_corners_toggle_10_gray_opacity_40_to_transparent));
-        textLinearLayout.addView(userNotRegisteredText);
-
-
-        // switch from login activity to the register activity when clicked on the "Don't have an account? Register" TextView on the login activity
-        userNotRegisteredText.setOnClickListener(view -> {
-            Intent registerActivity = new Intent(getApplicationContext(), RegisterActivity.class);
-            startActivity(registerActivity);
-        });
+        mainContentLayout = findViewById(R.id.mainContentLayout);
+        goToRegisterLayout = createBackToLoginLayout(mainContentLayout);
+        mainContentLayout.addView(goToRegisterLayout);
 
         // toggle password visibility
         passwordVisibleImageButton.setOnClickListener(view -> togglePasswordVisibilityButton(passwordVisibleImageButton, passwordEditText));
@@ -114,33 +74,65 @@ public class LoginActivity extends AppCompatActivity {
 
         // if the user click anywhere on the background linear layout which is anywhere on the screen apart from the top bar
         // the focus from the edit texts should be cleared and the input keyboard should be hidden
+        LinearLayout linearLayoutBackground = findViewById(R.id.linearLayoutBackground);
         linearLayoutBackground.setOnClickListener(view -> {
             if(emailEditText.isFocused()) {
                 emailEditText.clearFocus();
             } else if(passwordEditText.isFocused()) {
                 passwordEditText.clearFocus();
             }
+            // https://stackoverflow.com/questions/1109022/how-to-close-hide-the-android-soft-keyboard-programmatically/15587937#15587937
+            // get the soft input keyboard from the context via the input_method_service service and hide it
+            InputMethodManager keyboard = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
             keyboard.hideSoftInputFromWindow(view.getWindowToken(), 0);
         });
     }
 
-    private void removeErrorMessages() {
-        emailEditText.setError(null);
-        passwordEditText.setError(null);
+
+
+    private LinearLayout createBackToLoginLayout(LinearLayout parentLayout) {
+        // give the text view the layout parameters of the main content linear layout
+        final LinearLayout.LayoutParams parentLayoutParams = new LinearLayout.LayoutParams(parentLayout.getLayoutParams());
+        // the text view to be added should be 40 pixels below the main content
+        parentLayoutParams.setMargins(0,40,0,0);
+        // linear layout to hold the text view which matches the layout params of main content
+        final LinearLayout textLinearLayout = new LinearLayout(getApplicationContext());
+        textLinearLayout.setLayoutParams(parentLayoutParams);
+        textLinearLayout.setGravity(Gravity.CENTER);
+
+        final LinearLayout.LayoutParams textLinearLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT);
+        // set up the text view
+        final TextView userNotRegisteredText = new TextView(getApplicationContext());
+        userNotRegisteredText.setLayoutParams(textLinearLayoutParams);
+        // define what the text view can do, its appearance and position
+        userNotRegisteredText.setClickable(true);
+        userNotRegisteredText.setGravity(Gravity.CENTER);
+        userNotRegisteredText.setMinWidth(48);
+        // get the spannable string
+        SpannableString text = createSpannableString();
+        userNotRegisteredText.setText(text);
+        userNotRegisteredText.setTextSize(16);
+        // need a slightly higher opacity value here in comparison to other two text view in forgot password and register since the background is too bright
+        userNotRegisteredText.setBackground(getDrawable(R.drawable.background_rounded_corners_toggle_10_gray_opacity_40_to_transparent));
+        textLinearLayout.addView(userNotRegisteredText);
+
+        // switch from login activity to the register activity when clicked on the "Don't have an account? Register" TextView on the login activity
+        userNotRegisteredText.setOnClickListener(view -> {
+            Intent registerActivity = new Intent(getApplicationContext(), RegisterActivity.class);
+            startActivity(registerActivity);
+        });
+
+        return textLinearLayout;
     }
 
-
-    // hide the error messages and spinners if were displayed when user decides to go back to this activity
-    protected void onResume() {
-        super.onResume();
-        showSpinner(false);
-        removeErrorMessages();
-        clearEditTexts();
-    }
-
-    private void clearEditTexts() {
-        emailEditText.setText(null);
-        passwordEditText.setText(null);
+    private SpannableString createSpannableString() {
+        // get a span by parsing out the HTML so that the string can be displayed as bold
+        Spanned span = HtmlCompat.fromHtml(getString(R.string.userDoesNotHaveAnAccount), HtmlCompat.FROM_HTML_MODE_LEGACY);
+        SpannableString spannableString = new SpannableString(span);
+        //  Color in the "Register" portion of the text in the spannable string with purple color
+        spannableString.setSpan(new ForegroundColorSpan(getColor(R.color.black)), 0,23, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        spannableString.setSpan(new ForegroundColorSpan(getColor(R.color.ordinaryButtonColor)), 23,spannableString.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        return spannableString;
     }
 
     private boolean validateEmail(String email) {
@@ -189,45 +181,30 @@ public class LoginActivity extends AppCompatActivity {
     private void signInWithFirebase() {
         String email = emailEditText.getText().toString().trim();
         String password = passwordEditText.getText().toString();
+
         boolean emailValidated = validateEmail(email);
         boolean passwordValidated = validatePassword(password);
 
-
         if(emailValidated && passwordValidated) {
-            showSpinner(true);
-            mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+            showSpinnerAndDisableComponents(true);
+            firebaseAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
                     if (task.isSuccessful()) {
                         // Sign in success, update UI with the signed-in user's information
+                        showSpinnerAndDisableComponents(false);
                         Intent mainPageActivity = new Intent(getApplicationContext(), MainPageActivity.class);
                         startActivity(mainPageActivity);
                     }
                 }
             });
-            mAuth.signInWithEmailAndPassword(email, password).addOnFailureListener(this, new OnFailureListener() {
+            firebaseAuth.signInWithEmailAndPassword(email, password).addOnFailureListener(this, new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
                     createErrorAlertDialog("Authentication:", e.getMessage());
+                    showSpinnerAndDisableComponents(false);
                 }
             });
-            showSpinner(false);
-        }
-    }
-
-    private void showSpinner(boolean flag) {
-        if(flag) {
-            progressSpinnerLayout.setVisibility(View.VISIBLE);
-            emailEditText.setClickable(false);
-            passwordEditText.setClickable(false);
-            signInButton.setClickable(false);
-            userNotRegisteredText.setClickable(false);
-        } else {
-            progressSpinnerLayout.setVisibility(View.INVISIBLE);
-            emailEditText.setClickable(true);
-            passwordEditText.setClickable(true);
-            signInButton.setClickable(true);
-            userNotRegisteredText.setClickable(true);
         }
     }
 
@@ -255,5 +232,45 @@ public class LoginActivity extends AppCompatActivity {
         // set text pointer to the position at the end of text changing the transformation method sets it back to zero
         int textLen = editTextPass.getText().length();
         editTextPass.setSelection(textLen);
+    }
+
+
+    private void showSpinnerAndDisableComponents(boolean flag) {
+        emailEditText.setFocusable(!flag);
+        passwordEditText.setFocusable(!flag);
+        signInButton.setClickable(!flag);
+        forgotPasswordTextView.setFocusable(!flag);
+        forgotPasswordTextView.setClickable(!flag);
+        goToRegisterLayout.getChildAt(0).setClickable(!flag);
+        if(flag) {
+            progressSpinnerLayout.setVisibility(View.VISIBLE);
+            signInButton.setBackground(null);
+            forgotPasswordTextView.setBackground(null);
+            goToRegisterLayout.getChildAt(0).setBackground(null);
+        } else {
+            progressSpinnerLayout.setVisibility(View.INVISIBLE);
+            signInButton.setBackground(getDrawable(R.drawable.background_rounded_corners_toggle_5_gray_opacity_30_to_transparent));
+            forgotPasswordTextView.setBackground(getDrawable(R.drawable.background_rounded_corners_toggle_35_gray_opacity_30_to_transparent));
+            goToRegisterLayout.getChildAt(0).setBackground(getDrawable(R.drawable.background_rounded_corners_toggle_10_gray_opacity_40_to_transparent));
+        }
+    }
+
+    private void removeErrorMessages() {
+        emailEditText.setError(null);
+        passwordEditText.setError(null);
+    }
+
+
+    // hide the error messages and spinners if were displayed when user decides to go back to this activity
+    protected void onResume() {
+        super.onResume();
+        showSpinnerAndDisableComponents(false);
+        removeErrorMessages();
+        clearEditTexts();
+    }
+
+    private void clearEditTexts() {
+        emailEditText.setText(null);
+        passwordEditText.setText(null);
     }
 }

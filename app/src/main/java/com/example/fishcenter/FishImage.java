@@ -25,19 +25,12 @@ public class FishImage {
     public FishImage(Uri fishImage, ContentResolver contentResolver) {
         this.fishImage = fishImage;
         this.contentResolver = contentResolver;
-        imageFileMimeType = extractImageFileMimeType();
+        imageFileMimeType = MediaUtilities.extractMediaMimeType(fishImage, contentResolver);
         imageFileName = extractImageFileName();
         imageFileSize = extractImageFileSize();
         imageFileBytesArray = getImageFileBytesArray();
         imageFileBytesArrayMD5 = getImageBytesMD5Checksum();
         imageFileBytesArrayMD5EncodedBase64 = encodeImageBytesArrayToBase64();
-    }
-
-
-    // use the ContentResolver and the image Uri obtained earlier to extract the mime type of the image
-    //https://developer.android.com/training/secure-file-sharing/retrieve-info
-    private String extractImageFileMimeType() {
-        return contentResolver.getType(fishImage);
     }
 
     private String extractImageFileName() {
@@ -64,9 +57,9 @@ public class FishImage {
     }
 
     private byte[] getImageFileBytesArray() {
-        int noOfBytes = Integer.parseInt(imageFileSize);
-        byte[] byteArray = new byte[noOfBytes];
         try {
+            int noOfBytes = Integer.parseInt(imageFileSize);
+            byte[] byteArray = new byte[noOfBytes];
             // open an input stream using the content resolver and the image uri
             InputStream inputStream = contentResolver.openInputStream(fishImage);
             // byte array to hold raw image data of the same size as the image
@@ -74,18 +67,18 @@ public class FishImage {
             inputStream.read(byteArray);
             // close the input stream
             inputStream.close();
+            return byteArray;
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return byteArray;
     }
 
     // below implementation is based on the information found on GeeksForGeeks https://www.geeksforgeeks.org/md5-hash-in-java/?ref=rp
     private byte[] getImageBytesMD5Checksum() {
-        byte[] md5DigestedBytes;
         try {
+            byte[] md5DigestedBytes;
             // parse the file size in bytes to int
             int noOfBytes = Integer.parseInt(imageFileSize);
             // open an input stream using the content resolver and the image uri
@@ -100,6 +93,7 @@ public class FishImage {
             MessageDigest md5 = MessageDigest.getInstance("MD5");
             // get bytes digested by MD5
             md5DigestedBytes = md5.digest(byteArray);
+            return md5DigestedBytes;
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         } catch (FileNotFoundException e) {
@@ -107,7 +101,6 @@ public class FishImage {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return md5DigestedBytes;
     }
 
     private String encodeImageBytesArrayToBase64() {
@@ -133,11 +126,9 @@ public class FishImage {
     public String getImageFileBytesArrayMD5EncodedBase64() {
         return imageFileBytesArrayMD5EncodedBase64;
     }
-
     public ContentResolver getContentResolver(){
         return contentResolver;
     }
-
 
 
 }

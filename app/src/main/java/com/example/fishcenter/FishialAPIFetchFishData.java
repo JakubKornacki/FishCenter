@@ -36,18 +36,18 @@ public class FishialAPIFetchFishData extends Thread {
 
     @Override
     public void run() {
-        super.run();
-        accessToken = fetchAuthorizationToken();
-        dataForCloudImageUpload = obtainDataForCloudUpload(accessToken, fishImage);
-        uploadAnImageToTheCloud(dataForCloudImageUpload, fishImage);
-        fishialImageRecognitionData = fishDetection(dataForCloudImageUpload, accessToken);
-        // get Activity from context
-        // https://stackoverflow.com/questions/9891360/getting-activity-from-context-in-android
-        Activity activity = (Activity) context;
-        // way of passing objects between activities using Intent with the help of serializable interface
-        // https://stackoverflow.com/questions/13601883/how-to-pass-arraylist-of-objects-from-one-to-another-activity-using-intent-in-an
-        // ArrayList of Fish objects is created by parsing out the JSON data
         try {
+            super.run();
+            accessToken = fetchAuthorizationToken();
+            dataForCloudImageUpload = obtainDataForCloudUpload(accessToken, fishImage);
+            uploadAnImageToTheCloud(dataForCloudImageUpload, fishImage);
+            fishialImageRecognitionData = fishDetection(dataForCloudImageUpload, accessToken);
+            // get Activity from context
+            // https://stackoverflow.com/questions/9891360/getting-activity-from-context-in-android
+            Activity activity = (Activity) context;
+            // way of passing objects between activities using Intent with the help of serializable interface
+            // https://stackoverflow.com/questions/13601883/how-to-pass-arraylist-of-objects-from-one-to-another-activity-using-intent-in-an
+            // ArrayList of Fish objects is created by parsing out the JSON data
             if(fishialImageRecognitionData.getJSONArray("results").length() != 0) {
                 Intent fishRecognisedIntent = new Intent(activity, FishRecognisedActivity.class);
                 ArrayList<Fish> fishes = parseJSONToFishObjectArrayList(fishialImageRecognitionData);
@@ -70,8 +70,8 @@ public class FishialAPIFetchFishData extends Thread {
 
 
     private ArrayList<Fish> parseJSONToFishObjectArrayList(JSONObject fishData){
-        ArrayList<Fish> fishes = new ArrayList<>();
         try {
+            ArrayList<Fish> fishes = new ArrayList<>();
             // get the species arrayList from fishData (there is one entry for each fish identified in an image)
             for(int i = 0; i < fishData.getJSONArray("results").length(); i++) {
                 JSONObject result = fishData.getJSONArray("results").getJSONObject(i);
@@ -148,15 +148,17 @@ public class FishialAPIFetchFishData extends Thread {
                     ));
                 }
             }
-            } catch (JSONException ex) {
+
+            return fishes;
+        } catch (JSONException ex) {
             throw new RuntimeException(ex);
         }
-        return fishes;
     }
 
     private JSONObject fetchAuthorizationToken() {
-        JSONObject response = null;
+
         try {
+            JSONObject response = null;
             // specify the URL for the authorization endpoint
             URL url = new URL("https://api-users.fishial.ai/v1/auth/token");
             // establish the connection with the endpoint
@@ -177,7 +179,6 @@ public class FishialAPIFetchFishData extends Thread {
             outStream.write(out);
             outStream.close();
 
-
             // if https request was successful then read in the response into an StringBuilder object using the http input stream
             if (http.getResponseCode() == 200) {
                 // create a buffered reader for reading the token data passed back from the authorization endpoint
@@ -192,22 +193,19 @@ public class FishialAPIFetchFishData extends Thread {
                 tokenDataReader.close();
                 // Create a response JSON object returned by this method by calling the toString() method on the created StringBuilder
                 response = new JSONObject(httpResponse.toString());
-
             }
             // close the http connection
             http.disconnect();
-
+            return response;
         } catch (JSONException | IOException e) {
             throw new RuntimeException(e);
         }
-
-        return response;
     }
 
 
     private JSONObject obtainDataForCloudUpload(JSONObject accessToken, FishImage fishImage) {
-        JSONObject response = null;
         try {
+            JSONObject response = null;
             JSONObject mainJsonBody = new JSONObject();
             mainJsonBody.put("filename", fishImage.getImageFileName());
             mainJsonBody.put("content_type", fishImage.getImageFileMimeType());
@@ -254,7 +252,7 @@ public class FishialAPIFetchFishData extends Thread {
             }
             // close the http connection
             http.disconnect();
-
+            return response;
         } catch (JSONException e) {
             throw new RuntimeException(e);
         } catch (ProtocolException e) {
@@ -264,7 +262,6 @@ public class FishialAPIFetchFishData extends Thread {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return response;
     }
 
     private void uploadAnImageToTheCloud(JSONObject dataForCloudImageUpload, FishImage fishImage) {
@@ -275,7 +272,6 @@ public class FishialAPIFetchFishData extends Thread {
             JSONObject imageHeaders = directUploadHeader.getJSONObject("headers");
             String contentMd5 = imageHeaders.getString("Content-MD5");
             String contentDisposition = imageHeaders.getString("Content-Disposition");
-
 
             // parse the file size in bytes to int
             int noOfBytes = Integer.parseInt(fishImage.getImageFileSize());
@@ -324,8 +320,8 @@ public class FishialAPIFetchFishData extends Thread {
     }
 
     private JSONObject fishDetection(JSONObject imageDataOnCloudJSON, JSONObject tokenJSON) {
-        JSONObject response = null;
         try {
+            JSONObject response = null;
             String urlPath = imageDataOnCloudJSON.getString("signed-id");
             String token = tokenJSON.getString("access_token");
 
@@ -350,6 +346,7 @@ public class FishialAPIFetchFishData extends Thread {
             }
             // close the http session
             http.disconnect();
+            return response;
         } catch (JSONException e) {
             throw new RuntimeException(e);}
         catch (MalformedURLException ex) {
@@ -357,9 +354,5 @@ public class FishialAPIFetchFishData extends Thread {
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
-
-        return response;
     }
-
-
 }
