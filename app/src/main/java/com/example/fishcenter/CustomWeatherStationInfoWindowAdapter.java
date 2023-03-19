@@ -1,21 +1,15 @@
 package com.example.fishcenter;
 
 import android.content.Context;
-import android.speech.tts.TextToSpeech;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.cardview.widget.CardView;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.Marker;
-
-import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 public class CustomWeatherStationInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
     private Context con;
@@ -28,7 +22,7 @@ public class CustomWeatherStationInfoWindowAdapter implements GoogleMap.InfoWind
     @Nullable
     @Override
     public View getInfoContents(@NonNull Marker marker) {
-        View customInfoWindow = LayoutInflater.from(con).inflate(R.layout.layout_fishing_location_data, null);
+        View customInfoWindow = LayoutInflater.from(con).inflate(R.layout.layout_fishing_location, null);
         TextView locationName = customInfoWindow.findViewById(R.id.fishingLocationName);
         TextView locationData = customInfoWindow.findViewById(R.id.data);
 

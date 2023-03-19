@@ -75,7 +75,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="15dp"
             android:layout_marginRight="15dp"
-            android:layout_marginTop="150dp"
+            android:layout_marginTop="115dp"
             android:background="@drawable/rounded_corners_white_15_opacity_55"
             android:gravity="center"
             android:orientation="vertical"
@@ -107,21 +107,32 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:paddingTop="20dp"
-                android:paddingBottom="20dp"
                 android:textColor="@color/black"
                 android:text="@string/errorMessage"
                 android:textSize="15sp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:layout_marginTop="30dp"
+            android:background="@color/ordinaryButtonColor"
+            android:visibility="visible">
 
             <ImageButton
                 android:id="@+id/goBackToFishRecognition"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/ordinaryButtonColor"
+                android:background="@drawable/background_rounded_corners_toggle_5_gray_opacity_30_to_transparent"
                 android:contentDescription="This button redirects the user back to the fish recognition page"
                 android:minHeight="48dp"
                 app:srcCompat="@drawable/ic_baseline_arrow_back_24_white" />
-        </LinearLayout>
 
+        </LinearLayout>
 
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

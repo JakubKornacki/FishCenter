@@ -2,6 +2,7 @@ package com.example.fishcenter;
 
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,12 +20,14 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
     private Context con;
     private ArrayList<PostModel> posts;
     private OnClickListener listener;
+    private Drawable playVideoIcon;
 
 
     public PostRecyclerViewAdapter(Context con, ArrayList<PostModel> posts, OnClickListener listener) {
         this.con = con;
         this.posts = posts;
         this.listener = listener;
+        playVideoIcon = con.getDrawable(R.drawable.img_play_video_foreground);
     }
 
     @NonNull
@@ -42,6 +45,7 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
         holder.userNickname.setText(posts.get(position).getNickname());
         holder.datePosted.setText(posts.get(position).getDatePosted());
         holder.postTitle.setText(posts.get(position).getTitle());
+
         if(posts.get(position).getMedia() != null) {
             Uri uri = Uri.parse(posts.get(position).getMedia());
             String mimeType = posts.get(position).getMimeType();
@@ -52,6 +56,7 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
                     holder.postVideoThumbnail.setVisibility(View.GONE);
                 } else if (MediaUtilities.supportedVideoMimeTypes.contains(mimeType)) {
                     Glide.with(con).load(uri).transform(new RoundedCorners(30)).into(holder.postVideoThumbnail);
+                    holder.postVideoThumbnail.setForeground(playVideoIcon);
                     holder.postVideoThumbnail.setVisibility(View.VISIBLE);
                     holder.postImageAndGif.setVisibility(View.GONE);
                 }
@@ -80,7 +85,6 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
         private ImageView likesButton;
         private TextView postLikes;
         private OnClickListener listener;
-
 
         public PostViewHolder(@NonNull View itemView, OnClickListener listener) {
             super(itemView);

@@ -2,6 +2,7 @@ package com.example.fishcenter;
 
 
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -15,6 +16,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.PickVisualMediaRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
@@ -56,9 +58,7 @@ public class FishRecognitionActivity extends AppCompatActivity {
         logoutImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                firebaseAuth.signOut();
-                Intent loginActivity = new Intent(getApplicationContext(), LoginActivity.class);
-                startActivity(loginActivity);
+                createLogoutDialog(firebaseAuth);
             }
         });
 
@@ -77,7 +77,7 @@ public class FishRecognitionActivity extends AppCompatActivity {
                         Toast.makeText(getBaseContext(), "Unsupported file format!", Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    Toast.makeText(getBaseContext(), "Cannot post an empty image!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getBaseContext(), "Load in your image!", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -109,21 +109,47 @@ public class FishRecognitionActivity extends AppCompatActivity {
 
     }
 
+    public void createLogoutDialog(FirebaseAuth firebaseAuthInstance) {
+        AlertDialog.Builder logoutDialog = new AlertDialog.Builder(FishRecognitionActivity.this);
+        logoutDialog.setMessage("Are you sure you want to sign out?");
+        logoutDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                firebaseAuthInstance.signOut();
+                Intent goBackToLogin = new Intent(getApplicationContext(), LoginActivity.class);
+                startActivity(goBackToLogin);
+                finish();
+            }
+        });
+
+        logoutDialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.cancel();
+            }
+        });
+        logoutDialog.show();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // disable the spinner if the user decides to go back to this activity
+        showSpinnerAndDisableComponents(false);
+    }
+
     private void showSpinnerAndDisableComponents(boolean flag) {
         identifyFishButton.setClickable(!flag);
-        logoutImageButton.setClickable(!flag);
         goBackImageButton.setClickable(!flag);
         fishImageLinearLayout.setEnabled(!flag);
         if(flag) {
             progressSpinnerLayout.setVisibility(View.VISIBLE);
             identifyFishButton.setBackground(null);
             goBackImageButton.setBackground(null);
-            logoutImageButton.setBackground(null);
         } else {
             progressSpinnerLayout.setVisibility(View.INVISIBLE);
             identifyFishButton.setBackground(getDrawable(R.drawable.background_rounded_corners_toggle_5_gray_opacity_30_to_transparent));
             goBackImageButton.setBackground(getDrawable(R.drawable.background_rounded_corners_toggle_5_gray_opacity_25_to_transparent));
-            logoutImageButton.setBackground(getDrawable(R.drawable.background_rounded_corners_toggle_5_gray_opacity_25_to_transparent));
         }
     }
 

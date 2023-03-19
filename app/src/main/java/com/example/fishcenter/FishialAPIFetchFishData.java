@@ -19,6 +19,7 @@ import java.net.ProtocolException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class FishialAPIFetchFishData extends Thread {
     // get the access token to use the Fishial.AI api
@@ -50,7 +51,7 @@ public class FishialAPIFetchFishData extends Thread {
             // ArrayList of Fish objects is created by parsing out the JSON data
             if(fishialImageRecognitionData.getJSONArray("results").length() != 0) {
                 Intent fishRecognisedIntent = new Intent(activity, FishRecognisedActivity.class);
-                ArrayList<Fish> fishes = parseJSONToFishObjectArrayList(fishialImageRecognitionData);
+                HashSet<Fish> fishes = parseJSONToFishObjectArrayList(fishialImageRecognitionData);
                 // New bundle which will be attached to the intent and passed over to the FishRecognisedActivity class
                 Bundle bundle = new Bundle();
                 // since Fish class is serializable we can put in the ArrayList of Fish object into the bundle and give it a key "fishes"
@@ -69,9 +70,9 @@ public class FishialAPIFetchFishData extends Thread {
     }
 
 
-    private ArrayList<Fish> parseJSONToFishObjectArrayList(JSONObject fishData){
+    private HashSet<Fish> parseJSONToFishObjectArrayList(JSONObject fishData){
         try {
-            ArrayList<Fish> fishes = new ArrayList<>();
+            HashSet<Fish> fishes = new HashSet<>();
             // get the species arrayList from fishData (there is one entry for each fish identified in an image)
             for(int i = 0; i < fishData.getJSONArray("results").length(); i++) {
                 JSONObject result = fishData.getJSONArray("results").getJSONObject(i);
@@ -148,7 +149,6 @@ public class FishialAPIFetchFishData extends Thread {
                     ));
                 }
             }
-
             return fishes;
         } catch (JSONException ex) {
             throw new RuntimeException(ex);

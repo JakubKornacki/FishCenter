@@ -1,6 +1,7 @@
 package com.example.fishcenter;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -19,6 +20,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.PickVisualMediaRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
@@ -119,8 +121,6 @@ public class CreatePost extends AppCompatActivity {
 
         final ActivityResultLauncher<PickVisualMediaRequest> pickMedia = registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), uri -> {
             if(uri != null) {
-                this.userMediaUri = null;
-                this.mimeType = null;
                 userImageView.setVisibility(View.GONE);
                 userVideoView.setVisibility(View.GONE);
                 String mimeType = MediaUtilities.extractMediaMimeType(uri, getContentResolver());
@@ -143,6 +143,8 @@ public class CreatePost extends AppCompatActivity {
                 mediaSelected = true;
             } else {
                 mediaSelected = false;
+                this.userMediaUri = null;
+                this.mimeType = null;
             }
         });
 
@@ -183,7 +185,7 @@ public class CreatePost extends AppCompatActivity {
         });
     }
 
-    private void startMainActivity(LocalPost localPost) {
+    private void returnNewPostToMainActivity(LocalPost localPost) {
         Intent mainPage = new Intent();
         setResult(Activity.RESULT_OK, mainPage);
         mainPage.putExtra("localPost", localPost);
@@ -237,7 +239,7 @@ public class CreatePost extends AppCompatActivity {
 
                 // create a local copy of the post
                 LocalPost localPost = new LocalPost(postTitle, postBody, userProfilePicture, userNickname, postUploadDate, "0", String.valueOf(userMediaUri), mimeType, uniquePostRef, currentUserId, null);
-                startMainActivity(localPost);
+                returnNewPostToMainActivity(localPost);
             }
         });
     }

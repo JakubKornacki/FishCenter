@@ -1,5 +1,6 @@
 package com.example.fishcenter;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.Image;
 import android.media.MediaPlayer;
@@ -12,6 +13,7 @@ import android.widget.MediaController;
 import android.widget.VideoView;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -51,11 +53,30 @@ public class PlayVideoActivity extends AppCompatActivity {
         logoutImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                firebaseAuth.signOut();
+                createLogoutDialog(firebaseAuth);
+            }
+        });
+    }
+
+    public void createLogoutDialog(FirebaseAuth firebaseAuthInstance) {
+        AlertDialog.Builder logoutDialog = new AlertDialog.Builder(PlayVideoActivity.this);
+        logoutDialog.setMessage("Are you sure you want to sign out?");
+        logoutDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                firebaseAuthInstance.signOut();
                 Intent goBackToLogin = new Intent(getApplicationContext(), LoginActivity.class);
                 startActivity(goBackToLogin);
                 finish();
             }
         });
+
+        logoutDialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.cancel();
+            }
+        });
+        logoutDialog.show();
     }
 }

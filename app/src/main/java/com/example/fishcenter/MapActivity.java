@@ -91,10 +91,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         logoutImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                firebaseAuth.signOut();
-                Intent loginActivity = new Intent(getApplicationContext(), LoginActivity.class);
-                startActivity(loginActivity);
-                finish();
+                createLogoutDialog(firebaseAuth);
             }
         });
 
@@ -120,23 +117,41 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     }
 
+    public void createLogoutDialog(FirebaseAuth firebaseAuthInstance) {
+        AlertDialog.Builder logoutDialog = new AlertDialog.Builder(MapActivity.this);
+        logoutDialog.setMessage("Are you sure you want to sign out?");
+        logoutDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                firebaseAuthInstance.signOut();
+                Intent goBackToLogin = new Intent(getApplicationContext(), LoginActivity.class);
+                startActivity(goBackToLogin);
+                finish();
+            }
+        });
+
+        logoutDialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.cancel();
+            }
+        });
+        logoutDialog.show();
+    }
+
     private void showSpinnerAndDisableComponents(boolean flag) {
         syncRoomWithFirestoreButton.setClickable(!flag);
-        logoutImageButton.setClickable(!flag);
         goBackImageButton.setClickable(!flag);
         if(flag) {
             progressSpinnerLayout.setVisibility(View.VISIBLE);
             syncRoomWithFirestoreButton.setBackground(null);
             goBackImageButton.setBackground(null);
-            logoutImageButton.setBackground(null);
         } else {
             progressSpinnerLayout.setVisibility(View.INVISIBLE);
             syncRoomWithFirestoreButton.setBackground(getDrawable(R.drawable.background_rounded_corners_toggle_5_gray_opacity_25_to_transparent));
             goBackImageButton.setBackground(getDrawable(R.drawable.background_rounded_corners_toggle_5_gray_opacity_25_to_transparent));
-            logoutImageButton.setBackground(getDrawable(R.drawable.background_rounded_corners_toggle_5_gray_opacity_25_to_transparent));
         }
     }
-
 
     @SuppressLint("PotentialBehaviorOverride")
     @Override
@@ -248,7 +263,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             }
         });
     }
-    
 
     private void reviewLocation(LatLng position) {
         AlertDialog.Builder reviewLocationDialogBuilder = new AlertDialog.Builder(MapActivity.this);
@@ -476,4 +490,5 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             }
         });
     }
+
 }

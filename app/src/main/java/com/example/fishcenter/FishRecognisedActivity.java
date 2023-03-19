@@ -1,5 +1,6 @@
 package com.example.fishcenter;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.SpannableStringBuilder;
@@ -12,10 +13,12 @@ import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.text.HtmlCompat;
@@ -26,14 +29,15 @@ import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 
 public class FishRecognisedActivity extends AppCompatActivity {
-    private ArrayList<Fish> fishes;
+    private HashSet<Fish> fishes;
     private LinearLayout linearLayoutInsideScrollView;
-    private Button backToMainMenuButton;
+    private LinearLayout backToMainMenuButtonLayout;
     private ImageButton goBackImageButton;
     private ImageButton logoutImageButton;
-    private FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+    private final FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -51,9 +55,7 @@ public class FishRecognisedActivity extends AppCompatActivity {
         logoutImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                firebaseAuth.signOut();
-                Intent loginActivity = new Intent(getApplicationContext(), LoginActivity.class);
-                startActivity(loginActivity);
+                createLogoutDialog(firebaseAuth);
             }
         });
 
@@ -62,23 +64,22 @@ public class FishRecognisedActivity extends AppCompatActivity {
         // https://stackoverflow.com/questions/13601883/how-to-pass-arraylist-of-objects-from-one-to-another-activity-using-intent-in-an
         Bundle packagedBundle = getIntent().getBundleExtra("bundle");
         // extract fishes ArrayList out from the bundle
-        fishes = (ArrayList<Fish>) packagedBundle.getSerializable("fishes");
+        fishes = (HashSet<Fish>) packagedBundle.getSerializable("fishes");
         linearLayoutInsideScrollView = findViewById(R.id.linearLayoutInsideScrollView);
 
-        // store unique fishes only
-        HashSet<Fish> fishesDisplayed = new HashSet<>();
         // iterate through the returned fishes and append non-duplicates to linear layout
-        for(int i = 0; i < fishes.size(); i++) {
-            Fish fish = fishes.get(i);
-            if(fishesDisplayed.add(fish)) {
-                LinearLayout table = drawResultsTable(fishes.get(i));
-                linearLayoutInsideScrollView.addView(table);
-            }
+        Iterator<Fish> fishesIterator = fishes.iterator();
+        while(fishesIterator.hasNext()) {
+            Fish fish = fishesIterator.next();
+            LinearLayout table = drawResultsTable(fish);
+            linearLayoutInsideScrollView.addView(table);
         }
-        backToMainMenuButton = createBackToMainMenuButton();
-        linearLayoutInsideScrollView.addView(backToMainMenuButton);
 
-        backToMainMenuButton.setOnClickListener(view ->  {
+        // iterate through the returned fishes and append non-duplicates to linear layout
+        backToMainMenuButtonLayout = createBackToMainMenuLayout(linearLayoutInsideScrollView);
+        linearLayoutInsideScrollView.addView(backToMainMenuButtonLayout);
+
+        backToMainMenuButtonLayout.getChildAt(0).setOnClickListener(view ->  {
             Intent mainMenuActivity = new Intent(getApplicationContext(), MainPageActivity.class);
             // if a main activity already exists in the activity stack then bring back that activity
             // with all its existing data to the user and clear also remove all activities from the stack
@@ -90,19 +91,46 @@ public class FishRecognisedActivity extends AppCompatActivity {
         });
     }
 
-    private Button createBackToMainMenuButton() {
+    public void createLogoutDialog(FirebaseAuth firebaseAuthInstance) {
+        AlertDialog.Builder logoutDialog = new AlertDialog.Builder(FishRecognisedActivity.this);
+        logoutDialog.setMessage("Are you sure you want to sign out?");
+        logoutDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                firebaseAuthInstance.signOut();
+                Intent goBackToLogin = new Intent(getApplicationContext(), LoginActivity.class);
+                startActivity(goBackToLogin);
+                finish();
+            }
+        });
+
+        logoutDialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.cancel();
+            }
+        });
+        logoutDialog.show();
+    }
+
+    private LinearLayout createBackToMainMenuLayout(View parentView) {
         Context con = getApplicationContext();
+        LinearLayout linearLayout = new LinearLayout(con);
+        linearLayout.setLayoutParams(parentView.getLayoutParams());
+        linearLayout.setBackgroundColor(getColor(R.color.ordinaryButtonColor));
         Button backToMainMenuButton = new Button(con);
-        backToMainMenuButton.setLayoutParams(linearLayoutInsideScrollView.getLayoutParams());
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        backToMainMenuButton.setLayoutParams(layoutParams);
         // https://stackoverflow.com/a/32202256 getColor() method is deprecated as of API 23
         // another way to get color from resources is to use ContextCompat.getColor(context, R.color.color_name)
         // by passing in the application context along with the resource id of the wanted colour
-        backToMainMenuButton.setBackgroundColor(ContextCompat.getColor(con, R.color.ordinaryButtonColor));
+        backToMainMenuButton.setBackground(getDrawable(R.drawable.background_rounded_corners_toggle_5_gray_opacity_30_to_transparent));
         backToMainMenuButton.setMinHeight(48);
         backToMainMenuButton.setText(getText(R.string.backToMainMenu));
         backToMainMenuButton.setTextColor(getColor(R.color.white));
         backToMainMenuButton.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
-        return backToMainMenuButton;
+        linearLayout.addView(backToMainMenuButton);
+        return linearLayout;
     }
 
 
@@ -355,7 +383,7 @@ public class FishRecognisedActivity extends AppCompatActivity {
     }
 
     private String predAccurString(float predAccuracy) {
-        return Float.toString(predAccuracy * 100) + " %";
+        return predAccuracy * 100 + " %";
     }
 
 

@@ -1,6 +1,7 @@
 package com.example.fishcenter;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -10,6 +11,7 @@ import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -92,10 +94,7 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
         logoutImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                firebaseAuth.signOut();
-                Intent loginActivity = new Intent(getApplicationContext(), LoginActivity.class);
-                startActivity(loginActivity);
-                finish();
+                createLogoutDialog(firebaseAuth);
             }
         });
 
@@ -139,23 +138,42 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
 
     private void showSpinnerAndDisableComponents(boolean flag) {
         reloadPostsButton.setClickable(!flag);
-        logoutImageButton.setClickable(!flag);
         fishRecognitionButton.setClickable(!flag);
         googleMapsButton.setClickable(!flag);
         createPostButton.setClickable(!flag);
         if(flag) {
             progressSpinnerLayout.setVisibility(View.VISIBLE);
             reloadPostsButton.setBackground(null);
-            logoutImageButton.setBackground(null);
             fishRecognitionButton.setBackground(null);
             googleMapsButton.setBackground(null);
         } else {
             progressSpinnerLayout.setVisibility(View.INVISIBLE);
             reloadPostsButton.setBackground(getDrawable(R.drawable.background_rounded_corners_toggle_5_gray_opacity_25_to_transparent));
-            logoutImageButton.setBackground(getDrawable(R.drawable.background_rounded_corners_toggle_5_gray_opacity_25_to_transparent));
             fishRecognitionButton.setBackground(getDrawable(R.drawable.background_rounded_corners_toggle_5_gray_opacity_30_to_transparent));
             googleMapsButton.setBackground(getDrawable(R.drawable.background_rounded_corners_toggle_5_gray_opacity_30_to_transparent));
         }
+    }
+
+    public void createLogoutDialog(FirebaseAuth firebaseAuthInstance) {
+        AlertDialog.Builder logoutDialog = new AlertDialog.Builder(MainPageActivity.this);
+        logoutDialog.setMessage("Are you sure you want to sign out?");
+        logoutDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                firebaseAuthInstance.signOut();
+                Intent goBackToLogin = new Intent(getApplicationContext(), LoginActivity.class);
+                startActivity(goBackToLogin);
+                finish();
+            }
+        });
+
+        logoutDialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.cancel();
+            }
+        });
+        logoutDialog.show();
     }
 
     @Override
