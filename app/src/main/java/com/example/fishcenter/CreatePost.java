@@ -238,7 +238,7 @@ public class CreatePost extends AppCompatActivity {
                 firestore.collection("posts").document(uniquePostRef).update(post);
 
                 // create a local copy of the post
-                LocalPost localPost = new LocalPost(postTitle, postBody, userProfilePicture, userNickname, postUploadDate, "0", String.valueOf(userMediaUri), mimeType, uniquePostRef, currentUserId, null);
+                LocalPost localPost = new LocalPost(postTitle, postBody, userProfilePicture, userNickname, postUploadDate, "0", String.valueOf(userMediaUri), mimeType, uniquePostRef, currentUserId, null, null);
                 returnNewPostToMainActivity(localPost);
             }
         });

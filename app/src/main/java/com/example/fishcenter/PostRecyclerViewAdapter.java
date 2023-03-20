@@ -65,7 +65,6 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
         holder.likesButton.setImageResource(R.drawable.ic_baseline_thumb_up_24_white);
         holder.dislikesButton.setImageResource(R.drawable.ic_baseline_thumb_down_24_white);
         holder.postLikes.setText(posts.get(position).getNumLikes());
-
     }
 
 

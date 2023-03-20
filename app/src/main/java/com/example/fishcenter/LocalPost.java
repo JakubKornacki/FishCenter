@@ -15,8 +15,8 @@ public class LocalPost implements Serializable {
     private String uniquePostRef;
     private String userId;
     private ArrayList<String> postLikedBy;
-
-    public LocalPost(String title, String body, byte[] profilePhoto, String nickname, String postUploadDate, String numLikes, String media, String mimeType, String uniquePostRef, String userId, ArrayList<String> postLikedBy) {
+    private ArrayList<String> postDislikedBy;
+    public LocalPost(String title, String body, byte[] profilePhoto, String nickname, String postUploadDate, String numLikes, String media, String mimeType, String uniquePostRef, String userId, ArrayList<String> postLikedBy, ArrayList<String> postDislikedBy) {
         this.title = title;
         this.body = body;
         this.profilePhoto = profilePhoto;
@@ -28,6 +28,7 @@ public class LocalPost implements Serializable {
         this.uniquePostRef = uniquePostRef;
         this.userId = userId;
         this.postLikedBy = postLikedBy;
+        this.postDislikedBy = postDislikedBy;
     }
 
     public String getTitle() {
@@ -78,6 +79,10 @@ public class LocalPost implements Serializable {
 
     public ArrayList<String> getPostLikedBy() {
         return postLikedBy;
+    }
+
+    public ArrayList<String> getPostDislikedBy() {
+        return postDislikedBy;
     }
 
 }

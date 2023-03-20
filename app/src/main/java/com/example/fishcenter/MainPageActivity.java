@@ -195,7 +195,8 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
                     localPost.getMimeType(),
                     localPost.getUniquePostRef(),
                     currentUserId,
-                    localPost.getPostLikedBy()
+                    localPost.getPostLikedBy(),
+                    localPost.getPostDislikedBy()
             );
             // add this post to posts and re-sort them
             posts.add(newPost);
@@ -236,7 +237,7 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
     private int calculateTotalLikes(ArrayList<String> likesList, ArrayList<String> dislikesList) {
         int totalLikes = 0;
         if(likesList != null && dislikesList != null) {
-            totalLikes = likesList.size() - dislikesList.size();
+            totalLikes = likesList.size() + (dislikesList.size() * -1);
         } else if (likesList != null) {
             totalLikes = likesList.size();
         } else if(dislikesList != null) {
@@ -384,6 +385,7 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
                     String userId = post.getString("userId");
                     String uniquePostRef = post.getId();
                     ArrayList<String> postLikedBy = (ArrayList<String>) post.get("likedBy");
+                    ArrayList<String> postDislikedBy = (ArrayList<String>) post.get("dislikedBy");
                     // get media from firestore cloud if exists then create an PostModel object  with media otherwise set media to null
                     StorageReference storageRefMedia = firebaseStorage.getReference().child("/postMedia/" + post.getId());
                     storageRefMedia.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
@@ -393,14 +395,14 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
                             String uriMedia = String.valueOf(uri);
                             String mimeType = post.get("mimeType").toString();
                             // add on the media, profile picture and metadata along with standard post components
-                            PostModel post = new PostModel(getApplicationContext(), title, body, userProfilePic, nickname, postUploadDate, likes, uriMedia, mimeType, uniquePostRef, userId, postLikedBy);
+                            PostModel post = new PostModel(getApplicationContext(), title, body, userProfilePic, nickname, postUploadDate, likes, uriMedia, mimeType, uniquePostRef, userId, postLikedBy, postDislikedBy);
                             posts.add(post);
                         }
                     }).addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
                             // the post did not have any media associated with it and profile picture is fetched below
-                            PostModel post = new PostModel(getApplicationContext(), title, body, userProfilePic, nickname, postUploadDate, likes, null, null, uniquePostRef, userId, postLikedBy);
+                            PostModel post = new PostModel(getApplicationContext(), title, body, userProfilePic, nickname, postUploadDate, likes, null, null, uniquePostRef, userId, postLikedBy, postDislikedBy);
                             posts.add(post);
                         }
                     });
