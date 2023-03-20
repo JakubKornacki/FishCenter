@@ -223,42 +223,91 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
 
     // handle on-clicks for like buttons
     @Override
-    public void onClickLikeButton(int position) {
-        ArrayList<String> listOfUsers = updateLocalLikedByList(position);
-        updateFirestoreLikedByList(position, listOfUsers);
-        updateFirestoreNumLikes(position, listOfUsers);
+    public void onClickEitherLikeButton(int position, int resCalled) {
+        ArrayList<ArrayList<String>> lists = updateLocalLikesLists(position, resCalled);
+        updateFirestoreLikedByList(position, lists.get(0));
+        updateFirestoreDislikedByList(position, lists.get(1));
+        int totalLikes = calculateTotalLikes(lists.get(0), lists.get(1));
+        updateFirestoreNumLikes(position, totalLikes);
+        posts.get(position).setNumLikes(totalLikes);
+        adapter.notifyDataSetChanged();
     }
 
-    private void updateFirestoreNumLikes(int position, ArrayList<String> listOfUsers) {
+    private int calculateTotalLikes(ArrayList<String> likesList, ArrayList<String> dislikesList) {
+        int totalLikes = 0;
+        if(likesList != null && dislikesList != null) {
+            totalLikes = likesList.size() - dislikesList.size();
+        } else if (likesList != null) {
+            totalLikes = likesList.size();
+        } else if(dislikesList != null) {
+            totalLikes = dislikesList.size() * -1;
+        }
+        return totalLikes;
+    }
+
+    private void updateFirestoreNumLikes(int position, int numLikes) {
         String uniquePostRef = posts.get(position).getUniquePostRef();
         Map<String, Object> numLikesMap = new HashMap<>();
-        numLikesMap.put("likes", listOfUsers.size());
+        numLikesMap.put("likes", numLikes);
         firestore.collection("posts").document(uniquePostRef).update(numLikesMap);
     }
 
-    private ArrayList<String> updateLocalLikedByList(int position) {
-        ArrayList<String> listOfUsers = posts.get(position).getPostLikedBy();
-        if (listOfUsers == null) {
-            listOfUsers = new ArrayList<>(Arrays.asList(currentUserId));
-        } else if (listOfUsers.contains(currentUserId)) {
-            listOfUsers.remove(currentUserId);
-        } else {
-            listOfUsers.add(currentUserId);
+
+    private ArrayList<ArrayList<String>> updateLocalLikesLists(int position, int resCalled) {
+        ArrayList<String> listOfUsersLiking = posts.get(position).getPostLikedBy();
+        ArrayList<String> listOfUsersDisliking = posts.get(position).getPostDislikedBy();
+
+        if(resCalled == R.id.likesButton) {
+            if (listOfUsersLiking == null) {
+                listOfUsersLiking = new ArrayList<>(Arrays.asList(currentUserId));
+            } else if (listOfUsersLiking.contains(currentUserId)) {
+                listOfUsersLiking.remove(currentUserId);
+            } else {
+                listOfUsersLiking.add(currentUserId);
+            }
+            if(listOfUsersDisliking != null) {
+                if (listOfUsersDisliking.contains(currentUserId)) {
+                    listOfUsersDisliking.remove(currentUserId);
+                }
+            }
+        } else if (resCalled == R.id.dislikesButton) {
+            if (listOfUsersDisliking == null) {
+                listOfUsersDisliking = new ArrayList<>(Arrays.asList(currentUserId));
+            } else if (listOfUsersDisliking.contains(currentUserId)) {
+                listOfUsersDisliking.remove(currentUserId);
+            } else {
+                listOfUsersDisliking.add(currentUserId);
+            }
+            if(listOfUsersLiking != null) {
+                if (listOfUsersLiking.contains(currentUserId)) {
+                    listOfUsersLiking.remove(currentUserId);
+                }
+            }
         }
+
         // local update
-        posts.get(position).setPostLikedBy(listOfUsers);
-        posts.get(position).setNumLikes(listOfUsers.size());
-        adapter.notifyDataSetChanged();
-        return listOfUsers;
+        posts.get(position).setPostLikedBy(listOfUsersLiking);
+        posts.get(position).setPostDislikedBy(listOfUsersDisliking);
+        // arraylist containing the lists
+        ArrayList<ArrayList<String>> lists = new ArrayList<>();
+        lists.add(listOfUsersLiking);
+        lists.add(listOfUsersDisliking);
+        return lists;
     }
 
-    private void updateFirestoreLikedByList(int position, ArrayList<String> listOfUsers) {
+    private void updateFirestoreLikedByList(int position, ArrayList<String> listOfUsersLiking) {
         String uniquePostRef = posts.get(position).getUniquePostRef();
-        Map<String, Object> listOfUsersMap = new HashMap<>();
-        listOfUsersMap.put("likedBy", listOfUsers);
-        firestore.collection("posts").document(uniquePostRef).update(listOfUsersMap);
+        Map<String, Object> listOfUsersLikingMap = new HashMap<>();
+        listOfUsersLikingMap.put("likedBy", listOfUsersLiking);
+        firestore.collection("posts").document(uniquePostRef).update(listOfUsersLikingMap);
     }
 
+    private void updateFirestoreDislikedByList(int position, ArrayList<String> listOfUsersDisliking) {
+        String uniquePostRef = posts.get(position).getUniquePostRef();
+        Map<String, Object> listOfUsersDislikingMap = new HashMap<>();
+        listOfUsersDislikingMap.put("dislikedBy", listOfUsersDisliking);
+        firestore.collection("posts").document(uniquePostRef).update(listOfUsersDislikingMap);
+    }
 
     private void waitForDataFromFirebaseAndCloudStorage() {
         new Thread() {

@@ -126,29 +126,43 @@
                 app:layout_constraintTop_toBottomOf="parent">
             </ImageView>
             </LinearLayout>
+
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 app:layout_constraintTop_toBottomOf="@+id/mediaLayout"
-                app:layout_constraintStart_toStartOf="parent">
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
 
-            <LinearLayout
-                android:id="@+id/linearLayoutButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:background="@drawable/rounded_corners_10_ordinary_button_color"
-                android:orientation="horizontal">
-                <ImageView
-                    android:id="@+id/likesButton"
-                    android:layout_width="120dp"
-                    android:layout_height="48dp"
-                    android:background="@drawable/background_rounded_corners_toggle_5_gray_opacity_30_to_transparent"
-                    android:contentDescription="Button for clicking likes"
-                    app:srcCompat="@drawable/ic_baseline_thumb_up_24_white">
-                </ImageView>
-            </LinearLayout>
+                    <LinearLayout
+                        android:id="@+id/linearLayoutLikesButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:background="@drawable/rounded_corners_10_ordinary_button_color"
+                        android:orientation="horizontal">
+                        <ImageView
+                            android:id="@+id/likesButton"
+                            android:layout_width="120dp"
+                            android:layout_height="48dp"
+                            android:background="@drawable/background_rounded_corners_toggle_5_gray_opacity_30_to_transparent"
+                            android:contentDescription="Button for clicking likes"
+                            app:srcCompat="@drawable/ic_baseline_thumb_up_24_white">
+                        </ImageView>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1">
+                </View>
+
                 <TextView
                     android:id="@+id/postLikes"
                     android:layout_width="wrap_content"
@@ -156,13 +170,38 @@
                     android:text="0"
                     android:textSize="15sp"
                     android:textStyle="bold"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginLeft="10dp"
+                    android:layout_gravity="center"
                     app:layout_constraintLeft_toRightOf="@id/likesButton">
                 </TextView>
-        </LinearLayout>
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1">
+                </View>
 
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
 
+                    <LinearLayout
+                        android:id="@+id/linearLayoutDislikesButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:background="@drawable/rounded_corners_10_ordinary_button_color"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:id="@+id/dislikesButton"
+                            android:layout_width="120dp"
+                            android:layout_height="48dp"
+                            android:background="@drawable/background_rounded_corners_toggle_5_gray_opacity_30_to_transparent"
+                            android:contentDescription="Button for clicking likes"
+                            app:srcCompat="@drawable/ic_baseline_thumb_down_24_white"></ImageView>
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

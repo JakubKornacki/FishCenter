@@ -45,7 +45,6 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
         holder.userNickname.setText(posts.get(position).getNickname());
         holder.datePosted.setText(posts.get(position).getDatePosted());
         holder.postTitle.setText(posts.get(position).getTitle());
-
         if(posts.get(position).getMedia() != null) {
             Uri uri = Uri.parse(posts.get(position).getMedia());
             String mimeType = posts.get(position).getMimeType();
@@ -62,9 +61,11 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
                 }
             }
         }
-        holder.likesButton.setImageResource(R.drawable.ic_baseline_thumb_up_24_white);
         holder.postBody.setText(posts.get(position).getBody());
+        holder.likesButton.setImageResource(R.drawable.ic_baseline_thumb_up_24_white);
+        holder.dislikesButton.setImageResource(R.drawable.ic_baseline_thumb_down_24_white);
         holder.postLikes.setText(posts.get(position).getNumLikes());
+
     }
 
 
@@ -84,6 +85,7 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
         private TextView postBody;
         private ImageView likesButton;
         private TextView postLikes;
+        private ImageView dislikesButton;
         private OnClickListener listener;
 
         public PostViewHolder(@NonNull View itemView, OnClickListener listener) {
@@ -97,11 +99,13 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
             postBody = itemView.findViewById(R.id.postBody);
             likesButton = itemView.findViewById(R.id.likesButton);
             postLikes = itemView.findViewById(R.id.postLikes);
+            dislikesButton = itemView.findViewById(R.id.dislikesButton);
             // reference to the MainPageActivity class in which the on-clicks will be handled
             this.listener = listener;
             // listen for on-click the video thumbnail and likes button
             postVideoThumbnail.setOnClickListener(this);
             likesButton.setOnClickListener(this);
+            dislikesButton.setOnClickListener(this);
         }
         @Override
         public void onClick(View view) {
@@ -109,8 +113,8 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
             // if the view clicked is an image
             if(view.getId() == R.id.postVideoThumbnail) {
                 listener.onClickVideoThumbnail(position);
-            } else if(view.getId() == R.id.likesButton) {
-                listener.onClickLikeButton(position);
+            } else if(view.getId() == R.id.likesButton || view.getId() == R.id.dislikesButton) {
+                listener.onClickEitherLikeButton(position, view.getId());
             }
         }
 

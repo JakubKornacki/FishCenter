@@ -23,6 +23,7 @@ public class PostModel extends RecyclerView implements Serializable {
     private String uniquePostRef;
     private String userId;
     private ArrayList<String> postLikedBy;
+    private ArrayList<String> postDislikedBy;
 
     public PostModel(@NonNull Context context) {
         super(context);
@@ -81,15 +82,14 @@ public class PostModel extends RecyclerView implements Serializable {
     public ArrayList<String> getPostLikedBy() {
         return postLikedBy;
     }
+    public ArrayList<String> getPostDislikedBy() {return postDislikedBy;}
 
     public void setPostLikedBy(ArrayList<String> postLikedBy) {
         this.postLikedBy = postLikedBy;
     }
 
-    public String getUserId() {
-        return userId;
-    }
-
+    public void setPostDislikedBy(ArrayList<String> postDislikedBy) {this.postDislikedBy = postDislikedBy;}
+    public String getUserId() {return userId;}
     public String getUniquePostRef() {
         return uniquePostRef;
     }
@@ -116,11 +116,9 @@ public class PostModel extends RecyclerView implements Serializable {
     public String getDatePosted() {
         return postUploadDate;
     }
-
     public String getNumLikes() {
         return numLikes;
     }
-
     public String getMedia() {
         return media;
     }
