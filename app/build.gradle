@@ -59,9 +59,6 @@ dependencies {
     // When using the BoM, don't specify versions in Firebase dependencies
     implementation 'com.google.firebase:firebase-analytics'
 
-    // DroidsOnRoids for displaying gifs in the application
-    implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.25'
-
     // Google Maps
     implementation 'com.google.android.gms:play-services-maps:18.1.0'
     // utilities for google maps, will use ClusterItem interface to define items that can be clustered on a map

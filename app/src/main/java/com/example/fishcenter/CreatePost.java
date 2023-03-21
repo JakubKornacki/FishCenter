@@ -45,7 +45,7 @@ public class CreatePost extends AppCompatActivity {
 
     private EditText postEditText;
     private EditText postTitleEditText;
-    private InputMethodManager keyboard;
+
     private VideoView userVideoView;
     private MediaController mediaController;
     private FirebaseStorage firebaseStorage = FirebaseStorage.getInstance();
@@ -93,6 +93,10 @@ public class CreatePost extends AppCompatActivity {
                 boolean postTitleValidated = postTitleValidated(postTitle);
                 // post needs to have body and title other media is optional
                 if (postValidated && postTitleValidated) {
+                    if(userMediaUri != null) {
+                        int flag = Intent.FLAG_GRANT_READ_URI_PERMISSION;
+                        getContentResolver().takePersistableUriPermission(userMediaUri, flag);
+                    }
                     savePostInBackend(postBody, postTitle);
                 }
             }

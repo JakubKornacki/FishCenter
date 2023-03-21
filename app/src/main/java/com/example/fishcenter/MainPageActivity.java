@@ -1,5 +1,7 @@
 package com.example.fishcenter;
 
+import static android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION;
+
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -89,7 +91,7 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
         postsRecyclerView.setAdapter(adapter);
 
         // initialise the posts database and the posts dao
-        postsDatabase = Room.databaseBuilder(getApplicationContext(), PostsDatabase.class, "postsDatabase").allowMainThreadQueries().build();
+        postsDatabase = Room.databaseBuilder(getApplicationContext(), PostsDatabase.class, "postsDatabase").fallbackToDestructiveMigration().allowMainThreadQueries().build();
         postsDao = postsDatabase.postsDao();
 
         createPostButton = findViewById(R.id.createPostButton);
@@ -237,35 +239,31 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
     private int[] updateUserLikesLists(int position, String uniquePostRef, int resCalled) {
         int numLikes = Integer.parseInt(posts.get(position).getNumLikes());
         int numDislikes = Integer.parseInt(posts.get(position).getNumDislikes());
-        int like = 0, dislike = 0;
         if(resCalled == R.id.likesButton) {
            if (postsLikedByUser.contains(uniquePostRef)) {
                postsLikedByUser.remove(uniquePostRef);
-               like--;
+               numLikes--;
            } else {
                postsLikedByUser.add(uniquePostRef);
-               like++;
+               numLikes++;
            }
            if (postsDislikedByUser.contains(uniquePostRef)) {
                postsDislikedByUser.remove(uniquePostRef);
-               dislike--;
+               numDislikes--;
            }
         } else if (resCalled == R.id.dislikesButton) {
            if (postsDislikedByUser.contains(uniquePostRef)) {
                postsDislikedByUser.remove(uniquePostRef);
-               dislike--;
+               numDislikes--;
            } else {
                postsDislikedByUser.add(uniquePostRef);
-               dislike++;
+               numDislikes++;
            }
            if (postsLikedByUser.contains(uniquePostRef)) {
                postsLikedByUser.remove(uniquePostRef);
-               like--;
+               numLikes--;
            }
         }
-        // update the totals of likes
-        numLikes += like;
-        numDislikes += dislike;
         return new int[] {numLikes, numDislikes};
     }
 
@@ -443,11 +441,11 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
                             String uriMedia = String.valueOf(uri);
                             String mimeType = post.get("mimeType").toString();
                             // add on the media, profile picture and metadata along with standard post components
-                            LocalPost localPost = new LocalPost(title, body, userProfilePic, nickname, postUploadDate, numLikes, numDislikes, uriMedia, mimeType, uniquePostRef, userId);
+                            LocalPost newLocalPost = new LocalPost(title, body, userProfilePic, nickname, postUploadDate, numLikes, numDislikes, uriMedia, mimeType, uniquePostRef, userId);
                             if (postsDao.findLocalPostByUniqueRef(uniquePostRef) == null) {
-                                postsDao.addLocalPost(localPost);
+                                postsDao.addLocalPost(newLocalPost);
                             } else {
-                                postsDao.updateLocalPost(localPost);
+                                postsDao.updateLocalPost(newLocalPost);
                             }
 
                         }
@@ -456,11 +454,11 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
                         public void onFailure(@NonNull Exception e) {
                             postsLoaded++;
                             // the post did not have any media associated with it and profile picture is fetched below
-                            LocalPost localPost = new LocalPost(title, body, userProfilePic, nickname, postUploadDate, numLikes, numDislikes, null, null, uniquePostRef, userId);
+                            LocalPost newLocalPost = new LocalPost(title, body, userProfilePic, nickname, postUploadDate, numLikes, numDislikes, null,null, uniquePostRef, userId);
                             if (postsDao.findLocalPostByUniqueRef(uniquePostRef) == null) {
-                                postsDao.addLocalPost(localPost);
+                                postsDao.addLocalPost(newLocalPost);
                             } else {
-                                postsDao.updateLocalPost(localPost);
+                                postsDao.updateLocalPost(newLocalPost);
                             }
                         }
                     });

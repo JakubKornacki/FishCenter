@@ -10,12 +10,13 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.MediaController;
 import android.widget.VideoView;
-
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.google.firebase.auth.FirebaseAuth;
+
+import java.io.File;
+
 
 public class PlayVideoActivity extends AppCompatActivity {
 
@@ -23,12 +24,14 @@ public class PlayVideoActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_play_video);
-        Uri videoUri = Uri.parse(getIntent().getExtras().getString("video"));
+
         VideoView videoView = findViewById(R.id.videoView);
-        MediaController mediaController = new MediaController(PlayVideoActivity.this);
+        Uri videoUri = Uri.parse(getIntent().getExtras().getString("video"));
         videoView.setVideoURI(videoUri);
+        MediaController mediaController = new MediaController(PlayVideoActivity.this);
         videoView.setMediaController(mediaController);
         mediaController.setAnchorView(videoView);
+
         ImageButton goBackImageButton = findViewById(R.id.goBackImageButton);
         ImageButton logoutImageButton = findViewById(R.id.logoutImageButton);
         FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
