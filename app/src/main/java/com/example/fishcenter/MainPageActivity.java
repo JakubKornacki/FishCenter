@@ -66,6 +66,7 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
     private boolean syncOver = true;
     private ArrayList<String> postsLikedByUser;
     private ArrayList<String> postsDislikedByUser;
+    private boolean userDataLoaded = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -221,9 +222,13 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
         // local recycler view update
         posts.get(position).setNumLikes(totalLikesArray[0]);
         posts.get(position).setNumDislikes(totalLikesArray[1]);
+
+        updatePostNumLikesFirestore(uniquePostRef, totalLikesArray[0]);
+        updatePostNumDislikesFirestore(uniquePostRef, totalLikesArray[1]);
+
         // firebase update user lists
-        updateUserPostsLikedListFirestore(uniquePostRef, postsLikedByUser);
-        updateUserPostsDislikedListFirestore(uniquePostRef, postsDislikedByUser);
+        updateUserPostsLikedListFirestore(postsLikedByUser);
+        updateUserPostsDislikedListFirestore(postsDislikedByUser);
         // update room database
         updateLocalPostInRoomDatabase(uniquePostRef, totalLikesArray[0], totalLikesArray[1]);
         adapter.notifyDataSetChanged();
@@ -232,9 +237,7 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
     private int[] updateUserLikesLists(int position, String uniquePostRef, int resCalled) {
         int numLikes = Integer.parseInt(posts.get(position).getNumLikes());
         int numDislikes = Integer.parseInt(posts.get(position).getNumDislikes());
-        int like = 0;
-        int dislike = 0;
-
+        int like = 0, dislike = 0;
         if(resCalled == R.id.likesButton) {
            if (postsLikedByUser.contains(uniquePostRef)) {
                postsLikedByUser.remove(uniquePostRef);
@@ -243,11 +246,9 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
                postsLikedByUser.add(uniquePostRef);
                like++;
            }
-            updatePostNumLikesFirestore(uniquePostRef, like);
            if (postsDislikedByUser.contains(uniquePostRef)) {
                postsDislikedByUser.remove(uniquePostRef);
                dislike--;
-               updatePostNumDislikesFirestore(uniquePostRef, dislike);
            }
         } else if (resCalled == R.id.dislikesButton) {
            if (postsDislikedByUser.contains(uniquePostRef)) {
@@ -257,11 +258,9 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
                postsDislikedByUser.add(uniquePostRef);
                dislike++;
            }
-            updatePostNumDislikesFirestore(uniquePostRef, dislike);
            if (postsLikedByUser.contains(uniquePostRef)) {
                postsLikedByUser.remove(uniquePostRef);
                like--;
-               updatePostNumLikesFirestore(uniquePostRef, like);
            }
         }
         // update the totals of likes
@@ -278,39 +277,24 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
     }
 
     private void updatePostNumLikesFirestore(String uniquePostRef, int numLikes) {
-        firestore.collection("posts").document(uniquePostRef).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                Long likesFromFirestore = (Long) documentSnapshot.get("likes");
-                likesFromFirestore += numLikes;
-                Map<String, Object> numLikesMap = new HashMap<>();
-                numLikesMap.put("likes", likesFromFirestore);
-                firestore.collection("posts").document(uniquePostRef).update(numLikesMap);
-            }
-        });
-
+        Map<String, Object> numLikesMap = new HashMap<>();
+        numLikesMap.put("likes", numLikes);
+        firestore.collection("posts").document(uniquePostRef).update(numLikesMap);
     }
 
     private void updatePostNumDislikesFirestore(String uniquePostRef, int numDislikes) {
-       firestore.collection("posts").document(uniquePostRef).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-           @Override
-           public void onSuccess(DocumentSnapshot documentSnapshot) {
-               Long dislikesFromFirestore = (Long) documentSnapshot.get("dislikes");
-               dislikesFromFirestore += numDislikes;
-               Map<String, Object> numDislikesMap = new HashMap<>();
-               numDislikesMap.put("dislikes", dislikesFromFirestore);
-               firestore.collection("posts").document(uniquePostRef).update(numDislikesMap);
-           }
-       });
+        Map<String, Object> numDislikesMap = new HashMap<>();
+        numDislikesMap.put("dislikes", numDislikes);
+        firestore.collection("posts").document(uniquePostRef).update(numDislikesMap);
     }
 
-    private void updateUserPostsLikedListFirestore(String uniquePostRef, ArrayList<String> postsLikedByUsers) {
+    private void updateUserPostsLikedListFirestore(ArrayList<String> postsLikedByUsers) {
         Map<String, Object> postLikedByUsersMap = new HashMap<>();
         postLikedByUsersMap.put("postsLiked", postsLikedByUsers);
         firestore.collection("users").document(currentUserId).update(postLikedByUsersMap);
     }
 
-    private void updateUserPostsDislikedListFirestore(String uniquePostRef, ArrayList<String> postsDislikedByUsers) {
+    private void updateUserPostsDislikedListFirestore(ArrayList<String> postsDislikedByUsers) {
         Map<String, Object> postDislikedByUsersMap = new HashMap<>();
         postDislikedByUsersMap.put("postsDisliked", postsDislikedByUsers);
         firestore.collection("users").document(currentUserId).update(postDislikedByUsersMap);
@@ -330,7 +314,7 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
                     try {
                         Thread.sleep(50);
                         // if both are fetched update the ui with the runOnUiThread by hiding the spinner and brining back interactivity to components
-                        if(userNickname != null && userProfilePic != null ) {
+                        if(userDataLoaded && userProfilePic != null ) {
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -360,6 +344,7 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
                 if(postsDislikedByUser == null) {
                     postsDislikedByUser = new ArrayList<>();
                 }
+                userDataLoaded = true;
             }
         });
     }
@@ -380,12 +365,10 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
                super.run();
                // get the list of all posts
                List<LocalPost> localPostList = postsDao.getAllLocalPosts();
+               posts.clear();
                for(LocalPost localPost : localPostList) {
                    PostModel recyclerViewPost = new PostModel(getApplicationContext(), localPost.getTitle(), localPost.getBody(), localPost.getProfilePhoto(), localPost.getNickname(), localPost.getPostUploadDate(), localPost.getNumLikes(), localPost.getNumDislikes(), localPost.getMedia(), localPost.getMimeType(), localPost.getUniquePostRef(), localPost.getUserId());
-                   // if this post is not in the list add it to the list
-                   if (posts.stream().noneMatch(post -> post.getUniquePostRef().equals(recyclerViewPost.getUniquePostRef()))) {
-                       posts.add(recyclerViewPost);
-                   }
+                   posts.add(recyclerViewPost);
                }
                runOnUiThread(new Runnable() {
                    @Override
