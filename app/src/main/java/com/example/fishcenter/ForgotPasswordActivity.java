@@ -164,7 +164,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 
 
     private void showSpinnerAndDisableComponents(boolean flag) {
-        emailEditText.setFocusable(!flag);
+        emailEditText.setEnabled(!flag);
         submitButton.setClickable(!flag);
         backToLoginLayout.getChildAt(0).setClickable(!flag);
 

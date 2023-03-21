@@ -79,11 +79,11 @@ public class FishingLocation {
     public void setOverallRating(double overallRating) {
         this.overallRating = overallRating;
     }
-
+    @Nullable
     public void setRatingsList(ArrayList<Double> ratingsList) {
         this.ratingsList = ratingsList;
     }
-
+    @Nullable
     public ArrayList<Double> getRatingsList() {
         return ratingsList;
     }

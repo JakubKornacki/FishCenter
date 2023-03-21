@@ -219,6 +219,7 @@ public class CreatePost extends AppCompatActivity {
         post.put("body", postBody);
         post.put("timestamp", timestamp);
         post.put("likes", 0);
+        post.put("dislikes", 0);
         post.put("userId", currentUserId);
         post.put("nickname", userNickname);
         post.put("mimeType", mimeType);
@@ -238,8 +239,8 @@ public class CreatePost extends AppCompatActivity {
                 firestore.collection("posts").document(uniquePostRef).update(post);
 
                 // create a local copy of the post
-                LocalPost localPost = new LocalPost(postTitle, postBody, userProfilePicture, userNickname, postUploadDate, "0", String.valueOf(userMediaUri), mimeType, uniquePostRef, currentUserId, null, null);
-                returnNewPostToMainActivity(localPost);
+               LocalPost localPost = new LocalPost(postTitle, postBody, userProfilePicture, userNickname, postUploadDate, "0", "0", String.valueOf(userMediaUri), mimeType, uniquePostRef, currentUserId);
+               returnNewPostToMainActivity(localPost);
             }
         });
     }

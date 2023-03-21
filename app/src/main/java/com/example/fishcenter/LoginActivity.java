@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.text.HtmlCompat;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.Spanned;
@@ -34,21 +35,34 @@ public class LoginActivity extends AppCompatActivity {
     private TextView forgotPasswordTextView;
     private LinearLayout mainContentLayout;
     private LinearLayout goToRegisterLayout;
+
+
     // if the user is still authenticated then redirect him to the main page of the application
     @Override
-    protected void onStart( ) {
+    protected void onStart() {
         super.onStart();
-        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
-        if (currentUser != null) {
-            Intent mainPageActivity = new Intent(getApplicationContext(), MainPageActivity.class);
-            startActivity(mainPageActivity);
-        }
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                // wait for 50 milliseconds before executing the transfer to the main activity
+                // this gives time for the login activity to fully load on a cold start
+                // before transferring to the main page and therefor avoids an ugly black screen
+                // on path splash screen -> black screen -> login activity -> main page activity
+                FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+                if (currentUser != null) {
+                    Intent mainPageActivity = new Intent(getApplicationContext(), MainPageActivity.class);
+                    startActivity(mainPageActivity);
+                    finish();
+                }
+            }
+        }, 50);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
         // get references to different components visible on this activity such as editTexts and Buttons
         emailEditText = findViewById(R.id.emailEditText);
         passwordEditText = findViewById(R.id.retypePasswordEditText);
@@ -60,6 +74,7 @@ public class LoginActivity extends AppCompatActivity {
         mainContentLayout = findViewById(R.id.mainContentLayout);
         goToRegisterLayout = createBackToLoginLayout(mainContentLayout);
         mainContentLayout.addView(goToRegisterLayout);
+
 
         // toggle password visibility
         passwordVisibleImageButton.setOnClickListener(view -> togglePasswordVisibilityButton(passwordVisibleImageButton, passwordEditText));
@@ -201,8 +216,8 @@ public class LoginActivity extends AppCompatActivity {
             firebaseAuth.signInWithEmailAndPassword(email, password).addOnFailureListener(this, new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
-                    createErrorAlertDialog("Authentication:", e.getMessage());
                     showSpinnerAndDisableComponents(false);
+                    createErrorAlertDialog("Authentication:", e.getMessage());
                 }
             });
         }
@@ -236,8 +251,8 @@ public class LoginActivity extends AppCompatActivity {
 
 
     private void showSpinnerAndDisableComponents(boolean flag) {
-        emailEditText.setFocusable(!flag);
-        passwordEditText.setFocusable(!flag);
+        emailEditText.setEnabled(!flag);
+        passwordEditText.setEnabled(!flag);
         signInButton.setClickable(!flag);
         forgotPasswordTextView.setFocusable(!flag);
         forgotPasswordTextView.setClickable(!flag);
@@ -264,7 +279,11 @@ public class LoginActivity extends AppCompatActivity {
     // hide the error messages and spinners if were displayed when user decides to go back to this activity
     protected void onResume() {
         super.onResume();
-        showSpinnerAndDisableComponents(false);
+        // hide the spinner only if the user is not logged in
+        // otherwise the spinner should be displayed for 50 milliseconds
+        if(firebaseAuth.getCurrentUser() == null) {
+            showSpinnerAndDisableComponents(false);
+        }
         removeErrorMessages();
         clearEditTexts();
     }

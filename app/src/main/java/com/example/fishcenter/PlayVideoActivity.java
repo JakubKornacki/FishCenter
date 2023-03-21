@@ -2,7 +2,6 @@ package com.example.fishcenter;
 
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.media.Image;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;

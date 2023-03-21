@@ -9,7 +9,7 @@ import java.util.ArrayList;
 // converters class is necessary to instruct the ROOM database how to store data types other than primitives
 // ROOM database can store boxed types, therefore, Double[] values is perfectly valid and is equivalent to double[]
 
-public class Converters {
+public class FishingLocationConverters {
     @TypeConverter
     public ArrayList<Double> fromString(String gsonValues) {
         Gson gson = new Gson();

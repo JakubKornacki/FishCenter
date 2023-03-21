@@ -5,7 +5,7 @@ import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 
 @Database(entities = {FishingLocation.class}, version = 1)
-@TypeConverters ({Converters.class})
+@TypeConverters ({FishingLocationConverters.class})
 public abstract class FishingLocationDatabase extends RoomDatabase {
     public abstract FishingLocationDao fishingLocationDao();
 }

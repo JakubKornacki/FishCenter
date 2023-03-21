@@ -18,12 +18,11 @@ public class PostModel extends RecyclerView implements Serializable {
     private String nickname;
     private String postUploadDate;
     private String numLikes;
+    private String numDislikes;
     private String media;
     private String mimeType;
     private String uniquePostRef;
     private String userId;
-    private ArrayList<String> postLikedBy;
-    private ArrayList<String> postDislikedBy;
 
     public PostModel(@NonNull Context context) {
         super(context);
@@ -37,7 +36,7 @@ public class PostModel extends RecyclerView implements Serializable {
         super(context, attrs, defStyleAttr);
     }
 
-    public PostModel(@NonNull Context context, String title, String body, byte[] profilePhoto, String nickname, String postUploadDate, String numLikes, String media, String mimeType, String uniquePostRef, String userId, ArrayList<String> postLikedBy, ArrayList<String> postDislikedBy) {
+    public PostModel(@NonNull Context context, String title, String body, byte[] profilePhoto, String nickname, String postUploadDate, String numLikes, String numDislikes, String media, String mimeType, String uniquePostRef, String userId) {
         super(context);
         this.title = title;
         this.body = body;
@@ -45,15 +44,14 @@ public class PostModel extends RecyclerView implements Serializable {
         this.nickname = nickname;
         this.postUploadDate = postUploadDate;
         this.numLikes = numLikes;
+        this.numDislikes = numDislikes;
         this.media = media;
         this.mimeType = mimeType;
         this.uniquePostRef = uniquePostRef;
         this.userId = userId;
-        this.postLikedBy = postLikedBy;
-        this.postDislikedBy = postDislikedBy;
     }
 
-    public PostModel(@NonNull Context context, @Nullable AttributeSet attrs, String title, String body, byte[] profilePhoto, String postUploadDate, String nickname, String numLikes, String media, String mimeType, String uniquePostRef, String userId, ArrayList<String> postLikedBy, ArrayList<String> postDislikedBy) {
+    public PostModel(@NonNull Context context, @Nullable AttributeSet attrs, String title, String body, byte[] profilePhoto, String postUploadDate, String nickname, String numLikes, String numDislikes, String media, String mimeType, String uniquePostRef, String userId) {
         super(context, attrs);
         this.title = title;
         this.body = body;
@@ -61,15 +59,14 @@ public class PostModel extends RecyclerView implements Serializable {
         this.nickname = nickname;
         this.postUploadDate = postUploadDate;
         this.numLikes = numLikes;
+        this.numDislikes = numDislikes;
         this.media = media;
         this.mimeType = mimeType;
         this.uniquePostRef = uniquePostRef;
         this.userId = userId;
-        this.postLikedBy = postLikedBy;
-        this.postDislikedBy = postDislikedBy;
     }
 
-    public PostModel(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, String title, String body, byte[] profilePhoto, String nickname, String postUploadDate, String numLikes, String media, String mimeType, String uniquePostRef, String userId, ArrayList<String> postLikedBy, ArrayList<String> postDislikedBy) {
+    public PostModel(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, String title, String body, byte[] profilePhoto, String nickname, String postUploadDate, String numLikes, String numDislikes, String media, String mimeType, String uniquePostRef, String userId) {
         super(context, attrs, defStyleAttr);
         this.title = title;
         this.body = body;
@@ -77,24 +74,13 @@ public class PostModel extends RecyclerView implements Serializable {
         this.nickname = nickname;
         this.postUploadDate = postUploadDate;
         this.numLikes = numLikes;
+        this.numDislikes = numDislikes;
         this.media = media;
         this.mimeType = mimeType;
         this.uniquePostRef = uniquePostRef;
         this.userId = userId;
-        this.postLikedBy = postLikedBy;
-        this.postDislikedBy = postDislikedBy;
     }
 
-    public ArrayList<String> getPostLikedBy() {
-        return postLikedBy;
-    }
-    public ArrayList<String> getPostDislikedBy() {return postDislikedBy;}
-
-    public void setPostLikedBy(ArrayList<String> postLikedBy) {
-        this.postLikedBy = postLikedBy;
-    }
-
-    public void setPostDislikedBy(ArrayList<String> postDislikedBy) {this.postDislikedBy = postDislikedBy;}
     public String getUserId() {return userId;}
     public String getUniquePostRef() {
         return uniquePostRef;
@@ -125,6 +111,7 @@ public class PostModel extends RecyclerView implements Serializable {
     public String getNumLikes() {
         return numLikes;
     }
+    public String getNumDislikes() {return numDislikes;}
     public String getMedia() {
         return media;
     }
@@ -133,4 +120,5 @@ public class PostModel extends RecyclerView implements Serializable {
         this.numLikes = String.valueOf(numLikes);
     }
 
+    public void setNumDislikes(int numDislikes) { this.numDislikes = String.valueOf(numDislikes);}
 }

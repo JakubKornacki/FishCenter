@@ -65,6 +65,7 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
         holder.likesButton.setImageResource(R.drawable.ic_baseline_thumb_up_24_white);
         holder.dislikesButton.setImageResource(R.drawable.ic_baseline_thumb_down_24_white);
         holder.postLikes.setText(posts.get(position).getNumLikes());
+        holder.postDislikes.setText(posts.get(position).getNumDislikes());
     }
 
 
@@ -84,6 +85,7 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
         private TextView postBody;
         private ImageView likesButton;
         private TextView postLikes;
+        private TextView postDislikes;
         private ImageView dislikesButton;
         private OnClickListener listener;
 
@@ -99,6 +101,7 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
             likesButton = itemView.findViewById(R.id.likesButton);
             postLikes = itemView.findViewById(R.id.postLikes);
             dislikesButton = itemView.findViewById(R.id.dislikesButton);
+            postDislikes = itemView.findViewById(R.id.postDislikes);
             // reference to the MainPageActivity class in which the on-clicks will be handled
             this.listener = listener;
             // listen for on-click the video thumbnail and likes button
@@ -109,6 +112,13 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
         @Override
         public void onClick(View view) {
             int position = getAdapterPosition();
+            // indicates an invalid position in the recycler view
+            // return from the method if the position is invalid
+            // the position can become -1 when the user click both
+            // like and dislike button at a time
+            if(position == -1) {
+                return;
+            }
             // if the view clicked is an image
             if(view.getId() == R.id.postVideoThumbnail) {
                 listener.onClickVideoThumbnail(position);

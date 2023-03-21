@@ -303,6 +303,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     private Uri getDefaultProfilePicture() {
         int profilePicId = R.mipmap.img_profile_pic_white_default_round;
+        // way of getting the uri of an resource through specifying the path to the resource ://package/type/name of the resource with id profilePicId
         Uri defaultProfilePicture = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + getResources().getResourcePackageName(profilePicId) + "/" + getResources().getResourceTypeName(profilePicId) + "/" + getResources().getResourceEntryName(profilePicId));
         return defaultProfilePicture;
     }
@@ -337,10 +338,10 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void showSpinnerAndClearFocus(boolean flag) {
-        emailEditText.setFocusable(!flag);
-        nicknameEditText.setFocusable(!flag);
-        passwordEditText.setFocusable(!flag);
-        retypePasswordEditText.setFocusable(!flag);
+        emailEditText.setEnabled(!flag);
+        nicknameEditText.setEnabled(!flag);
+        passwordEditText.setEnabled(!flag);
+        retypePasswordEditText.setEnabled(!flag);
         termsAndConditionCheckbox.setClickable(!flag);
         registerButton.setClickable(!flag);
         backToLoginLayout.getChildAt(0).setClickable(!flag);
