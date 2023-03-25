@@ -238,9 +238,6 @@ public class CreatePost extends AppCompatActivity {
                     StorageReference storageRef = firebaseStorage.getReference();
                     storageRef.child("/postMedia/" + uniquePostRef + "/").putFile(userMediaUri);
                 }
-                // put in the unique post to firestore
-                post.put("postId", uniquePostRef);
-                firestore.collection("posts").document(uniquePostRef).update(post);
 
                 // create a local copy of the post
                LocalPost localPost = new LocalPost(postTitle, postBody, userProfilePicture, userNickname, postUploadDate, "0", "0", String.valueOf(userMediaUri), mimeType, uniquePostRef, currentUserId);

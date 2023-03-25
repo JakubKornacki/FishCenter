@@ -91,7 +91,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         logoutImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                createLogoutDialog(firebaseAuth);
+                AlertUtilities.createLogoutDialog(MapActivity.this, firebaseAuth);
             }
         });
 
@@ -115,28 +115,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             }
         }); */
 
-    }
-
-    public void createLogoutDialog(FirebaseAuth firebaseAuthInstance) {
-        AlertDialog.Builder logoutDialog = new AlertDialog.Builder(MapActivity.this);
-        logoutDialog.setMessage("Are you sure you want to sign out?");
-        logoutDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                firebaseAuthInstance.signOut();
-                Intent goBackToLogin = new Intent(getApplicationContext(), LoginActivity.class);
-                startActivity(goBackToLogin);
-                finish();
-            }
-        });
-
-        logoutDialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                dialogInterface.cancel();
-            }
-        });
-        logoutDialog.show();
     }
 
     private void showSpinnerAndDisableComponents(boolean flag) {

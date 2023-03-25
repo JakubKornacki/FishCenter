@@ -18,7 +18,6 @@ public interface PostsDao {
     void updateLocalPost(LocalPost localPost);
     @Delete
     void deleteLocalPost(LocalPost localPost);
-
     @Query("SELECT * FROM LocalPosts WHERE uniquePostRef  == :uniquePostRefToCheck")
     LocalPost findLocalPostByUniqueRef(String uniquePostRefToCheck);
 }

@@ -154,7 +154,6 @@
                 android:layout_margin="20dp"
                 android:background="@color/ordinaryButtonColor">
 
-
             <ImageButton
                 android:id="@+id/signInButton"
                 android:layout_width="match_parent"

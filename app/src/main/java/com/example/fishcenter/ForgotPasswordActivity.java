@@ -155,7 +155,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
             firebaseAuth.sendPasswordResetEmail(email).addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
-                    createErrorAlertDialog("E-mail reset error:", e.getMessage());
+                    AlertUtilities.createErrorAlertDialog(ForgotPasswordActivity.this,"E-mail reset error:", e.getMessage());
                     showSpinnerAndDisableComponents(false);
                 }
             });
@@ -177,14 +177,5 @@ public class ForgotPasswordActivity extends AppCompatActivity {
             submitButton.setBackground(getDrawable(R.drawable.background_rounded_corners_toggle_5_gray_opacity_30_to_transparent));
             backToLoginLayout.getChildAt(0).setBackground(getDrawable(R.drawable.background_rounded_corners_toggle_5_gray_opacity_30_to_transparent));
         }
-    }
-
-    // utility method to an error alert dialog programmatically
-    private void createErrorAlertDialog(String alertTitle, String alertMessage) {
-        AlertDialog.Builder alert = new AlertDialog.Builder(this);
-        alert.setTitle(alertTitle);
-        alert.setMessage(alertMessage);
-        alert.setIcon(R.drawable.ic_baseline_error_outline_36_black);
-        alert.show();
     }
 }

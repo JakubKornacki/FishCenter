@@ -109,7 +109,7 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
         logoutImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                createLogoutDialog(firebaseAuth);
+                AlertUtilities.createLogoutDialog(MainPageActivity.this, firebaseAuth);
             }
         });
 
@@ -166,28 +166,6 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
         }
     }
 
-    public void createLogoutDialog(FirebaseAuth firebaseAuthInstance) {
-        AlertDialog.Builder logoutDialog = new AlertDialog.Builder(MainPageActivity.this);
-        logoutDialog.setMessage("Are you sure you want to sign out?");
-        logoutDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                firebaseAuthInstance.signOut();
-                Intent goBackToLogin = new Intent(getApplicationContext(), LoginActivity.class);
-                startActivity(goBackToLogin);
-                finish();
-            }
-        });
-
-        logoutDialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                dialogInterface.cancel();
-            }
-        });
-        logoutDialog.show();
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -218,9 +196,9 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
 
     // handle on-clicks for like buttons
     @Override
-    public void onClickEitherLikeButton(int position, int resCalled) {
+    public void onClickEitherLikeButton(int position, int buttonCalled) {
         String uniquePostRef = posts.get(position).getUniquePostRef();
-        int[] totalLikesArray = updateUserLikesLists(position, uniquePostRef, resCalled);
+        int[] totalLikesArray = updateUserLikesLists(position, uniquePostRef, buttonCalled);
         // local recycler view update
         posts.get(position).setNumLikes(totalLikesArray[0]);
         posts.get(position).setNumDislikes(totalLikesArray[1]);
@@ -236,10 +214,10 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
         adapter.notifyDataSetChanged();
     }
 
-    private int[] updateUserLikesLists(int position, String uniquePostRef, int resCalled) {
+    private int[] updateUserLikesLists(int position, String uniquePostRef, int buttonCalled) {
         int numLikes = Integer.parseInt(posts.get(position).getNumLikes());
         int numDislikes = Integer.parseInt(posts.get(position).getNumDislikes());
-        if(resCalled == R.id.likesButton) {
+        if(buttonCalled == R.id.likesButton) {
            if (postsLikedByUser.contains(uniquePostRef)) {
                postsLikedByUser.remove(uniquePostRef);
                numLikes--;
@@ -251,7 +229,7 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
                postsDislikedByUser.remove(uniquePostRef);
                numDislikes--;
            }
-        } else if (resCalled == R.id.dislikesButton) {
+        } else if (buttonCalled == R.id.dislikesButton) {
            if (postsDislikedByUser.contains(uniquePostRef)) {
                postsDislikedByUser.remove(uniquePostRef);
                numDislikes--;

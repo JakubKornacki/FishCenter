@@ -80,7 +80,12 @@ public class LoginActivity extends AppCompatActivity {
         passwordVisibleImageButton.setOnClickListener(view -> togglePasswordVisibilityButton(passwordVisibleImageButton, passwordEditText));
 
         // sign in button
-        signInButton.setOnClickListener(view -> signInWithFirebase());
+        signInButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                signInWithFirebase();
+            }
+        });
 
         forgotPasswordTextView.setOnClickListener(view -> {
             Intent forgotPasswordActivity = new Intent(getApplicationContext(), ForgotPasswordActivity.class);
@@ -217,18 +222,10 @@ public class LoginActivity extends AppCompatActivity {
                 @Override
                 public void onFailure(@NonNull Exception e) {
                     showSpinnerAndDisableComponents(false);
-                    createErrorAlertDialog("Authentication:", e.getMessage());
+                    AlertUtilities.createErrorAlertDialog(LoginActivity.this,"Authentication:", e.getMessage());
                 }
             });
         }
-    }
-
-    private void createErrorAlertDialog(String alertTitle, String alertMessage) {
-        AlertDialog.Builder alert = new AlertDialog.Builder(this);
-        alert.setTitle(alertTitle);
-        alert.setMessage(alertMessage);
-        alert.setIcon(R.drawable.ic_baseline_error_outline_36_black);
-        alert.show();
     }
 
     private void togglePasswordVisibilityButton(ImageButton imgBtn, EditText editTextPass) {

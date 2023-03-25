@@ -34,9 +34,11 @@ public class FishImage {
     }
 
     private String extractImageFileName() {
-        // create a cursor object to point at the image data that is returned by the content resolver query which is supplied with the image uri
+        // create a cursor object to point at the image data that is returned
+        // by the content resolver query which is supplied with the image uri
         Cursor cursor = contentResolver.query(fishImage, null, null, null, null);
-        // move the first element initially it points to 0 which points to no element now the cursor is able to fetch the data wanted when queried with the column index
+        // move the first element initially it points to 0 which points to no element now
+        // the cursor is able to fetch the data wanted when  queried with the column index
         cursor.moveToFirst();
         // get the index of the column which contains the display name of the file
         int fileNameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);

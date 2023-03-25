@@ -61,7 +61,7 @@ dependencies {
 
     // Google Maps
     implementation 'com.google.android.gms:play-services-maps:18.1.0'
-    // utilities for google maps, will use ClusterItem interface to define items that can be clustered on a map
+
     implementation 'com.google.maps.android:android-maps-utils:2.3.0'
 
 

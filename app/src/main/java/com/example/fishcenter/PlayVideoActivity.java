@@ -55,30 +55,9 @@ public class PlayVideoActivity extends AppCompatActivity {
         logoutImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                createLogoutDialog(firebaseAuth);
+                AlertUtilities.createLogoutDialog(PlayVideoActivity.this, firebaseAuth);
             }
         });
     }
 
-    public void createLogoutDialog(FirebaseAuth firebaseAuthInstance) {
-        AlertDialog.Builder logoutDialog = new AlertDialog.Builder(PlayVideoActivity.this);
-        logoutDialog.setMessage("Are you sure you want to sign out?");
-        logoutDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                firebaseAuthInstance.signOut();
-                Intent goBackToLogin = new Intent(getApplicationContext(), LoginActivity.class);
-                startActivity(goBackToLogin);
-                finish();
-            }
-        });
-
-        logoutDialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                dialogInterface.cancel();
-            }
-        });
-        logoutDialog.show();
-    }
 }
