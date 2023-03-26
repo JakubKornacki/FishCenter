@@ -58,7 +58,7 @@ public class FishImage {
         return cursor.getString(imageSizeIndex);
     }
 
-    private byte[] getImageFileBytesArray() {
+    public byte[] getImageFileBytesArray() {
         try {
             int noOfBytes = Integer.parseInt(imageFileSize);
             byte[] byteArray = new byte[noOfBytes];
@@ -91,7 +91,7 @@ public class FishImage {
             inputStream.read(byteArray);
             // close the input stream
             inputStream.close();
-            // get an instance of the MD5 hash alg.
+            // get an instance of the MD5 hash algorithm
             MessageDigest md5 = MessageDigest.getInstance("MD5");
             // get bytes digested by MD5
             md5DigestedBytes = md5.digest(byteArray);
@@ -128,9 +128,4 @@ public class FishImage {
     public String getImageFileBytesArrayMD5EncodedBase64() {
         return imageFileBytesArrayMD5EncodedBase64;
     }
-    public ContentResolver getContentResolver(){
-        return contentResolver;
-    }
-
-
 }

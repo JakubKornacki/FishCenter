@@ -3,14 +3,12 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -18,7 +16,6 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.HashSet;
 
 public class FishialAPIFetchFishData extends Thread {
@@ -41,7 +38,7 @@ public class FishialAPIFetchFishData extends Thread {
             super.run();
             accessToken = fetchAuthorizationToken();
             dataForCloudImageUpload = obtainDataForCloudUpload(accessToken, fishImage);
-            uploadAnImageToTheCloud(dataForCloudImageUpload, fishImage);
+            uploadFishImageInCloud(dataForCloudImageUpload, fishImage);
             fishialImageRecognitionData = fishDetection(dataForCloudImageUpload, accessToken);
             // get Activity from context
             // https://stackoverflow.com/questions/9891360/getting-activity-from-context-in-android
@@ -51,7 +48,7 @@ public class FishialAPIFetchFishData extends Thread {
             // ArrayList of Fish objects is created by parsing out the JSON data
             if(fishialImageRecognitionData.getJSONArray("results").length() != 0) {
                 Intent fishRecognisedIntent = new Intent(activity, FishRecognisedActivity.class);
-                HashSet<Fish> fishes = parseJSONToFishObjectArrayList(fishialImageRecognitionData);
+                HashSet<Fish> fishes = parseJSONToFishObjectHashSet(fishialImageRecognitionData);
                 // New bundle which will be attached to the intent and passed over to the FishRecognisedActivity class
                 Bundle bundle = new Bundle();
                 // since Fish class is serializable we can put in the ArrayList of Fish object into the bundle and give it a key "fishes"
@@ -70,12 +67,12 @@ public class FishialAPIFetchFishData extends Thread {
     }
 
 
-    private HashSet<Fish> parseJSONToFishObjectArrayList(JSONObject fishData){
+    private HashSet<Fish> parseJSONToFishObjectHashSet(JSONObject fishesData){
         try {
             HashSet<Fish> fishes = new HashSet<>();
-            // get the species arrayList from fishData (there is one entry for each fish identified in an image)
-            for(int i = 0; i < fishData.getJSONArray("results").length(); i++) {
-                JSONObject result = fishData.getJSONArray("results").getJSONObject(i);
+            // get the species arrayList from fishesData (there is one entry for each fish identified in an image)
+            for(int i = 0; i < fishesData.getJSONArray("results").length(); i++) {
+                JSONObject result = fishesData.getJSONArray("results").getJSONObject(i);
                 JSONArray species = result.getJSONArray("species");
                 for (int j = 0; j < species.length(); j++) {
                     // always first object
@@ -85,41 +82,39 @@ public class FishialAPIFetchFishData extends Thread {
                     String latinName = (fishEntryInJSON.getString("name") != null) ? fishEntryInJSON.getString("name") : "Unknown";
                     float accuracy = (fishEntryInJSON.getString("accuracy") != null) ? Float.parseFloat(fishEntryInJSON.getString("accuracy")) : null;
 
-                    JSONObject fishAnglerData = fishEntryInJSON.getJSONObject("fishangler-data");
-                    String title = (fishAnglerData.has("title")) ? fishAnglerData.getString("title") : "Unknown";
+                    JSONObject fishData = fishEntryInJSON.getJSONObject("fishangler-data");
+                    String title = (fishData.has("title")) ? fishData.getString("title") : "Unknown";
 
                     String mediaUri = null;
-                    if(fishAnglerData.has("photo")) {
-                        if(fishAnglerData.getJSONObject("photo").has("mediaUri")) {
-                            mediaUri = fishAnglerData.getJSONObject("photo").getString("mediaUri");
+                    if(fishData.has("photo")) {
+                        if(fishData.getJSONObject("photo").has("mediaUri")) {
+                            mediaUri = fishData.getJSONObject("photo").getString("mediaUri");
                         }
                     }
 
                     String[] commonNames = null;
-                    if(fishAnglerData.has("commonNames")) {
+                    if(fishData.has("commonNames")) {
                         // parse out common names from JSON array to String array
-                        JSONArray commonNamesJSON = fishAnglerData.getJSONArray("commonNames");
+                        JSONArray commonNamesJSON = fishData.getJSONArray("commonNames");
                         commonNames = new String[commonNamesJSON.length()];
                         for (int k = 0; k < commonNamesJSON.length(); k++) {
                             commonNames[k] = commonNamesJSON.getString(k);
                         }
                     }
 
-                    // more fish variables
-                    String distribution = (fishAnglerData.has("distribution")) ? fishAnglerData.getString("distribution") : "Unknown";
-                    boolean scales = fishAnglerData.getBoolean("brack");
-                    boolean saltWater = fishAnglerData.getBoolean("saltwater");
-                    boolean freshWater = fishAnglerData.getBoolean("fresh");
-                    String coloration = (fishAnglerData.has("coloration")) ? fishAnglerData.getString("coloration") : "Unknown";
-                    String feedingBehaviour = (fishAnglerData.has("feedingBehaviour")) ? fishAnglerData.getString("feedingBehaviour") : "Unknown";
-                    String healthWarnings = (fishAnglerData.has("healthWarnings")) ? fishAnglerData.getString("healthWarnings") : "Unknown";
-                    String foodValue = (fishAnglerData.has("foodValue")) ? fishAnglerData.getString("foodValue") : "Unknown" ;
-
+                    String distribution = (fishData.has("distribution")) ? fishData.getString("distribution") : "Unknown";
+                    boolean scales = fishData.getBoolean("brack");
+                    boolean saltWater = fishData.getBoolean("saltwater");
+                    boolean freshWater = fishData.getBoolean("fresh");
+                    String coloration = (fishData.has("coloration")) ? fishData.getString("coloration") : "Unknown";
+                    String feedingBehaviour = (fishData.has("feedingBehaviour")) ? fishData.getString("feedingBehaviour") : "Unknown";
+                    String healthWarnings = (fishData.has("healthWarnings")) ? fishData.getString("healthWarnings") : "Unknown";
+                    String foodValue = (fishData.has("foodValue")) ? fishData.getString("foodValue") : "Unknown" ;
 
                     // parse out names of similar species for this fish
                     String[] similarSpecies = null;
-                    if(fishAnglerData.has("similarSpecies")) {
-                        JSONArray similarSpeciesJSON = fishAnglerData.getJSONArray("similarSpecies");
+                    if(fishData.has("similarSpecies")) {
+                        JSONArray similarSpeciesJSON = fishData.getJSONArray("similarSpecies");
                         similarSpecies = new String[similarSpeciesJSON.length()];
                         for (int l = 0; l < similarSpeciesJSON.length(); l++) {
                             JSONObject similarFishJSON = similarSpeciesJSON.getJSONObject(l);
@@ -127,11 +122,11 @@ public class FishialAPIFetchFishData extends Thread {
                         }
                     }
                     // last bit of information
-                    String environmentDetail = (fishAnglerData.has("environmentDetail")) ? fishAnglerData.getString("environmentDetail") : "Unknown" ;
+                    String environmentDetail = (fishData.has("environmentDetail")) ? fishData.getString("environmentDetail") : "Unknown" ;
 
                     // create a Fish object out of the gathered info
                     fishes.add(new Fish(
-                            latinName,
+                                latinName,
                             accuracy,
                             title,
                             mediaUri,
@@ -145,8 +140,8 @@ public class FishialAPIFetchFishData extends Thread {
                             healthWarnings,
                             foodValue,
                             similarSpecies,
-                            environmentDetail
-                    ));
+                            environmentDetail)
+                    );
                 }
             }
             return fishes;
@@ -264,26 +259,15 @@ public class FishialAPIFetchFishData extends Thread {
         }
     }
 
-    private void uploadAnImageToTheCloud(JSONObject dataForCloudImageUpload, FishImage fishImage) {
+    private void uploadFishImageInCloud(JSONObject pathForCloudUpload, FishImage fishImage) {
         try {
             // get values of the JSON object used for uploading the image to the cloud
-            JSONObject directUploadHeader = dataForCloudImageUpload.getJSONObject("direct-upload");
+            JSONObject directUploadHeader = pathForCloudUpload.getJSONObject("direct-upload");
             String urlString = directUploadHeader.getString("url");
             JSONObject imageHeaders = directUploadHeader.getJSONObject("headers");
             String contentMd5 = imageHeaders.getString("Content-MD5");
             String contentDisposition = imageHeaders.getString("Content-Disposition");
-
-            // parse the file size in bytes to int
-            int noOfBytes = Integer.parseInt(fishImage.getImageFileSize());
-            // open an input stream using the content resolver and the image uri
-            InputStream inputStream = fishImage.getContentResolver().openInputStream(fishImage.getFishImage());
-            // byte array to hold raw image data of the same size as the image
-            byte[] byteArray = new byte[noOfBytes];
-            // read bytes of the image into the byte array
-            inputStream.read(byteArray);
-            // close the input stream
-            inputStream.close();
-
+            byte[] byteArray = fishImage.getImageFileBytesArray();
             URL url = new URL(urlString);
             // establish the connection with the endpoint
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
@@ -293,7 +277,6 @@ public class FishialAPIFetchFishData extends Thread {
             http.setRequestProperty("Content-MD5", contentMd5);
             http.setRequestProperty("Content-Type", "");
             http.setDoOutput(true);
-
             OutputStream outStream = http.getOutputStream();
             outStream.write(byteArray);
             outStream.close();

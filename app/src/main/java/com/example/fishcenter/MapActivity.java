@@ -2,7 +2,6 @@ package com.example.fishcenter;
 
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
@@ -55,7 +54,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private FishingLocationDatabase fishingLocationDatabase;
     private FishingLocationDao fishingLocationDao;
     private SupportMapFragment mapFragment;
-    private CustomWeatherStationInfoWindowAdapter adapter;
+    private CustomFishingLocationInfoWindowAdapter adapter;
     private ImageView syncRoomWithFirestoreButton;
     private ArrayList<Marker> refMapMarkers = new ArrayList<>();
     //private ImageView getWeatherStations;
@@ -99,6 +98,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         syncRoomWithFirestoreButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                showSpinnerAndDisableComponents(true);
                 setMakersVisible(false);
                 syncRoomWithFirestore();
                 setupMarkersFromRoom();
@@ -136,7 +136,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         this.googleMap = googleMap;
         googleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
-        adapter = new CustomWeatherStationInfoWindowAdapter(getApplicationContext());
+        adapter = new CustomFishingLocationInfoWindowAdapter(getApplicationContext());
         googleMap.setInfoWindowAdapter(adapter);
         // setup markers that are in the user ROOM database
         setupMarkersFromRoom();
@@ -197,7 +197,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     }
 
     public void setupMarkersFromRoom() {
-        showSpinnerAndDisableComponents(true);
         new Thread() {
             @Override
             public void run() {
@@ -236,8 +235,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                         refMapMarkers.add(marker);
                     }
                 }
-                showSpinnerAndDisableComponents(false);
                 setMakersVisible(true);
+                showSpinnerAndDisableComponents(false);
             }
         });
     }

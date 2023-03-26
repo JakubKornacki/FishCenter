@@ -130,7 +130,7 @@ public class CreatePost extends AppCompatActivity {
                 String mimeType = MediaUtilities.extractMediaMimeType(uri, getContentResolver());
                 if(MediaUtilities.supportedImageMimeTypes.contains(mimeType)) {
                     // load the image from the uri into the image view using glide
-                    // Glide helps round off the corners and load the gif from the uri into the GifImageView and ensuring it is not bigger than 360x360 pixels
+                    // Glide helps round off the corners and load media into the image view
                     Glide.with(getApplicationContext()).load(uri).transform(new RoundedCorners(10)).into(userImageView);
                     userImageView.setVisibility(View.VISIBLE);
                 } else if (MediaUtilities.supportedVideoMimeTypes.contains(mimeType)) {
