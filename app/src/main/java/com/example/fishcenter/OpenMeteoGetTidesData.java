@@ -26,9 +26,8 @@ public class OpenMeteoGetTidesData extends Thread {
     private Context con;
     private double lat;
     private double lng;
-    private StringBuilder response = new StringBuilder();
+    private String response;
     private int responseCode;
-
     public OpenMeteoGetTidesData(Context con, double lat, double lng) {
         this.con = con;
         this.lat = lat;
@@ -49,10 +48,12 @@ public class OpenMeteoGetTidesData extends Thread {
                 builder.append(line);
             }
             responseDataReader.close();
-            responseCode = http.getResponseCode();
-            if(responseCode == 200) {
-                parseJSONString(new JSONObject(builder.toString()));
+            if(http.getResponseCode() == 200) {
+                response = parseJSONString(new JSONObject(builder.toString()));
+            } else {
+                response = null;
             }
+            responseCode = http.getResponseCode();
             http.disconnect();
         } catch ( MalformedURLException e) {
             throw new RuntimeException(e);
@@ -64,12 +65,13 @@ public class OpenMeteoGetTidesData extends Thread {
         }
     }
 
-    private void parseJSONString(JSONObject jsonObject) {
+    private String parseJSONString(JSONObject jsonObject) {
         try {
             JSONArray time = jsonObject.getJSONObject("hourly").getJSONArray("time");
             JSONArray height = jsonObject.getJSONObject("hourly").getJSONArray("wave_height");
             String timezone = jsonObject.get("timezone").toString();
             String timezoneAbbreviation = jsonObject.get("timezone_abbreviation").toString();
+            StringBuilder response = new StringBuilder();
             // decimal format to convert numbers like 4.9 to 4.90 so that the window displays consistently
             DecimalFormat df = new DecimalFormat("0.00");
             // from 00:00 to 24:00
@@ -84,15 +86,17 @@ public class OpenMeteoGetTidesData extends Thread {
                 }
                 response.append("Time: " + timeSplit[1] + "\t\tHeight: " +  df.format(Double.valueOf(height.getString(i))) + " m\n");
             }
+            return response.toString();
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
     }
-    public int getResponseCode() {
+
+    public int getResponseCode(){
         return responseCode;
     }
 
     public String getTidesData() {
-        return response.toString();
+        return response;
     }
 }

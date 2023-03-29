@@ -1,5 +1,6 @@
 package com.example.fishcenter;
 
+import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.net.Uri;
@@ -319,15 +320,11 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void togglePasswordVisibilityButton(ImageButton imgBtn, EditText editTextPass) {
-        // switch between the active and inactive state as defined in the ic_password_visible_toggle_button.xml file
-        // this will switch the image of the button and will set the new transformation method of the EditText
-        // if null, no transformation method is specified and the password appears as plaintext on the user screen
-        // otherwise set a new password transformation method which makes the password appear as sequence of dots
+        // if the button for showing password is already activated disable it
+        // and change the edit text to display dotted password
         if (imgBtn.isActivated()) {
             imgBtn.setActivated(false);
-            editTextPass.setTransformationMethod(null);
             editTextPass.setTransformationMethod(new PasswordTransformationMethod());
-
         } else {
             imgBtn.setActivated(true);
             editTextPass.setTransformationMethod(null);
@@ -337,6 +334,7 @@ public class RegisterActivity extends AppCompatActivity {
         editTextPass.setSelection(textLen);
     }
 
+    @SuppressLint("UseCompatLoadingForDrawables")
     private void showSpinnerAndClearFocus(boolean flag) {
         emailEditText.setEnabled(!flag);
         nicknameEditText.setEnabled(!flag);

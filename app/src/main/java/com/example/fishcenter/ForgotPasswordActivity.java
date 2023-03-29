@@ -120,23 +120,19 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         if(email.isEmpty()) {
             errorMessageEmail.append("E-mail cannot be empty!\n");
         }
-
         // email length exceeded
         if(email.length() > 320) {
             errorMessageEmail.append("E-mail length cannot exceed 320 characters!\n");
         }
-
         // make sure email contains '.' and '@'
         if((email.indexOf('.') == -1 ) && email.indexOf('@') == -1 ) {
             errorMessageEmail.append("E-mail needs to contain '.' and '@'!");
         }
-
-        // display the error messages and return false, clear the error message
+        // display the error messages and return false
         if(errorMessageEmail.length() != 0) {
             emailEditText.setError(errorMessageEmail.toString());
             return false;
         }
-
         return true;
     }
 
@@ -151,8 +147,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
                     Toast.makeText(ForgotPasswordActivity.this, "Your password reset e-mail is on the way!", Toast.LENGTH_LONG).show();
                     showSpinnerAndDisableComponents(false);
                 }
-            });
-            firebaseAuth.sendPasswordResetEmail(email).addOnFailureListener(new OnFailureListener() {
+            }).addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
                     AlertUtilities.createErrorAlertDialog(ForgotPasswordActivity.this,"E-mail reset error:", e.getMessage());

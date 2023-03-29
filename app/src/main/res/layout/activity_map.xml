@@ -70,23 +70,6 @@
             android:src="@drawable/ic_baseline_reload_24_white"
             tools:ignore="HardcodedText"></ImageButton>
 
-
-
-        <!-- used for fetching weather stations
-        <ImageButton
-            android:id="@+id/getWeatherStations"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:layout_marginEnd="10dp"
-            android:background="@drawable/layout_background_rounded_corners_toggle_5_gray_opacity_25_to_transparent"
-            android:contentDescription="logs user out"
-            android:minWidth="48dp"
-            android:minHeight="48dp"
-            android:padding="5dp"
-            android:src="@drawable/ic_baseline_map_24_white"
-            tools:ignore="HardcodedText"></ImageButton>
-        -->
     </androidx.appcompat.widget.Toolbar>
 
 
@@ -107,7 +90,7 @@
        android:layout_height="match_parent"
        android:background="@color/graywithopacity75"
        android:orientation="vertical"
-       android:visibility="invisible"
+       android:visibility="visible"
        android:gravity="center"
        app:layout_constraintBottom_toBottomOf="parent"
        app:layout_constraintStart_toStartOf="parent"

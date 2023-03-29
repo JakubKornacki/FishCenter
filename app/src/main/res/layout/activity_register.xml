@@ -80,7 +80,7 @@
                         android:inputType="textEmailAddress"
                         android:minHeight="48dp"
                         android:paddingLeft="15dp"
-                        tools:ignore="TouchTargetSizeCheck" />
+                        tools:ignore="TouchTargetSizeCheck,TextContrastCheck" />
 
                     <ImageView
                         android:layout_width="wrap_content"
@@ -106,7 +106,7 @@
                         android:inputType="text"
                         android:minHeight="48dp"
                         android:paddingLeft="15dp"
-                        tools:ignore="TouchTargetSizeCheck" />
+                        tools:ignore="TouchTargetSizeCheck,TextContrastCheck" />
 
 
                     <ImageView
@@ -133,7 +133,7 @@
                         android:inputType="textPassword"
                         android:minHeight="48dp"
                         android:paddingLeft="15dp"
-                        tools:ignore="TouchTargetSizeCheck" />
+                        tools:ignore="TouchTargetSizeCheck,TextContrastCheck" />
 
                     <ImageButton
                         android:id="@+id/passwordVisibleImageButton"
@@ -145,7 +145,7 @@
                         android:minWidth="48dp"
                         android:padding="10dp"
                         android:src="@drawable/ic_password_visible_toggle_button"
-                        tools:ignore="TouchTargetSizeCheck" />
+                        tools:ignore="TouchTargetSizeCheck,DuplicateSpeakableTextCheck" />
 
                 </LinearLayout>
 
@@ -236,12 +236,12 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/graywithopacity75"
+        android:gravity="center"
         android:orientation="vertical"
         android:visibility="invisible"
-        android:gravity="center"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <ProgressBar

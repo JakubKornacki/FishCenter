@@ -2,6 +2,7 @@ package com.example.fishcenter;
 
 import static android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -195,6 +196,7 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
     }
 
     // handle on-clicks for like buttons
+    @SuppressLint("NotifyDataSetChanged")
     @Override
     public void onClickEitherLikeButton(int position, int buttonCalled) {
         String uniquePostRef = posts.get(position).getUniquePostRef();
@@ -202,7 +204,7 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
         // local recycler view update
         posts.get(position).setNumLikes(totalLikesArray[0]);
         posts.get(position).setNumDislikes(totalLikesArray[1]);
-
+        // update firestore
         updatePostNumLikesFirestore(uniquePostRef, totalLikesArray[0]);
         updatePostNumDislikesFirestore(uniquePostRef, totalLikesArray[1]);
 

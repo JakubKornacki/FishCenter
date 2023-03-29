@@ -2,8 +2,7 @@ package com.example.fishcenter;
 
 
 
-import android.content.DialogInterface;
-import android.content.Intent;
+import android.annotation.SuppressLint;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
@@ -16,7 +15,6 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.PickVisualMediaRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
@@ -71,7 +69,7 @@ public class FishRecognitionActivity extends AppCompatActivity {
                     if(MediaUtilities.supportedImageMimeTypes.contains(fishImage.getImageFileMimeType())) {
                         showSpinnerAndDisableComponents(true);
                         // start the new thread to fetch data about the fish
-                        FishialAPIFetchFishData fetchFishialRecognitionDataThread = new FishialAPIFetchFishData(fishImage, FishRecognitionActivity.this);
+                        FishialRecogniseFish fetchFishialRecognitionDataThread = new FishialRecogniseFish(fishImage, FishRecognitionActivity.this);
                         fetchFishialRecognitionDataThread.start();
                     } else {
                         Toast.makeText(getBaseContext(), "Unsupported file format!", Toast.LENGTH_SHORT).show();
@@ -116,6 +114,7 @@ public class FishRecognitionActivity extends AppCompatActivity {
         showSpinnerAndDisableComponents(false);
     }
 
+    @SuppressLint("UseCompatLoadingForDrawables")
     private void showSpinnerAndDisableComponents(boolean flag) {
         identifyFishButton.setClickable(!flag);
         goBackImageButton.setClickable(!flag);

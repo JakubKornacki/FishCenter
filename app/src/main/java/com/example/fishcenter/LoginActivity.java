@@ -211,17 +211,16 @@ public class LoginActivity extends AppCompatActivity {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
                     if (task.isSuccessful()) {
-                        // Sign in success, update UI with the signed-in user's information
-                        showSpinnerAndDisableComponents(false);
+                        // redirect the user to the main page
                         Intent mainPageActivity = new Intent(getApplicationContext(), MainPageActivity.class);
                         startActivity(mainPageActivity);
                     }
+                    showSpinnerAndDisableComponents(false);
                 }
-            });
-            firebaseAuth.signInWithEmailAndPassword(email, password).addOnFailureListener(this, new OnFailureListener() {
+            }).addOnFailureListener(this, new OnFailureListener() {
+                // notify the user of the error
                 @Override
                 public void onFailure(@NonNull Exception e) {
-                    showSpinnerAndDisableComponents(false);
                     AlertUtilities.createErrorAlertDialog(LoginActivity.this,"Authentication:", e.getMessage());
                 }
             });
@@ -229,19 +228,17 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void togglePasswordVisibilityButton(ImageButton imgBtn, EditText editTextPass) {
-        // switch between the active and inactive state as defined in the ic_password_visible_toggle_button.xml file
-        //  this will switch the image of the button and will set the new transformation method of the EditText
-        // if null, no transformation method is specified and the password appears as plaintext on the user screen
-        // otherwise set a new password transformation method which makes the password appear as sequence of dots
+        // if the button for showing password is already activated disable it
+        // and change the edit text to display dotted password
         if(imgBtn.isActivated()) {
             imgBtn.setActivated(false);
             editTextPass.setTransformationMethod(new PasswordTransformationMethod());
-
         } else {
             imgBtn.setActivated(true);
             editTextPass.setTransformationMethod(null);
         }
-        // set text pointer to the position at the end of text changing the transformation method sets it back to zero
+        // set text pointer to the position at the end of text changing
+        // the transformation method sets it back to zero
         int textLen = editTextPass.getText().length();
         editTextPass.setSelection(textLen);
     }

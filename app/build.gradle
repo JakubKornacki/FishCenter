@@ -41,43 +41,39 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.activity:activity:1.6.1'
 
-    // gson needed for room type converters
-    // https://mvnrepository.com/artifact/com.google.code.gson/gson
-    implementation group: 'com.google.code.gson', name: 'gson', version: '2.10.1'
 
     // Import the BoM for the Firebase platform
     implementation platform('com.google.firebase:firebase-bom:31.2.0')
-
-    //FireStore
-    implementation 'com.google.firebase:firebase-firestore:24.1.1'
-    //FireBase Cloud Storage
-    implementation 'com.google.firebase:firebase-storage:20.0.1'
-    // Add the dependency for the Firebase Authentication library
-    implementation 'com.google.firebase:firebase-auth'
     // Import the Firebase BoM
     implementation platform('com.google.firebase:firebase-bom:31.2.0')
     // When using the BoM, don't specify versions in Firebase dependencies
     implementation 'com.google.firebase:firebase-analytics'
 
+    //Firestore
+    implementation 'com.google.firebase:firebase-firestore:24.1.1'
+    //Firebase Cloud Storage
+    implementation 'com.google.firebase:firebase-storage:20.0.1'
+    // Firebase Authentication
+    implementation 'com.google.firebase:firebase-auth'
+
     // Google Maps
     implementation 'com.google.android.gms:play-services-maps:18.1.0'
-
     implementation 'com.google.maps.android:android-maps-utils:2.3.0'
-
 
     // Glide for easy handling of images
     implementation 'com.github.bumptech.glide:glide:4.15.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.15.0'
 
+    // Gson needed for Room type converters
+    implementation group: 'com.google.code.gson', name: 'gson', version: '2.10.1'
+
+    // Room for storing fishing locations and posts on the user device
+    def room_version = "2.5.0"
+    implementation "androidx.room:room-runtime:$room_version"
+    annotationProcessor "androidx.room:room-compiler:$room_version"
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
-
-    // ROOM for storing an object relational mapping representations of weather stations
-    // to store fishing location data locally instead of loading it all from firestore
-    def room_version = "2.5.0"
-    implementation "androidx.room:room-runtime:$room_version"
-    annotationProcessor "androidx.room:room-compiler:$room_version"
 }
 

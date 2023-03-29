@@ -8,7 +8,6 @@ import androidx.room.PrimaryKey;
 
 import com.google.android.gms.maps.model.LatLng;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 @Entity (tableName = "fishingLocation")
@@ -17,7 +16,7 @@ public class FishingLocation {
     public int key;
     @NonNull
     @ColumnInfo(name = "title")
-    public String title;
+    public String locationName;
     @Nullable
     @ColumnInfo (name = "snippet")
     public String snippet;
@@ -39,8 +38,8 @@ public class FishingLocation {
     @Nullable
     @ColumnInfo (name = "ratingsList")
     public ArrayList<Double> ratingsList;
-    public FishingLocation(String title, String snippet, LatLng latLng, double overallRating, double userRating, ArrayList<Double> ratingsList){
-        this.title = title;
+    public FishingLocation(String locationName, String snippet, LatLng latLng, double overallRating, double userRating, ArrayList<Double> ratingsList){
+        this.locationName = locationName;
         this.snippet = snippet;
         this.lat = latLng.latitude;
         this.lng = latLng.longitude;
@@ -49,8 +48,8 @@ public class FishingLocation {
         this.ratingsList = ratingsList;
     }
 
-    public FishingLocation(String title, String snippet, double lat, double lng, double overallRating, double userRating, ArrayList<Double> ratingsList){
-        this.title = title;
+    public FishingLocation(String locationName, String snippet, double lat, double lng, double overallRating, double userRating, ArrayList<Double> ratingsList){
+        this.locationName = locationName;
         this.snippet = snippet;
         this.lat = lat;
         this.lng = lng;
@@ -64,8 +63,8 @@ public class FishingLocation {
     }
 
     @Nullable
-    public String getTitle() {
-        return title;
+    public String getLocationName() {
+        return locationName;
     }
 
     @Nullable

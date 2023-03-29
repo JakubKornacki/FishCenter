@@ -31,10 +31,6 @@ public class PlayVideoActivity extends AppCompatActivity {
         MediaController mediaController = new MediaController(PlayVideoActivity.this);
         videoView.setMediaController(mediaController);
         mediaController.setAnchorView(videoView);
-
-        ImageButton goBackImageButton = findViewById(R.id.goBackImageButton);
-        ImageButton logoutImageButton = findViewById(R.id.logoutImageButton);
-        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
         LinearLayout videoTimeoutSpinner = findViewById(R.id.videoTimeoutSpinner);
         videoTimeoutSpinner.setVisibility(View.VISIBLE);
         videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
@@ -45,13 +41,18 @@ public class PlayVideoActivity extends AppCompatActivity {
             }
         });
 
+
+        ImageButton goBackImageButton = findViewById(R.id.goBackImageButton);
+        ImageButton logoutImageButton = findViewById(R.id.logoutImageButton);
+        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+
         goBackImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 finish();
             }
         });
-
+        // button for logging out of the application
         logoutImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

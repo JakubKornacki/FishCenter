@@ -1,7 +1,6 @@
 package com.example.fishcenter;
 
 import android.app.Activity;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -20,7 +19,6 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.PickVisualMediaRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
@@ -36,6 +34,7 @@ import com.google.firebase.storage.StorageReference;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class CreatePost extends AppCompatActivity {
@@ -74,7 +73,7 @@ public class CreatePost extends AppCompatActivity {
         userNickname = getIntent().getExtras().getString("userNickname");
 
 
-        ImageButton goBackImageButton = findViewById(R.id.goBackImageButton);
+        final ImageButton goBackImageButton = findViewById(R.id.goBackImageButton);
         goBackImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -82,7 +81,7 @@ public class CreatePost extends AppCompatActivity {
             }
         });
 
-        ImageButton sendPostImageButton = findViewById(R.id.sendPostImageButton);
+        final ImageButton sendPostImageButton = findViewById(R.id.sendPostImageButton);
         sendPostImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -97,14 +96,14 @@ public class CreatePost extends AppCompatActivity {
                         int flag = Intent.FLAG_GRANT_READ_URI_PERMISSION;
                         getContentResolver().takePersistableUriPermission(userMediaUri, flag);
                     }
-                    savePostInBackend(postBody, postTitle);
+                    savePostInFirestoreAndCloudStorage(postBody, postTitle);
                 }
             }
         });
 
 
-        LinearLayout linearLayoutBackground = findViewById(R.id.linearLayoutBackground);
-        InputMethodManager keyboard = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+        final LinearLayout linearLayoutBackground = findViewById(R.id.linearLayoutBackground);
+        final InputMethodManager keyboard = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
         linearLayoutBackground.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -142,9 +141,9 @@ public class CreatePost extends AppCompatActivity {
                     Toast.makeText(this, "Unsupported file format!", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                this.userMediaUri = uri;
-                this.mimeType = MediaUtilities.extractMediaMimeType(uri, getContentResolver());
                 mediaSelected = true;
+                this.userMediaUri = uri;
+                this.mimeType = mimeType;
             } else {
                 mediaSelected = false;
                 this.userMediaUri = null;
@@ -152,7 +151,7 @@ public class CreatePost extends AppCompatActivity {
             }
         });
 
-        ImageView selectImage = findViewById(R.id.selectImage);
+        final ImageView selectImage = findViewById(R.id.selectImage);
         selectImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -212,13 +211,11 @@ public class CreatePost extends AppCompatActivity {
         return true;
     }
 
-    private void savePostInBackend(String postBody, String postTitle) {
+    private void savePostInFirestoreAndCloudStorage(String postBody, String postTitle) {
         // mark the timestamp at the beginning of creating a post
         Map<String, Object> post = new HashMap<>();
-
         Timestamp timestamp = Timestamp.now();
-        DateFormat dateFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-
+        DateFormat dateFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.ENGLISH);
         post.put("title", postTitle);
         post.put("body", postBody);
         post.put("timestamp", timestamp);

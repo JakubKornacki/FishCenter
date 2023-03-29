@@ -13,7 +13,7 @@
     <string name="termsAndConditionsCheckBox">Accept our Terms &amp; Conditions</string>
     <string name="submit">Submit</string>
     <string name="forgotPasswordDescription">Enter your e-mail address below so that we can send you a password reset e-mail.</string>
-    <string name="fishRecognition">Fish Recognition</string>
+    <string name="fishIdentification">Fish Identifier</string>
     <string name="map">Map</string>
     <string name="addImage">Add Image</string>
     <string name="identify">Identify</string>
@@ -46,5 +46,16 @@
     <string name="noPostsToLoad">There are no posts to display!</string>
     <string name="waitForVideo">Hang on while we load your video!</string>
     <string name="waitForMapSetup">Hang on while we lay out your map!</string>
+    <string name="videoPlayer">Video Player</string>
+    <string name="button_for_clicking_likes">Button for clicking likes</string>
+    <string name="_0">0</string>
+    <string name="button_for_clicking_likes2">Button for clicking likes</string>
+    <string name="post_thumbnail">post thumbnail</string>
+    <string name="user_image">user image</string>
+    <string name="post_timestamp">Post timestamp</string>
+    <string name="this_is_a_sample_post_body_the_user_content_will_be_placed_here_above_the_post_body_will_be_used_content_in_the_form_of_an_image_gif_or_video_provided_that_the_user_decided_to_upload_such_content">This is a sample post body. The user content will be placed here. Above the post body will be used content in the form of an image, gif or video provided that the user decided to upload such content.</string>
+    <string name="post_title">Post title</string>
+    <string name="user_nickname">User nickname</string>
+    <string name="user_image2">User Image</string>
 
 </resources>

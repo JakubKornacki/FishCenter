@@ -18,7 +18,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 
-public class FishialAPIFetchFishData extends Thread {
+public class FishialRecogniseFish extends Thread {
     // get the access token to use the Fishial.AI api
     private JSONObject accessToken;
     private JSONObject dataForCloudImageUpload;
@@ -27,7 +27,7 @@ public class FishialAPIFetchFishData extends Thread {
     private Context context;
 
 
-    public FishialAPIFetchFishData(FishImage fishImage, Context context) {
+    public FishialRecogniseFish(FishImage fishImage, Context context) {
         this.fishImage = fishImage;
         this.context = context;
     }

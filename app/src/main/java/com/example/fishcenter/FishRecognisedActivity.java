@@ -1,4 +1,5 @@
 package com.example.fishcenter;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -27,6 +28,7 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.target.Target;
 import com.google.firebase.auth.FirebaseAuth;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -60,17 +62,15 @@ public class FishRecognisedActivity extends AppCompatActivity {
         });
 
         // way of passing objects between activities using Intent with the help of serializable interface and Bundle
-        // more references in the FishialAPIFetchFishData.java class
+        // more references in the FishialRecogniseFish.java class
         // https://stackoverflow.com/questions/13601883/how-to-pass-arraylist-of-objects-from-one-to-another-activity-using-intent-in-an
         Bundle packagedBundle = getIntent().getBundleExtra("bundle");
         // extract fishes ArrayList out from the bundle
         fishes = (HashSet<Fish>) packagedBundle.getSerializable("fishes");
         linearLayoutInsideScrollView = findViewById(R.id.linearLayoutInsideScrollView);
 
-        // iterate through the returned fishes and append non-duplicates to linear layout
-        Iterator<Fish> fishesIterator = fishes.iterator();
-        while(fishesIterator.hasNext()) {
-            Fish fish = fishesIterator.next();
+        // iterate through the hash set of identified fishes
+        for (Fish fish : fishes) {
             LinearLayout table = drawResultsTable(fish);
             linearLayoutInsideScrollView.addView(table);
         }
@@ -91,6 +91,7 @@ public class FishRecognisedActivity extends AppCompatActivity {
         });
     }
 
+    @SuppressLint("UseCompatLoadingForDrawables")
     private LinearLayout createBackToMainMenuLayout(View parentView) {
         Context con = getApplicationContext();
         LinearLayout linearLayout = new LinearLayout(con);
@@ -99,9 +100,6 @@ public class FishRecognisedActivity extends AppCompatActivity {
         Button backToMainMenuButton = new Button(con);
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         backToMainMenuButton.setLayoutParams(layoutParams);
-        // https://stackoverflow.com/a/32202256 getColor() method is deprecated as of API 23
-        // another way to get color from resources is to use ContextCompat.getColor(context, R.color.color_name)
-        // by passing in the application context along with the resource id of the wanted colour
         backToMainMenuButton.setBackground(getDrawable(R.drawable.background_rounded_corners_toggle_5_gray_opacity_30_to_transparent));
         backToMainMenuButton.setMinHeight(48);
         backToMainMenuButton.setText(getText(R.string.backToMainMenu));
@@ -329,12 +327,12 @@ public class FishRecognisedActivity extends AppCompatActivity {
         foodValueText.setTextColor(ContextCompat.getColor(con, R.color.black));
         foodValueRow.addView(foodValueText);
 
-
+        // create the fish similar species row
         TableRow similarSpeciesRow = new TableRow(con);
         similarSpeciesRow.setLayoutParams(tabLayoutParams);
         similarSpeciesRow.setPadding(20,10,0,15);
         tableLayout.addView(similarSpeciesRow);
-        // create the fish name text view
+        // create the fish similar species text view
         TextView similarSpeciesText = new TextView(con);
         similarSpeciesText.setLayoutParams(tableRowParams);
         SpannableStringBuilder simSpeciesSpanString = createSpannableString(R.string.similarSpecies, fish.getSimilarSpecies());
@@ -343,12 +341,12 @@ public class FishRecognisedActivity extends AppCompatActivity {
         similarSpeciesText.setTextColor(ContextCompat.getColor(con, R.color.black));
         similarSpeciesRow.addView(similarSpeciesText);
 
-
+        // create the fish environmental details row
         TableRow environmentalDetailRow = new TableRow(con);
         environmentalDetailRow.setLayoutParams(tabLayoutParams);
         environmentalDetailRow.setPadding(20,10,0,50);
         tableLayout.addView(environmentalDetailRow);
-        // create the fish name text view
+        // create the fish environmental details text view
         TextView environmentalsDetailText = new TextView(con);
         environmentalsDetailText.setLayoutParams(tableRowParams);
         SpannableStringBuilder environmentalDetSpanString = createSpannableString(R.string.environmentalDetails, fish.getEnvironmentDetail());
@@ -361,7 +359,9 @@ public class FishRecognisedActivity extends AppCompatActivity {
     }
 
     private String predAccurString(float predAccuracy) {
-        return predAccuracy * 100 + " %";
+        DecimalFormat df = new DecimalFormat("0.00");
+        return df.format(predAccuracy * 100) + " %";
+
     }
 
 
