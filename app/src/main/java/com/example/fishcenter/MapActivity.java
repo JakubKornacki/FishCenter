@@ -86,7 +86,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             }
         });
 
-
         logoutImageButton = findViewById(R.id.logoutImageButton);
         logoutImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -105,7 +104,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             }
         });
     }
-
     private void showSpinnerAndDisableComponents(boolean flag) {
         syncRoomWithFirestoreButton.setClickable(!flag);
         goBackImageButton.setClickable(!flag);
@@ -159,7 +157,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 createNewFishingLocationAlertDialog(latLng);
             }
         });
-
         googleMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
             public void onInfoWindowClick(@NonNull Marker marker) {
@@ -168,7 +165,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 }
             }
         });
-
         googleMap.setOnInfoWindowLongClickListener(new GoogleMap.OnInfoWindowLongClickListener() {
             @Override
             public void onInfoWindowLongClick(@NonNull Marker marker) {
@@ -199,7 +195,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                         @Override
                         public void run() {
                             if(findMarkerByLatLng(position) == null) {
-                                createNewMarker(locationName, position);
+                                createMarkerFromRoomDatabase(locationName, position);
                             }
                             showSpinnerAndDisableComponents(false);
                         }
@@ -214,7 +210,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             }
         }.start();
     }
-
     private Marker findMarkerByLatLng(LatLng position) {
         for(int i = 0; i < refMapMarkers.size(); i++) {
             if(refMapMarkers.get(i).getPosition().equals(position)){
@@ -223,7 +218,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         }
         return null;
     }
-
     private String getTidesDataForMarker(LatLng position) throws InvalidLocationException {
         double longitude = position.longitude;
         double latitude = position.latitude;
@@ -321,9 +315,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             updateMarkerOnMapWithNewOverallRating(markerToUpdate);
         }
     }
-
-
-
     private void updateMarkerOnMapWithNewOverallRating(Marker marker) {
         try {
             LatLng markerPosition = marker.getPosition();
@@ -338,8 +329,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             throw new RuntimeException(e);
         }
     }
-
-
     private void updateFishingLocationRatingInFirestore(LatLng position, double newUserRating){
         // call to firebase to save the rating in the backend
         CollectionReference fishingLocations = firebaseFirestore.collection("fishingLocations");
@@ -376,7 +365,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             }
         });
     }
-
     private DocumentSnapshot getUserPreviousRating(List<DocumentSnapshot> fishingLocationRatings, String userId) {
         for(DocumentSnapshot rating : fishingLocationRatings) {
             if(rating.get("userId").equals(userId)){
@@ -385,8 +373,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         }
         return null;
     }
-
-
     private void createNewFishingLocationAlertDialog(LatLng position) {
         AlertDialog.Builder newLocationBuilder = new AlertDialog.Builder(MapActivity.this);
         newLocationBuilder.setTitle("How would you like to call this location?");
@@ -408,7 +394,20 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         newLocationBuilder.show();
     }
 
-
+    private void createMarkerFromRoomDatabase(String locationName, LatLng position) {
+        try {
+            // this may throw an invalid location exception
+            // if this is the case then non of the below code will execute
+            String tidesData = getTidesDataForMarker(position);
+            String ratingData = getRatingDataForMarker(position);
+            MarkerOptions markerOption = new MarkerOptions().position(position).title(locationName).snippet(tidesData + ratingData);
+            Marker marker = googleMap.addMarker(markerOption);
+            // add marker to reference ArrayList
+            refMapMarkers.add(marker);
+        } catch (InvalidLocationException e) {
+            // do nothing a this is a valid marker and should its position should not throw an exception
+        }
+    }
     private void createNewMarker(String locationName, LatLng position) {
         try {
             // this may throw an invalid location exception
@@ -432,7 +431,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         FishingLocation newFishingLocation = new FishingLocation(locationName, null, position, 0, 0, null);
         fishingLocationDao.addFishingLocation(newFishingLocation);
     }
-
     private void saveNewMarkerInFirestore(String locationName, LatLng position) {
         // proceed to save a valid location in firestore
         Map<String, Object> fishingLocationMap = new HashMap<>();
@@ -441,7 +439,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         fishingLocationMap.put("longitude", position.longitude);
         firebaseFirestore.collection("fishingLocations").add(fishingLocationMap);
     }
-
     private void synchronizeRoomDatabaseWithFirestore() {
         // if true then the database needs to be setup first
         CollectionReference fishingLocations = firebaseFirestore.collection("fishingLocations");
@@ -487,5 +484,4 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             }
         });
     }
-
 }
