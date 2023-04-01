@@ -14,5 +14,4 @@ public class MediaUtilities {
     public static String extractMediaMimeType(Uri media, ContentResolver contResolver) {
         return media == null ? null : contResolver.getType(media);
     }
-
 }

@@ -35,7 +35,7 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
     public PostViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(con);
         View view = inflater.inflate(R.layout.layout_post, parent, false);
-        return new PostRecyclerViewAdapter.PostViewHolder(view, listener);
+        return new PostViewHolder(view, listener);
     }
 
     @Override
@@ -75,7 +75,7 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
         return posts.size();
     }
 
-    public class PostViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public static class PostViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private ImageView userProfilePicture;
         private TextView userNickname;
         private TextView datePosted;

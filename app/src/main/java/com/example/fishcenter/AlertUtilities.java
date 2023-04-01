@@ -22,9 +22,9 @@ public class AlertUtilities {
             public void onClick(DialogInterface dialogInterface, int i) {
                 firebaseAuthInstance.signOut();
                 Intent goBackToLogin = new Intent(context, LoginActivity.class);
+                // clear the task back stack to remove the history of previous activities which may have been on the stack
+                goBackToLogin.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(context, goBackToLogin, null);
-                Activity activity = (Activity) context;
-                activity.finish();
             }
         });
 

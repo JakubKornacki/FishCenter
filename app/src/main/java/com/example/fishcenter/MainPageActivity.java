@@ -1,28 +1,25 @@
 package com.example.fishcenter;
 
-import static android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION;
-
-import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.room.Room;
 
-import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
@@ -36,7 +33,6 @@ import com.google.firebase.storage.StorageReference;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -64,9 +60,8 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
     private String userNickname = null;
     private PostsDatabase postsDatabase;
     private PostsDao postsDao;
-    private int postsToLoad = -1;
-    private int postsLoaded;
-    private boolean syncOver = true;
+    private int numPostsToLoad = -1;
+    private int numPostsLoaded;
     private ArrayList<String> postsLikedByUser;
     private ArrayList<String> postsDislikedByUser;
     private boolean userDataLoaded = false;
@@ -90,6 +85,7 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
         postsRecyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         adapter = new PostRecyclerViewAdapter(getApplicationContext(), posts, MainPageActivity.this);
         postsRecyclerView.setAdapter(adapter);
+        postsRecyclerView.setItemAnimator(null);
 
         // initialise the posts database and the posts dao
         postsDatabase = Room.databaseBuilder(getApplicationContext(), PostsDatabase.class, "postsDatabase").fallbackToDestructiveMigration().allowMainThreadQueries().build();
@@ -136,17 +132,14 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
         reloadPostsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(syncOver) {
-                    syncOver = false;
-                    waitForSyncComplete();
-                    syncRoomWithFirestoreAndCloudStorage();
-                }
+                waitForDatabasesSyncComplete();
+                syncRoomDatabaseWithFirestoreAndCloudStorage();
             }
         });
 
         loadPostsFromRoomDatabase();
         // get posts, nickname and user profile picture
-        waitForBasicUserDataFromFirestore();
+        waitForPrimaryUserDataFromFirestore();
     }
 
     private void showSpinnerAndDisableComponents(boolean flag) {
@@ -196,7 +189,6 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
     }
 
     // handle on-clicks for like buttons
-    @SuppressLint("NotifyDataSetChanged")
     @Override
     public void onClickEitherLikeButton(int position, int buttonCalled) {
         String uniquePostRef = posts.get(position).getUniquePostRef();
@@ -207,13 +199,12 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
         // update firestore
         updatePostNumLikesFirestore(uniquePostRef, totalLikesArray[0]);
         updatePostNumDislikesFirestore(uniquePostRef, totalLikesArray[1]);
-
         // firebase update user lists
         updateUserPostsLikedListFirestore(postsLikedByUser);
         updateUserPostsDislikedListFirestore(postsDislikedByUser);
         // update room database
         updateLocalPostInRoomDatabase(uniquePostRef, totalLikesArray[0], totalLikesArray[1]);
-        adapter.notifyDataSetChanged();
+        adapter.notifyItemChanged(position);
     }
 
     private int[] updateUserLikesLists(int position, String uniquePostRef, int buttonCalled) {
@@ -278,7 +269,7 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
         firestore.collection("users").document(currentUserId).update(postDislikedByUsersMap);
     }
 
-    private void waitForBasicUserDataFromFirestore() {
+    private void waitForPrimaryUserDataFromFirestore() {
         // fetch both pieces of data and start the spinner
         showSpinnerAndDisableComponents(true);
         getUserNicknameFromFirestore();
@@ -287,10 +278,10 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
             @Override
             public void run() {
                 super.run();
-                // sleep for 50 seconds if user nickname and userprofile pic have not been fetched
+                // sleep for 200 milliseconds if user nickname and userprofile pic have not been fetched
                 while (true) {
                     try {
-                        Thread.sleep(50);
+                        Thread.sleep(200);
                         // if both are fetched update the ui with the runOnUiThread by hiding the spinner and brining back interactivity to components
                         if(userDataLoaded && userProfilePic != null ) {
                             runOnUiThread(new Runnable() {
@@ -341,14 +332,17 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
            @Override
            public void run() {
                super.run();
-               // get the list of all posts
+               // get the list of all posts from room database
                List<LocalPost> localPostList = postsDao.getAllLocalPosts();
                posts.clear();
                for(LocalPost localPost : localPostList) {
-                   PostModel recyclerViewPost = new PostModel(getApplicationContext(), localPost.getTitle(), localPost.getBody(), localPost.getProfilePhoto(), localPost.getNickname(), localPost.getPostUploadDate(), localPost.getNumLikes(), localPost.getNumDislikes(), localPost.getMedia(), localPost.getMimeType(), localPost.getUniquePostRef(), localPost.getUserId());
+                   PostModel recyclerViewPost = new PostModel(MainPageActivity.this, localPost.getTitle(), localPost.getBody(), localPost.getProfilePhoto(), localPost.getNickname(), localPost.getPostUploadDate(), localPost.getNumLikes(), localPost.getNumDislikes(), localPost.getMedia(), localPost.getMimeType(), localPost.getUniquePostRef(), localPost.getUserId());
                    posts.add(recyclerViewPost);
                }
+               // sort the posts as they do not come in a sorted order from the external databases
+               posts.sort(new TimestampComparator());
                runOnUiThread(new Runnable() {
+
                    @Override
                    public void run() {
                        if(posts.size() == 0) {
@@ -357,29 +351,26 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
                        } else {
                            postsRecyclerView.setVisibility(View.VISIBLE);
                            linearLayoutNoPostsToLoad.setVisibility(View.GONE);
-                           // add this post to posts and re-sort them
-                           Collections.sort(posts, new TimestampComparator());
+                           
                        }
                        adapter.notifyDataSetChanged();
                        showSpinnerAndDisableComponents(false);
-                       postsToLoad = -1;
-                       syncOver = true;
+                       numPostsToLoad = -1;
                    }
                });
            }
        }.start();
     }
 
-    private void waitForSyncComplete() {
-        showSpinnerAndDisableComponents(true);
+    private void waitForDatabasesSyncComplete() {
         new Thread() {
             @Override
             public void run() {
                 super.run();
                 while(true) {
                     try {
-                        Thread.sleep(50);
-                        if(postsToLoad == postsLoaded) {
+                        Thread.sleep(200);
+                        if(numPostsToLoad == numPostsLoaded) {
                             loadPostsFromRoomDatabase();
                             break;
                         }
@@ -391,12 +382,25 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
         }.start();
     }
 
-    private void syncRoomWithFirestoreAndCloudStorage() {
+    private boolean checkIfSynchronisationIsNecessary(int numPosts) {
+        if(numPosts == posts.size() && numPosts != 0) {
+            Toast.makeText(MainPageActivity.this, "Your posts list is up to date!", Toast.LENGTH_SHORT).show();
+            return false;
+        } else {
+            showSpinnerAndDisableComponents(true);
+            return true;
+        }
+    }
+
+    private void syncRoomDatabaseWithFirestoreAndCloudStorage() {
         firestore.collection("posts").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                postsToLoad = queryDocumentSnapshots.size();
-                postsLoaded = 0;
+                numPostsToLoad = queryDocumentSnapshots.size();
+                numPostsLoaded = 0;
+                if(!checkIfSynchronisationIsNecessary(numPostsToLoad)) {
+                    return;
+                }
                 // get all posts in firestore
                 for (QueryDocumentSnapshot post : queryDocumentSnapshots) {
                     String nickname = post.getString("nickname");
@@ -413,33 +417,31 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
                     String uniquePostRef = post.getId();
                     // get media from firestore cloud if exists then create an PostModel object  with media otherwise set media to null
                     StorageReference storageRefMedia = firebaseStorage.getReference().child("/postMedia/" + post.getId());
-                    storageRefMedia.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                    // the following code downloads the uri of the media rather than the files itself this
+                    // is done in order to note flood the user memory with posts, rather than that each
+                    // local post has the download url of the media which it can downloaded at runtime
+                    // and when the application closes the downloaded data is not stored the user device
+                    storageRefMedia.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
                         @Override
-                        public void onSuccess(Uri uri) {
-                            // the post had media associated with it and profile picture is fetched below
-                            postsLoaded++;
-                            String uriMedia = String.valueOf(uri);
-                            String mimeType = post.get("mimeType").toString();
-                            // add on the media, profile picture and metadata along with standard post components
-                            LocalPost newLocalPost = new LocalPost(title, body, userProfilePic, nickname, postUploadDate, numLikes, numDislikes, uriMedia, mimeType, uniquePostRef, userId);
+                        public void onComplete(@NonNull Task<Uri> task) {
+                            LocalPost newLocalPost;
+                            // the post has media
+                            if(task.isSuccessful()) {
+                                Uri uri = task.getResult();
+                                String uriMedia = String.valueOf(uri);
+                                String mimeType = post.get("mimeType").toString();
+                                newLocalPost = new LocalPost(title, body, userProfilePic, nickname, postUploadDate, numLikes, numDislikes, uriMedia, mimeType, uniquePostRef, userId);
+                            } else {
+                                // this post does not contain any media
+                                newLocalPost = new LocalPost(title, body, userProfilePic, nickname, postUploadDate, numLikes, numDislikes, null,null, uniquePostRef, userId);
+                            }
+                            // update the Room database
                             if (postsDao.findLocalPostByUniqueRef(uniquePostRef) == null) {
                                 postsDao.addLocalPost(newLocalPost);
                             } else {
                                 postsDao.updateLocalPost(newLocalPost);
                             }
-
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            postsLoaded++;
-                            // the post did not have any media associated with it and profile picture is fetched below
-                            LocalPost newLocalPost = new LocalPost(title, body, userProfilePic, nickname, postUploadDate, numLikes, numDislikes, null,null, uniquePostRef, userId);
-                            if (postsDao.findLocalPostByUniqueRef(uniquePostRef) == null) {
-                                postsDao.addLocalPost(newLocalPost);
-                            } else {
-                                postsDao.updateLocalPost(newLocalPost);
-                            }
+                            numPostsLoaded++;
                         }
                     });
                 }
@@ -447,3 +449,4 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
         });
     }
 }
+

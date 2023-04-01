@@ -44,7 +44,7 @@ public class LocalPost implements Serializable {
     @NonNull
     @ColumnInfo(name = "userId")
     private String userId;
-    public LocalPost(String title, String body, byte[] profilePhoto, String nickname, String postUploadDate, String numLikes, String numDislikes, String media,String mimeType, String uniquePostRef, String userId) {
+    public LocalPost(String title, String body, byte[] profilePhoto, String nickname, String postUploadDate, String numLikes, String numDislikes, String media, String mimeType, String uniquePostRef, String userId) {
         this.title = title;
         this.body = body;
         this.profilePhoto = profilePhoto;
