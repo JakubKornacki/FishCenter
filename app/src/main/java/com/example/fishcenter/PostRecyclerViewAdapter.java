@@ -21,7 +21,7 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
     private ArrayList<PostModel> posts;
     private OnClickListener listener;
     private Drawable playVideoIcon;
-
+    private boolean adapterClickable = true;
 
     public PostRecyclerViewAdapter(Context con, ArrayList<PostModel> posts, OnClickListener listener) {
         this.con = con;
@@ -68,11 +68,13 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
         holder.postDislikes.setText(posts.get(position).getNumDislikes());
     }
 
-
-
     @Override
     public int getItemCount() {
         return posts.size();
+    }
+
+    public void setAdapterClickable(boolean clickable) {
+        adapterClickable = clickable;
     }
 
     public static class PostViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -109,6 +111,8 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
             likesButton.setOnClickListener(this);
             dislikesButton.setOnClickListener(this);
         }
+
+
         @Override
         public void onClick(View view) {
             int position = getAdapterPosition();

@@ -81,6 +81,22 @@ public class PostModel extends RecyclerView implements Serializable {
         this.userId = userId;
     }
 
+
+    public PostModel(@NonNull Context context, LocalPost localPost) {
+        super(context);
+        this.title = localPost.getTitle();
+        this.body = localPost.getBody();
+        this.profilePhoto = localPost.getProfilePhoto();
+        this.nickname = localPost.getNickname();
+        this.postUploadDate = localPost.getPostUploadDate();
+        this.numLikes = localPost.getNumLikes();
+        this.numDislikes = localPost.getNumDislikes();
+        this.media = localPost.getMedia();
+        this.mimeType = localPost.getMimeType();
+        this.uniquePostRef = localPost.getUniquePostRef();
+        this.userId = localPost.getUserId();
+    }
+
     public String getUserId() {return userId;}
     public String getUniquePostRef() {
         return uniquePostRef;

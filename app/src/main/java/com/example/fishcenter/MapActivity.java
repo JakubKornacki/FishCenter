@@ -59,6 +59,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private ImageView syncRoomWithFirestoreButton;
     private ArrayList<Marker> refMapMarkers = new ArrayList<>();
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,13 +70,16 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.mapFragment);
         mapFragment.getMapAsync(this);
 
+        fishingLocationDatabase = Room.databaseBuilder(MapActivity.this, FishingLocationDatabase.class, "fishLocationDatabase").fallbackToDestructiveMigration().allowMainThreadQueries().build();
+        fishingLocationDao =  fishingLocationDatabase.fishingLocationDao();
+
+
         // need this as google maps overwrite the view and make the toolbar dis
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-        fishingLocationDatabase = Room.databaseBuilder(getApplicationContext(), FishingLocationDatabase.class, "fishLocationDatabase").fallbackToDestructiveMigration().allowMainThreadQueries().build();
-        fishingLocationDao =  fishingLocationDatabase.fishingLocationDao();
+
 
         goBackImageButton = findViewById(R.id.goBackImageButton);
         goBackImageButton.setOnClickListener(new View.OnClickListener() {
@@ -181,6 +186,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         CameraPosition newCameraPosition = new CameraPosition(marker.getPosition(),currentZoom, currentTilt, currentBearing);
         map.animateCamera(CameraUpdateFactory.newCameraPosition(newCameraPosition));
     }
+
     public void setupMapWithMarkersFromRoomDatabase() {
         new Thread() {
             @Override
@@ -462,15 +468,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         firebaseFirestore.collection("fishingLocations").add(fishingLocationMap);
     }
 
-    private boolean checkIfSynchronisationNecessary(int numFishingLocations) {
-        if(numFishingLocations == refMapMarkers.size() && numFishingLocations != 0) {
-            Toast.makeText(MapActivity.this, "Your map is up to date!", Toast.LENGTH_SHORT).show();
-            return false;
-        } else {
-            showSpinnerAndDisableComponents(true);
-            return true;
-        }
-    }
+
 
     private void synchronizeRoomDatabaseWithFirestore() {
         // if true then the database needs to be setup first
@@ -478,10 +476,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         fishingLocations.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                int numFishingLocations = queryDocumentSnapshots.size();
-                if (!checkIfSynchronisationNecessary(numFishingLocations)) {
-                    return;
-                }
                 for(DocumentSnapshot fishingLocation : queryDocumentSnapshots) {
                     String locationName = fishingLocation.getString("name");
                     double lat = fishingLocation.getDouble("latitude");

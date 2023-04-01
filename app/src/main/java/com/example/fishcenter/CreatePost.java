@@ -33,11 +33,12 @@ import com.google.firebase.storage.StorageReference;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-public class CreatePost extends AppCompatActivity {
+public class CreatePost extends AppCompatActivity implements PostsAndUserDataCallback {
 
     private ImageView userImageView;
     private boolean mediaSelected;
@@ -47,16 +48,10 @@ public class CreatePost extends AppCompatActivity {
 
     private VideoView userVideoView;
     private MediaController mediaController;
-    private FirebaseStorage firebaseStorage = FirebaseStorage.getInstance();
-    private final FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
-    private final String currentUserId = firebaseAuth.getCurrentUser().getUid();
-    private FirebaseFirestore firestore = FirebaseFirestore.getInstance();
     private Uri userMediaUri;
-
-    private byte[] userProfilePicture;
-    private String userNickname;
+    private PostsAndUserDataController postsAndUserDataController;
+    private User user;
     private String mimeType;
-
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -68,9 +63,10 @@ public class CreatePost extends AppCompatActivity {
         userVideoView = findViewById(R.id.userVideoView);
         postTitleEditText = findViewById(R.id.postTitleEditText);
 
+        postsAndUserDataController = new PostsAndUserDataController(CreatePost.this, this);
+
         // extract the user profile picture passed in from the main activity used to create the new post
-        userProfilePicture = (byte[]) getIntent().getExtras().getSerializable("profilePicture");
-        userNickname = getIntent().getExtras().getString("userNickname");
+        user = (User) getIntent().getExtras().getSerializable("user");
 
 
         final ImageButton goBackImageButton = findViewById(R.id.goBackImageButton);
@@ -96,7 +92,7 @@ public class CreatePost extends AppCompatActivity {
                         int flag = Intent.FLAG_GRANT_READ_URI_PERMISSION;
                         getContentResolver().takePersistableUriPermission(userMediaUri, flag);
                     }
-                    savePostInFirestoreAndCloudStorage(postBody, postTitle);
+                    postsAndUserDataController.savePostInBackend(postBody, postTitle, user, mediaSelected, mimeType, userMediaUri);
                 }
             }
         });
@@ -213,40 +209,33 @@ public class CreatePost extends AppCompatActivity {
 
     private void savePostInFirestoreAndCloudStorage(String postBody, String postTitle) {
         // mark the timestamp at the beginning of creating a post
-        Map<String, Object> post = new HashMap<>();
-        Timestamp timestamp = Timestamp.now();
-        DateFormat dateFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.ENGLISH);
-        post.put("title", postTitle);
-        post.put("body", postBody);
-        post.put("timestamp", timestamp);
-        post.put("likes", 0);
-        post.put("dislikes", 0);
-        post.put("userId", currentUserId);
-        post.put("nickname", userNickname);
-        post.put("mimeType", mimeType);
-        firestore.collection("posts").add(post).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-            @Override
-            public void onSuccess(DocumentReference documentReference) {
-                String uniquePostRef = documentReference.getId();
-                String postUploadDate = dateFormatter.format(timestamp.toDate());
 
-                // update firebase storage
-                if(mediaSelected) {
-                    StorageReference storageRef = firebaseStorage.getReference();
-                    storageRef.child("/postMedia/" + uniquePostRef + "/").putFile(userMediaUri);
-                }
-
-                // create a local copy of the post
-               LocalPost localPost = new LocalPost(postTitle, postBody, userProfilePicture, userNickname, postUploadDate, "0", "0", String.valueOf(userMediaUri), mimeType, uniquePostRef, currentUserId);
-               returnNewPostToMainActivity(localPost);
-            }
-        });
     }
 
     private void launchPhotoPicker(ActivityResultLauncher<PickVisualMediaRequest> pickMedia) {
         // Launch the photo picker and allow the user to choose only images.
         // although the compiler complains about passing an invalid type to the setMediaType method the Photo Picker works fine and the application runs without crashing
         pickMedia.launch(new PickVisualMediaRequest.Builder().setMediaType(ActivityResultContracts.PickVisualMedia.ImageAndVideo.INSTANCE).build());
+    }
+
+    @Override
+    public void userDataReady(User user) {
+        // nothing to do here
+    }
+
+    @Override
+    public void userPostsReady(ArrayList<PostModel> userPosts) {
+        // nothing to do here
+    }
+
+    @Override
+    public void userPostUpdated(int position) {
+        // nothing to do here
+    }
+
+    @Override
+    public void newPostSaved(LocalPost newPost) {
+        returnNewPostToMainActivity(newPost);
     }
 
 }
