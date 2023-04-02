@@ -19,7 +19,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import java.util.ArrayList;
 
 
-public class MainPageActivity extends AppCompatActivity implements OnClickListener, PostsAndUserDataCallback {
+public class MainPageActivity extends AppCompatActivity implements OnClickListener, PostsCallback, UserCallback {
     private final FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
     private ImageButton fishRecognitionButton;
     private ImageButton googleMapsButton;
@@ -32,8 +32,9 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
 
     private LinearLayout progressSpinnerLayout;
     private LinearLayout linearLayoutNoPostsToLoad;
-    private User user;
-    private PostsAndUserDataController postsAndUserDataController;
+    private User currentUser;
+    private PostsController postsController;
+    private UserController userController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,8 +46,9 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
         linearLayoutNoPostsToLoad = findViewById(R.id.linearLayoutNoPostsToLoad);
         progressSpinnerLayout = findViewById(R.id.progressSpinnerLayout);
 
-        postsAndUserDataController = new PostsAndUserDataController(MainPageActivity.this, this);
-
+        postsController = new PostsController(MainPageActivity.this, this);
+        String currentUserId = firebaseAuth.getCurrentUser().getUid();
+        userController = new UserController(currentUserId, this);
         // setup the top application bar
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -65,7 +67,7 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
             @Override
             public void onClick(View view) {
                 Intent createPost = new Intent(getApplicationContext(), CreatePost.class);
-                createPost.putExtra("user", user);
+                createPost.putExtra("user", currentUser);
                 startActivityForResult(createPost, 1);
             }
         });
@@ -101,13 +103,13 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
             @Override
             public void onClick(View view) {
                 showSpinnerAndDisableComponents(true);
-                postsAndUserDataController.getPostsFromBackend();
+                postsController.getPostsFromBackend();
             }
         });
 
         showSpinnerAndDisableComponents(true);
-        postsAndUserDataController.getUserData();
-        postsAndUserDataController.loadPostsFromRoomDatabase();
+        userController.getUserData();
+        postsController.loadPostsFromRoomDatabase();
     }
 
     private void showSpinnerAndDisableComponents(boolean flag) {
@@ -135,7 +137,7 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
         if(resultCode == Activity.RESULT_OK && requestCode == 1) {
             // add the local post to the room database
             LocalPost localPost = (LocalPost) data.getSerializableExtra("localPost");
-            postsAndUserDataController.addLocalPostToRoomDatabase(localPost);
+            postsController.addLocalPostToRoomDatabase(localPost);
         }
     }
 
@@ -159,19 +161,37 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
     @Override
     public void onClickEitherLikeButton(int position, int buttonCalled) {
         PostModel post = posts.get(position);
-        postsAndUserDataController.handleUserLikesAndDislikes(post, user, position, buttonCalled);
+        postsController.handleUserLikesAndDislikes(post, currentUser, position, buttonCalled);
     }
 
     @Override
-    public void userDataReady(User user) {
-        this.user = user;
+    public void userDataReady(User currentUser) {
+        this.currentUser = currentUser;
         showSpinnerAndDisableComponents(false);
+    }
+
+
+    private void addNewPostsToPostsList(ArrayList<PostModel> userPosts) {
+        for(int i = 0; i < userPosts.size(); i++) {
+            boolean shouldAddPost = isPostNotInTheList(userPosts.get(i));
+            if(shouldAddPost) {
+                posts.add(userPosts.get(i));
+            }
+        }
+    }
+
+    private boolean isPostNotInTheList(PostModel post) {
+        for(int i = 0; i < posts.size(); i++) {
+            if(posts.get(i).getUniquePostRef().equals(post.getUniquePostRef())) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
     public void userPostsReady(ArrayList<PostModel> userPosts) {
-        posts.clear();
-        posts.addAll(userPosts);
+        addNewPostsToPostsList(userPosts);
         runOnUiThread(new Runnable() {
             @Override
             public void run() {

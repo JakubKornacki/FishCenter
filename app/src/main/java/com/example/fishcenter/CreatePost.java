@@ -23,22 +23,10 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.Timestamp;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
 
-public class CreatePost extends AppCompatActivity implements PostsAndUserDataCallback {
+public class CreatePost extends AppCompatActivity implements PostsCallback {
 
     private ImageView userImageView;
     private boolean mediaSelected;
@@ -49,7 +37,7 @@ public class CreatePost extends AppCompatActivity implements PostsAndUserDataCal
     private VideoView userVideoView;
     private MediaController mediaController;
     private Uri userMediaUri;
-    private PostsAndUserDataController postsAndUserDataController;
+    private PostsController postsController;
     private User user;
     private String mimeType;
 
@@ -63,7 +51,7 @@ public class CreatePost extends AppCompatActivity implements PostsAndUserDataCal
         userVideoView = findViewById(R.id.userVideoView);
         postTitleEditText = findViewById(R.id.postTitleEditText);
 
-        postsAndUserDataController = new PostsAndUserDataController(CreatePost.this, this);
+        postsController = new PostsController(CreatePost.this, this);
 
         // extract the user profile picture passed in from the main activity used to create the new post
         user = (User) getIntent().getExtras().getSerializable("user");
@@ -92,7 +80,7 @@ public class CreatePost extends AppCompatActivity implements PostsAndUserDataCal
                         int flag = Intent.FLAG_GRANT_READ_URI_PERMISSION;
                         getContentResolver().takePersistableUriPermission(userMediaUri, flag);
                     }
-                    postsAndUserDataController.savePostInBackend(postBody, postTitle, user, mediaSelected, mimeType, userMediaUri);
+                    postsController.savePostInBackend(postBody, postTitle, user, mediaSelected, mimeType, userMediaUri);
                 }
             }
         });
@@ -218,10 +206,6 @@ public class CreatePost extends AppCompatActivity implements PostsAndUserDataCal
         pickMedia.launch(new PickVisualMediaRequest.Builder().setMediaType(ActivityResultContracts.PickVisualMedia.ImageAndVideo.INSTANCE).build());
     }
 
-    @Override
-    public void userDataReady(User user) {
-        // nothing to do here
-    }
 
     @Override
     public void userPostsReady(ArrayList<PostModel> userPosts) {

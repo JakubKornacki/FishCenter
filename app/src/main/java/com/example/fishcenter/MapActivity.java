@@ -58,9 +58,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private CustomFishingLocationInfoWindowAdapter adapter;
     private ImageView syncRoomWithFirestoreButton;
     private ArrayList<Marker> refMapMarkers = new ArrayList<>();
-
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -134,6 +131,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(@NonNull Marker marker) {
+
                 LatLng markerPosition = marker.getPosition();
                 String tidesData;
                 try {

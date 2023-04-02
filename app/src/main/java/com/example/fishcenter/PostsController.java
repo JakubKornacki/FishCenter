@@ -12,7 +12,6 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -28,21 +27,20 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-public class PostsAndUserDataController {
+public class PostsController {
     private FirebaseFirestore firestore =  FirebaseFirestore.getInstance();
     private FirebaseStorage firebaseStorage =  FirebaseStorage.getInstance();
 
     private FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
     private String currentUserId;
-    private PostsAndUserDataCallback postsAndUserDataCallback;
+    private PostsCallback postsCallback;
 
     private PostsDatabase postsDatabase;
     private PostsDao postsDao;
     private Context context;
-    private User user;
 
-    public PostsAndUserDataController(Context context, PostsAndUserDataCallback postsAndUserDataCallback) {
-        this.postsAndUserDataCallback = postsAndUserDataCallback;
+    public PostsController(Context context, PostsCallback postsCallback) {
+        this.postsCallback = postsCallback;
         currentUserId = firebaseAuth.getCurrentUser().getUid();
         this.context = context;
         // initialise the posts database and the posts dao
@@ -50,25 +48,6 @@ public class PostsAndUserDataController {
         postsDao = postsDatabase.postsDao();
     }
 
-
-    public void getUserData() {
-        firestore.collection("users").document(currentUserId).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                String userNickname = documentSnapshot.getString("nickname");
-                ArrayList<String> postsLikedByUser = (ArrayList<String>) documentSnapshot.get("postsLiked");
-                ArrayList<String> postsDislikedByUser = (ArrayList<String>) documentSnapshot.get("postsDisliked");
-
-                firebaseStorage.getReference("profilePictures/" + currentUserId + "/").getBytes(Integer.MAX_VALUE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-                    @Override
-                    public void onSuccess(byte[] pictureBytes) {
-                        user = new User(userNickname, currentUserId, postsLikedByUser, postsDislikedByUser, pictureBytes);
-                        postsAndUserDataCallback.userDataReady(user);
-                    }
-                });
-            }
-        });
-    }
 
     public void loadPostsFromRoomDatabase() {
         new Thread() {
@@ -84,7 +63,7 @@ public class PostsAndUserDataController {
                 }
                 // sort the posts as they do not come in a sorted order from the external databases
                 recyclerViewPosts.sort(new TimestampComparator());
-                postsAndUserDataCallback.userPostsReady(recyclerViewPosts);
+                postsCallback.userPostsReady(recyclerViewPosts);
             }
         }.start();
     }
@@ -104,7 +83,7 @@ public class PostsAndUserDataController {
         postsDao.addLocalPost(localPost);
         List<LocalPost> localPosts = postsDao.getAllLocalPosts();
         ArrayList<PostModel> recyclerViewPosts = convertLocalPostsToRecyclerViewPosts(localPosts);
-        postsAndUserDataCallback.userPostsReady(recyclerViewPosts);
+        postsCallback.userPostsReady(recyclerViewPosts);
     }
 
     private ArrayList<PostModel> convertLocalPostsToRecyclerViewPosts(List<LocalPost> localPosts) {
@@ -166,7 +145,7 @@ public class PostsAndUserDataController {
                                     posts.add(new PostModel(context, newLocalPost));
                                     if(posts.size() == numPostsToLoad) {
                                         posts.sort(new TimestampComparator());
-                                        postsAndUserDataCallback.userPostsReady(posts);
+                                        postsCallback.userPostsReady(posts);
                                     }
                                 }
                             });
@@ -207,7 +186,7 @@ public class PostsAndUserDataController {
                 }
                 // create a local copy of the post
                 LocalPost localPost = new LocalPost(postTitle, postBody, userProfilePicture, userNickname, postUploadDate, "0", "0", String.valueOf(userMediaUri), mimeType, uniquePostRef, currentUserId);
-                postsAndUserDataCallback.newPostSaved(localPost);
+                postsCallback.newPostSaved(localPost);
             }
         });
     }
@@ -232,7 +211,7 @@ public class PostsAndUserDataController {
         updateUserPostsDislikedListFirestore(postsDislikedByUser);
         // update room database
         updateLocalPostInRoomDatabase(uniquePostRef, totalLikesArray[0], totalLikesArray[1]);
-        postsAndUserDataCallback.userPostUpdated(position);
+        postsCallback.userPostUpdated(position);
     }
 
     public int[] updateUserLikesLists(PostModel post, String uniquePostRef, ArrayList<String> postsLikedByUser, ArrayList<String> postsDislikedByUser, int buttonCalled) {
