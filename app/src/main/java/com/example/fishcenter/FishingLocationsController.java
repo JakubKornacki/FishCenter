@@ -227,11 +227,7 @@ public class FishingLocationsController {
     }
 
     private ArrayList<FishingLocation> convertFishingLocationListToArrayList(List<FishingLocation> fishingLocationList) {
-        ArrayList<FishingLocation> fishingLocationArrayList = new ArrayList<>();
-        for(FishingLocation fishingLocation : fishingLocationList) {
-            fishingLocationArrayList.add(fishingLocation);
-        }
-        return fishingLocationArrayList;
+        return new ArrayList<>(fishingLocationList);
     }
 
 
