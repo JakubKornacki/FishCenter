@@ -38,7 +38,7 @@ public class CreatePost extends AppCompatActivity implements PostsCallback {
     private MediaController mediaController;
     private Uri userMediaUri;
     private PostsController postsController;
-    private User user;
+    private User currentUser;
     private String mimeType;
 
     @Override
@@ -53,8 +53,7 @@ public class CreatePost extends AppCompatActivity implements PostsCallback {
 
         postsController = new PostsController(CreatePost.this, this);
 
-        // extract the user profile picture passed in from the main activity used to create the new post
-        user = (User) getIntent().getExtras().getSerializable("user");
+        currentUser = (User) getIntent().getExtras().getSerializable("currentUser");
 
 
         final ImageButton goBackImageButton = findViewById(R.id.goBackImageButton);
@@ -80,7 +79,7 @@ public class CreatePost extends AppCompatActivity implements PostsCallback {
                         int flag = Intent.FLAG_GRANT_READ_URI_PERMISSION;
                         getContentResolver().takePersistableUriPermission(userMediaUri, flag);
                     }
-                    postsController.savePostInBackend(postBody, postTitle, user, mediaSelected, mimeType, userMediaUri);
+                    postsController.savePostInBackend(postBody, postTitle, currentUser, mediaSelected, mimeType, userMediaUri);
                 }
             }
         });
@@ -195,10 +194,6 @@ public class CreatePost extends AppCompatActivity implements PostsCallback {
         return true;
     }
 
-    private void savePostInFirestoreAndCloudStorage(String postBody, String postTitle) {
-        // mark the timestamp at the beginning of creating a post
-
-    }
 
     private void launchPhotoPicker(ActivityResultLauncher<PickVisualMediaRequest> pickMedia) {
         // Launch the photo picker and allow the user to choose only images.
@@ -220,6 +215,11 @@ public class CreatePost extends AppCompatActivity implements PostsCallback {
     @Override
     public void newPostSaved(LocalPost newPost) {
         returnNewPostToMainActivity(newPost);
+    }
+
+    @Override
+    public void isSynchronisationNecessary(boolean isNecessary) {
+        // nothing to do here
     }
 
 }

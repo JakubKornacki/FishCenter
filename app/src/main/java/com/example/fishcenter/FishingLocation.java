@@ -30,17 +30,13 @@ public class FishingLocation {
     @ColumnInfo (name = "overallRating")
     public double overallRating;
     @Nullable
-    @ColumnInfo (name = "noOfRatings")
-    public int noOfRatings;
-    @Nullable
     @ColumnInfo (name = "userRating")
     public double userRating;
     @Nullable
     @ColumnInfo (name = "ratingsList")
     public ArrayList<Double> ratingsList;
-    public FishingLocation(String locationName, String snippet, LatLng latLng, double overallRating, double userRating, ArrayList<Double> ratingsList){
+    public FishingLocation(String locationName, LatLng latLng, double overallRating, double userRating, ArrayList<Double> ratingsList){
         this.locationName = locationName;
-        this.snippet = snippet;
         this.lat = latLng.latitude;
         this.lng = latLng.longitude;
         this.overallRating = overallRating;
@@ -48,9 +44,8 @@ public class FishingLocation {
         this.ratingsList = ratingsList;
     }
 
-    public FishingLocation(String locationName, String snippet, double lat, double lng, double overallRating, double userRating, ArrayList<Double> ratingsList){
+    public FishingLocation(String locationName, double lat, double lng, double overallRating, double userRating, ArrayList<Double> ratingsList){
         this.locationName = locationName;
-        this.snippet = snippet;
         this.lat = lat;
         this.lng = lng;
         this.overallRating = overallRating;
@@ -68,11 +63,6 @@ public class FishingLocation {
     }
 
     @Nullable
-    public String getSnippet() {
-        return snippet;
-    }
-
-    @Nullable
     public double getOverallRating() {return overallRating;}
     @Nullable
     public void setOverallRating(double overallRating) {
@@ -86,10 +76,7 @@ public class FishingLocation {
     public ArrayList<Double> getRatingsList() {
         return ratingsList;
     }
-    @Nullable
-    public void setNoOfRatings(int noOfRatings) {
-        this.noOfRatings = noOfRatings;
-    }
+
     @Nullable
     public void setUserRating(double userRating) {
         this.userRating = userRating;

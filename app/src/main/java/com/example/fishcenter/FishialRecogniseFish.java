@@ -58,7 +58,7 @@ public class FishialRecogniseFish extends Thread {
                 // Start the activity called FishRecognisedActivity, the bundle with Fish objects should be attached and transferred over
                 context.startActivity(fishRecognisedIntent);
             } else {
-                Intent fishNotRecognisedOrOutOfAPICredits = new Intent(activity, FishNotRecognisedOrOutOfAPICredits.class);
+                Intent fishNotRecognisedOrOutOfAPICredits = new Intent(activity, FishNotRecognised.class);
                 context.startActivity(fishNotRecognisedOrOutOfAPICredits);
             }
         } catch (JSONException e) {

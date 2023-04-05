@@ -56,35 +56,30 @@ public class PostsController {
                 super.run();
                 // get the list of all posts from room database
                 List<LocalPost> localPostList = postsDao.getAllLocalPosts();
-                ArrayList<PostModel> recyclerViewPosts = new ArrayList<>();
-                for(LocalPost localPost : localPostList) {
-                    PostModel recyclerViewPost = new PostModel(context, localPost.getTitle(), localPost.getBody(), localPost.getProfilePhoto(), localPost.getNickname(), localPost.getPostUploadDate(), localPost.getNumLikes(), localPost.getNumDislikes(), localPost.getMedia(), localPost.getMimeType(), localPost.getUniquePostRef(), localPost.getUserId());
-                    recyclerViewPosts.add(recyclerViewPost);
-                }
-                // sort the posts as they do not come in a sorted order from the external databases
-                recyclerViewPosts.sort(new TimestampComparator());
+                ArrayList<PostModel> recyclerViewPosts = convertLocalPostsToRecyclerViewPosts(localPostList);
                 postsCallback.userPostsReady(recyclerViewPosts);
             }
         }.start();
     }
 
-
-    private void updatePostInRoomDatabase(LocalPost newLocalPost) {
-        String uniquePostRef = newLocalPost.getUniquePostRef();
-        // update the Room database
-        if (postsDao.findLocalPostByUniqueRef(uniquePostRef) == null) {
-            postsDao.addLocalPost(newLocalPost);
-        } else {
-            postsDao.updateLocalPost(newLocalPost);
-        }
+    private void updatePostInRoomDatabase(ArrayList<LocalPost> localPosts) {
+       for(LocalPost localPost : localPosts) {
+           String uniquePostRef = localPost.getUniquePostRef();
+           // update the Room database
+           if (postsDao.findLocalPostByUniqueRef(uniquePostRef) == null) {
+               postsDao.addLocalPost(localPost);
+           } else {
+               postsDao.updateLocalPost(localPost);
+           }
+       }
+       // load new posts after sync complete
+       loadPostsFromRoomDatabase();
     }
 
     public void addLocalPostToRoomDatabase(LocalPost localPost) {
         postsDao.addLocalPost(localPost);
-        List<LocalPost> localPosts = postsDao.getAllLocalPosts();
-        ArrayList<PostModel> recyclerViewPosts = convertLocalPostsToRecyclerViewPosts(localPosts);
-        postsCallback.userPostsReady(recyclerViewPosts);
     }
+
 
     private ArrayList<PostModel> convertLocalPostsToRecyclerViewPosts(List<LocalPost> localPosts) {
         ArrayList<PostModel> recyclerViewPosts = new ArrayList<>();
@@ -94,13 +89,19 @@ public class PostsController {
         return recyclerViewPosts;
     }
 
-    public void getPostsFromBackend() {
+    public void synchronizeRoomDatabaseWithFirestore(int numPostsExisting) {
         firestore.collection("posts").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                ArrayList<PostModel> posts = new ArrayList<>();
+                ArrayList<LocalPost> localPosts = new ArrayList<>();
                 int numPostsToLoad = queryDocumentSnapshots.size();
-                // get all posts in firestore
+                if(numPostsToLoad == numPostsExisting) {
+                    postsCallback.isSynchronisationNecessary(false);
+                    return;
+                } else {
+                    postsCallback.isSynchronisationNecessary(true);
+                }
+                // get all localPosts in firestore
                 for (QueryDocumentSnapshot post : queryDocumentSnapshots) {
                     String nickname = post.getString("nickname");
                     String title = post.getString("title");
@@ -122,7 +123,7 @@ public class PostsController {
                         public void onComplete(@NonNull Task<byte[]> task) {
                             byte[] userProfilePictureBytes = task.getResult();
                             // the following code downloads the uri of the media rather than the files itself this
-                            // is done in order to note flood the user memory with posts, rather than that each
+                            // is done in order to note flood the user memory with localPosts, rather than that each
                             // local post has the download url of the media which it can downloaded at runtime
                             // and when the application closes the downloaded data is not stored the user device
                             postMediaReference.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
@@ -140,12 +141,11 @@ public class PostsController {
                                         newLocalPost = new LocalPost(title, body, userProfilePictureBytes, nickname, postUploadDate, numLikes, numDislikes, null,null, uniquePostRef, userId);
                                     }
                                     // update room database
-                                    updatePostInRoomDatabase(newLocalPost);
                                     // add the new post which will be displayed in the recycler view
-                                    posts.add(new PostModel(context, newLocalPost));
-                                    if(posts.size() == numPostsToLoad) {
-                                        posts.sort(new TimestampComparator());
-                                        postsCallback.userPostsReady(posts);
+                                    localPosts.add(newLocalPost);
+                                    // if this is the last post return sorted arraylist to the main page
+                                    if(localPosts.size() == numPostsToLoad) {
+                                        updatePostInRoomDatabase(localPosts);
                                     }
                                 }
                             });

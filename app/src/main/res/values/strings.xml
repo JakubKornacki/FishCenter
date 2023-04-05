@@ -42,7 +42,7 @@
     <string name="tellUsWhatsOnYourMind">What\'s on your mind?</string>
     <string name="createPost">Post Creator</string>
     <string name="title">What\'s your post title?</string>
-    <string name="waitForPosts">Hang on while we load posts!</string>
+    <string name="waitForPosts">Hang on while we download your data!</string>
     <string name="noPostsToLoad">There are no posts to display!</string>
     <string name="waitForVideo">Hang on while we load your video!</string>
     <string name="waitForMapSetup">Hang on while we lay out your map!</string>

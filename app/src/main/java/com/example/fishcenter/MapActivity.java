@@ -18,7 +18,6 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
-import androidx.room.Room;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -33,31 +32,25 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 
-public class MapActivity extends AppCompatActivity implements OnMapReadyCallback {
-
+public class MapActivity extends AppCompatActivity implements OnMapReadyCallback, FishingLocationsCallback {
     private GoogleMap googleMap;
     private ImageButton goBackImageButton;
     private ImageButton logoutImageButton;
     private LinearLayout progressSpinnerLayout;
-    private final FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
-    private final FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
-    private final String userId = firebaseAuth.getCurrentUser().getUid();
+    private FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
     private Toolbar toolbar;
-    private FishingLocationDatabase fishingLocationDatabase;
-    private FishingLocationDao fishingLocationDao;
     private SupportMapFragment mapFragment;
     private CustomFishingLocationInfoWindowAdapter adapter;
     private ImageView syncRoomWithFirestoreButton;
     private ArrayList<Marker> refMapMarkers = new ArrayList<>();
+    private FishingLocation currentFishingLocation;
+    private FishingLocationsController fishingLocationsController;
+    private User currentUser;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,15 +60,14 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.mapFragment);
         mapFragment.getMapAsync(this);
 
-        fishingLocationDatabase = Room.databaseBuilder(MapActivity.this, FishingLocationDatabase.class, "fishLocationDatabase").fallbackToDestructiveMigration().allowMainThreadQueries().build();
-        fishingLocationDao =  fishingLocationDatabase.fishingLocationDao();
-
+        currentUser = (User) getIntent().getExtras().getSerializable("currentUser");
 
         // need this as google maps overwrite the view and make the toolbar dis
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
+        fishingLocationsController = new FishingLocationsController(MapActivity.this, this);
 
 
         goBackImageButton = findViewById(R.id.goBackImageButton);
@@ -98,8 +90,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         syncRoomWithFirestoreButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                synchronizeRoomDatabaseWithFirestore();
-                setupMapWithMarkersFromRoomDatabase();
+                int numExistingLocations = refMapMarkers.size();
+                fishingLocationsController.synchronizeRoomDatabaseWithFirestore(currentUser, numExistingLocations);
             }
         });
     }
@@ -125,14 +117,14 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         adapter = new CustomFishingLocationInfoWindowAdapter(getApplicationContext());
         googleMap.setInfoWindowAdapter(adapter);
         // setup markers that are in the user ROOM database
-        setupMapWithMarkersFromRoomDatabase();
+        fishingLocationsController.getFishingLocationsFromRoomDatabase();
         // snackBar to instruct the user how to use the map
         createMapInstructionsSnackBar();
         googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(@NonNull Marker marker) {
-
                 LatLng markerPosition = marker.getPosition();
+                fishingLocationsController.getCurrentFishingLocation(markerPosition);
                 String tidesData;
                 try {
                     tidesData = getTidesDataForMarker(markerPosition);
@@ -141,7 +133,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     // contain valid coordinates if a marker was created for it
                     throw new RuntimeException(e);
                 }
-                String ratingData = getRatingDataForMarker(markerPosition);
+                String ratingData = getRatingDataForCurrentlySelectedFishingLocation();
                 // need to concatenate both for display purposes as marker
                 // only contains 1 snippet and all data to be displayed
                 // needs to fit within it
@@ -170,7 +162,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         googleMap.setOnInfoWindowLongClickListener(new GoogleMap.OnInfoWindowLongClickListener() {
             @Override
             public void onInfoWindowLongClick(@NonNull Marker marker) {
-                createReviewFishingLocationAlertDialog(marker.getPosition());
+                double currentUserRating = currentFishingLocation.getUserRating();
+                createReviewFishingLocationAlertDialog(currentUserRating);
             }
         });
     }
@@ -183,34 +176,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         // define the new camera position and animate the camera to the new position
         CameraPosition newCameraPosition = new CameraPosition(marker.getPosition(),currentZoom, currentTilt, currentBearing);
         map.animateCamera(CameraUpdateFactory.newCameraPosition(newCameraPosition));
-    }
-
-    public void setupMapWithMarkersFromRoomDatabase() {
-        new Thread() {
-            @Override
-            public void run() {
-                super.run();
-                for(FishingLocation fishingLocation : fishingLocationDao.getAllFishingLocations()) {
-                    LatLng position = fishingLocation.getPosition();
-                    String locationName = fishingLocation.getLocationName();
-                    // both operation below need to be run on the UI thread as only it can modify the views
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if(findMarkerByLatLng(position) == null) {
-                                createMarkerFromRoomDatabase(locationName, position);
-                            }
-                        }
-                    });
-                }
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        showSpinnerAndDisableComponents(false);
-                    }
-                });
-            }
-        }.start();
     }
 
     private void createMapInstructionsSnackBar() {
@@ -230,15 +195,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         instructionSnackBar.show();
     }
 
-
-    private Marker findMarkerByLatLng(LatLng position) {
-        for(int i = 0; i < refMapMarkers.size(); i++) {
-            if(refMapMarkers.get(i).getPosition().equals(position)){
-                return refMapMarkers.get(i);
-            }
-        }
-        return null;
-    }
     private String getTidesDataForMarker(LatLng position) throws InvalidLocationException {
         double longitude = position.longitude;
         double latitude = position.latitude;
@@ -255,20 +211,15 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         return getTidesData.getTidesData();
     }
 
-    private String getRatingDataForMarker(LatLng position) {
-        double longitude = position.longitude;
-        double latitude = position.latitude;
-        FishingLocation fishingLocation = fishingLocationDao.findFishingLocationByLatLng(latitude, longitude);
-        if(fishingLocation == null) {
+    private String getRatingDataForCurrentlySelectedFishingLocation() {
+        if(currentFishingLocation == null) {
             return "\nThis location is rated: 0.0 \n\nPress on the window to rate the location!\n";
         } else {
-            return "\nThis location is rated: " + fishingLocation.getOverallRating() + "\n\nPress on the window to rate the location!\n";
+            return "\nThis location is rated: " + currentFishingLocation.getOverallRating() + "\n\nPress on the window to rate the location!\n";
         }
     }
 
-    private void createReviewFishingLocationAlertDialog(LatLng position) {
-        double longitude = position.longitude;
-        double latitude = position.latitude;
+    private void createReviewFishingLocationAlertDialog(double currentUserRating) {
         AlertDialog.Builder reviewLocationDialogBuilder = new AlertDialog.Builder(MapActivity.this);
         reviewLocationDialogBuilder.setTitle("Give a rating of this location!");
         // define the rating bar
@@ -277,25 +228,22 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         // linear layout to hold the rating bar that allows to define params to wrap content so rating bar does not overflow and stays at 5 stars
         LinearLayout ratingBarLinearLayout = new LinearLayout(MapActivity.this);
         LinearLayout.LayoutParams ratingBarLinearLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        // move the rating bar a bit down
         ratingBarLinearLayoutParams.setMargins(0,15,0,0);
         // set the layout params to the rating bar
         ratingBar.setLayoutParams(ratingBarLinearLayoutParams);
         // put the rating bar inside of the linear layout center the layout and add it into the dialog box
         ratingBarLinearLayout.addView(ratingBar);
         ratingBarLinearLayout.setGravity(Gravity.CENTER);
+        ratingBar.setRating((float) currentUserRating);
         reviewLocationDialogBuilder.setView(ratingBarLinearLayout);
-        // get the rating of the location in question which will show the user his previous rating of this location
-        double fishingLocationRating = fishingLocationDao.findFishingLocationByLatLng(latitude, longitude).getUserRating();
-        ratingBar.setRating((float) fishingLocationRating);
         reviewLocationDialogBuilder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 double newUserRating = ratingBar.getRating();
                 // if the user has actually rated an location
                 if(newUserRating != 0.0) {
-                    updateFishingLocationRatingInFirestore(position, newUserRating);
-                    updateFishingLocationRatingInRoomDatabase(position, newUserRating);
+                    fishingLocationsController.updateFishingLocationRatingInFirestore(currentFishingLocation, currentUser, newUserRating);
+                    fishingLocationsController.updateFishingLocationRatingInRoomDatabase(currentFishingLocation, newUserRating);
                 } else {
                     Toast.makeText(MapActivity.this, "Your rating was not saved! Please select a value!", Toast.LENGTH_SHORT).show();
                 }
@@ -304,48 +252,11 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         reviewLocationDialogBuilder.show();
     }
 
-
-    private void updateFishingLocationRatingInRoomDatabase(LatLng position, double newUserRating) {
-        double longitude = position.longitude;
-        double latitude = position.latitude;
-        // save the entry in ROOM and update the corresponding object
-        FishingLocation fishingLocation = fishingLocationDao.findFishingLocationByLatLng(latitude, longitude);
-        double overallRating = 0, averageRating;
-        double currentUserRating = fishingLocation.getUserRating();
-        ArrayList<Double> ratings = fishingLocation.getRatingsList();
-        if(ratings == null) {
-            ratings = new ArrayList<>();
-        }
-        // if the user has not rated the location before add the new rating
-        if(currentUserRating == 0) {
-            ratings.add(newUserRating);
-        } else {
-            // if the user rated the location before replace the rating
-            ratings.remove(currentUserRating);
-            ratings.add(newUserRating);
-        }
-        // recalculate the total rating
-        for(int j = 0; j < ratings.size(); j++) {
-            overallRating += ratings.get(j);
-        }
-        // get the average rating
-        averageRating = overallRating / ratings.size();
-        // update the entry in the ROOM database
-        fishingLocation.setUserRating(newUserRating);
-        fishingLocation.setOverallRating(averageRating);
-        fishingLocationDao.updateFishingLocation(fishingLocation);
-        // update the marker on the map
-        Marker markerToUpdate = findMarkerByLatLng(position);
-        // should not happen as the refMapMarkers list should contain this marker
-        if (markerToUpdate != null) {
-            updateMarkerOnMapWithNewOverallRating(markerToUpdate);
-        }
-    }
     private void updateMarkerOnMapWithNewOverallRating(Marker marker) {
         try {
             LatLng markerPosition = marker.getPosition();
             String tidesData = getTidesDataForMarker(markerPosition);
-            String ratingData = getRatingDataForMarker(markerPosition);
+            String ratingData = getRatingDataForCurrentlySelectedFishingLocation();
             marker.setSnippet(tidesData + ratingData);
             adapter.setLocationName(marker.getTitle());
             adapter.setLocationData(marker.getSnippet());
@@ -355,50 +266,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             throw new RuntimeException(e);
         }
     }
-    private void updateFishingLocationRatingInFirestore(LatLng position, double newUserRating){
-        // call to firebase to save the rating in the backend
-        CollectionReference fishingLocations = firebaseFirestore.collection("fishingLocations");
-        double latitude = position.latitude;
-        double longitude = position.longitude;
-        // find the fishing location based on latitude and longitude
-        fishingLocations.whereEqualTo("latitude", latitude).whereEqualTo("longitude", longitude).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-            @Override
-            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                // get the fishing location returned there should only be one instance of it
-                String fishingLocationFirestoreRef = queryDocumentSnapshots.getDocuments().get(0).getId();
-                fishingLocations.document(fishingLocationFirestoreRef).collection("ratings").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                    @Override
-                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                        Map<String, Object> ratingMap = new HashMap<>();
-                        ratingMap.put("userId", userId);
-                        ratingMap.put("rating", newUserRating);
-                        List<DocumentSnapshot> userRatings = queryDocumentSnapshots.getDocuments();
-                        // use the stream filter to find if the user has already liked this rating and collect the document reference into a list of document snapshots
-                        DocumentSnapshot userRating = getUserPreviousRating(userRatings, userId);
-                        // if the entry for this user exists update it
-                        if(userRating != null) {
-                            // there should only be one entry in the list per user
-                            String ratingFirestoreRef = userRating.getId();
-                            fishingLocations.document(fishingLocationFirestoreRef).collection("ratings").document(ratingFirestoreRef).update(ratingMap);
-                            Toast.makeText(MapActivity.this, "We have updated your rating with " + newUserRating + "!", Toast.LENGTH_SHORT).show();
-                        } else {
-                            // the user did not like this location yet so create a new entry
-                            fishingLocations.document(fishingLocationFirestoreRef).collection("ratings").add(ratingMap);
-                            Toast.makeText(MapActivity.this, "We have received your rating of " + newUserRating + "!", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-            }
-        });
-    }
-    private DocumentSnapshot getUserPreviousRating(List<DocumentSnapshot> fishingLocationRatings, String userId) {
-        for(DocumentSnapshot rating : fishingLocationRatings) {
-            if(rating.get("userId").equals(userId)){
-                return rating;
-            }
-        }
-        return null;
-    }
+
     private void createNewFishingLocationAlertDialog(LatLng position) {
         AlertDialog.Builder newLocationBuilder = new AlertDialog.Builder(MapActivity.this);
         newLocationBuilder.setTitle("How would you like to call this location?");
@@ -425,7 +293,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             // this may throw an invalid location exception
             // if this is the case then non of the below code will execute
             String tidesData = getTidesDataForMarker(position);
-            String ratingData = getRatingDataForMarker(position);
+            String ratingData = getRatingDataForCurrentlySelectedFishingLocation();
             MarkerOptions markerOption = new MarkerOptions().position(position).title(locationName).snippet(tidesData + ratingData);
             Marker marker = googleMap.addMarker(markerOption);
             // add marker to reference ArrayList
@@ -439,79 +307,79 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             // this may throw an invalid location exception
             // if this is the case then non of the below code will execute
             String tidesData = getTidesDataForMarker(position);
-            String ratingData = getRatingDataForMarker(position);
+            String ratingData = getRatingDataForCurrentlySelectedFishingLocation();
             MarkerOptions markerOption = new MarkerOptions().position(position).title(locationName).snippet(tidesData + ratingData);
             Marker marker = googleMap.addMarker(markerOption);
             // add marker to reference ArrayList
             refMapMarkers.add(marker);
-            saveNewMarkerInFirestore(locationName, position);
-            saveNewMarkerInRoomDatabase(locationName, position);
+            fishingLocationsController.saveNewMarkerInFirestore(locationName, position);
+            fishingLocationsController.saveNewMarkerInRoomDatabase(locationName, position);
         } catch (InvalidLocationException e) {
             Toast.makeText(MapActivity.this, "Cannot place a marker on land!", Toast.LENGTH_SHORT).show();
         }
     }
-    private void saveNewMarkerInRoomDatabase(String locationName, LatLng position) {
-        // proceed to save a valid location in ROOM
-        // snippet is left out intentionally, it needs to be defines because
-        // of the interface but the snippet will be defined dynamically
-        FishingLocation newFishingLocation = new FishingLocation(locationName, null, position, 0, 0, null);
-        fishingLocationDao.addFishingLocation(newFishingLocation);
-    }
-    private void saveNewMarkerInFirestore(String locationName, LatLng position) {
-        // proceed to save a valid location in firestore
-        Map<String, Object> fishingLocationMap = new HashMap<>();
-        fishingLocationMap.put("name", locationName);
-        fishingLocationMap.put("latitude", position.latitude);
-        fishingLocationMap.put("longitude", position.longitude);
-        firebaseFirestore.collection("fishingLocations").add(fishingLocationMap);
+
+    @Override
+    public void currentFishingLocationReady(FishingLocation currentFishingLocation) {
+        this.currentFishingLocation = currentFishingLocation;
     }
 
+    @Override
+    public void fishingLocationUpdated(LatLng position) {
+        Marker markerToUpdate = findMarkerByLatLng(position);
+        // should not happen as the refMapMarkers list should contain this marker
+        if (markerToUpdate != null) {
+            updateMarkerOnMapWithNewOverallRating(markerToUpdate);
+        }
+    }
 
+    @Override
+    public void fishingLocationRatingUpdated(boolean previouslyUpdated, double newUserRating) {
+        if(previouslyUpdated) {
+            Toast.makeText(MapActivity.this, "We have updated your rating with " + newUserRating + "!", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(MapActivity.this, "We have received your rating of " + newUserRating + "!", Toast.LENGTH_SHORT).show();
+        }
+    }
 
-    private void synchronizeRoomDatabaseWithFirestore() {
-        // if true then the database needs to be setup first
-        CollectionReference fishingLocations = firebaseFirestore.collection("fishingLocations");
-        fishingLocations.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-            @Override
-            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                for(DocumentSnapshot fishingLocation : queryDocumentSnapshots) {
-                    String locationName = fishingLocation.getString("name");
-                    double lat = fishingLocation.getDouble("latitude");
-                    double lng = fishingLocation.getDouble("longitude");
-                    fishingLocations.document(fishingLocation.getId()).collection("ratings").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                        @Override
-                        public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                            double overallRating = 0, userRating = 0, averageRating = 0;
-                            int noOfRatings =  queryDocumentSnapshots.getDocuments().size();
-                            ArrayList<Double> ratings = new ArrayList<>();
-                            // loop through all ratings and accumulate the total rating
-                            for(DocumentSnapshot ratingFromFirestore : queryDocumentSnapshots) {
-                                overallRating += ratingFromFirestore.getDouble("rating");
-                                // if the current user rated this location extract his rating
-                                if(ratingFromFirestore.get("userId").equals(userId)) {
-                                    userRating = ratingFromFirestore.getDouble("rating");
-                                }
-                                ratings.add(ratingFromFirestore.getDouble("rating"));
-                            }
-                            // divide the total rating by the number of ratings to get the average
-                            if(overallRating != 0) {
-                                 averageRating = overallRating / noOfRatings;
-                            }
+    private Marker findMarkerByLatLng(LatLng position) {
+        for(int i = 0; i < refMapMarkers.size(); i++) {
+            if(refMapMarkers.get(i).getPosition().equals(position)){
+                return refMapMarkers.get(i);
+            }
+        }
+        return null;
+    }
 
-                            // update the room database
-                            if(fishingLocationDao.findFishingLocationByLatLng(lat, lng) == null) {
-                                fishingLocationDao.addFishingLocation(new FishingLocation(locationName, null, lat, lng, averageRating, userRating, ratings));
-                            } else {
-                                FishingLocation fishingLocationInRoom = fishingLocationDao.findFishingLocationByLatLng(lat, lng);
-                                fishingLocationInRoom.setOverallRating(averageRating);
-                                fishingLocationInRoom.setUserRating(userRating);
-                                fishingLocationInRoom.setRatingsList(ratings);
-                                fishingLocationDao.updateFishingLocation(fishingLocationInRoom);
-                            }
-                        }
-                    });
+    @Override
+    public void fishingLocationsReady(ArrayList<FishingLocation> fishingLocations) {
+        for(FishingLocation fishingLocation : fishingLocations) {
+            LatLng position = fishingLocation.getPosition();
+            String locationName = fishingLocation.getLocationName();
+            // only create markers which do not already exist
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if(findMarkerByLatLng(position) == null) {
+                        createMarkerFromRoomDatabase(locationName, position);
+                    }
                 }
+            });
+        }
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                showSpinnerAndDisableComponents(false);
             }
         });
+    }
+
+    @Override
+    public void isSynchronisationNecessary(boolean isNecessary) {
+        if(isNecessary) {
+            showSpinnerAndDisableComponents(true);
+        } else {
+            Toast.makeText(MapActivity.this, "Your map is up to date!", Toast.LENGTH_SHORT).show();
+        }
     }
 }

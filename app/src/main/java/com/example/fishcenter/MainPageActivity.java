@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -67,7 +68,7 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
             @Override
             public void onClick(View view) {
                 Intent createPost = new Intent(getApplicationContext(), CreatePost.class);
-                createPost.putExtra("user", currentUser);
+                createPost.putExtra("currentUser", currentUser);
                 startActivityForResult(createPost, 1);
             }
         });
@@ -94,6 +95,7 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
             @Override
             public void onClick(View view) {
                 Intent mapActivity = new Intent(getApplicationContext(), MapActivity.class);
+                mapActivity.putExtra("currentUser", currentUser);
                 startActivity(mapActivity);
             }
         });
@@ -102,8 +104,8 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
         reloadPostsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                showSpinnerAndDisableComponents(true);
-                postsController.getPostsFromBackend();
+                int numPostsExisting = posts.size();
+                postsController.synchronizeRoomDatabaseWithFirestore(numPostsExisting);
             }
         });
 
@@ -138,6 +140,7 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
             // add the local post to the room database
             LocalPost localPost = (LocalPost) data.getSerializableExtra("localPost");
             postsController.addLocalPostToRoomDatabase(localPost);
+            postsController.loadPostsFromRoomDatabase();
         }
     }
 
@@ -178,6 +181,7 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
                 posts.add(userPosts.get(i));
             }
         }
+        posts.sort(new TimestampComparator());
     }
 
     private boolean isPostNotInTheList(PostModel post) {
@@ -202,8 +206,11 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
                     postsRecyclerView.setVisibility(View.VISIBLE);
                     linearLayoutNoPostsToLoad.setVisibility(View.GONE);
                 }
+                // only hide the spinner if the user data has been downloaded
+                if(currentUser != null) {
+                    showSpinnerAndDisableComponents(false);
+                }
                 adapter.notifyDataSetChanged();
-                showSpinnerAndDisableComponents(false);
             }
         });
     }
@@ -216,6 +223,15 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
     @Override
     public void newPostSaved(LocalPost newPost) {
         // nothing to do here
+    }
+
+    @Override
+    public void isSynchronisationNecessary(boolean isNecessary) {
+        if(isNecessary) {
+            showSpinnerAndDisableComponents(true);
+        } else {
+            Toast.makeText(MainPageActivity.this, "Your posts are up to date!", Toast.LENGTH_SHORT).show();
+        }
     }
 }
 

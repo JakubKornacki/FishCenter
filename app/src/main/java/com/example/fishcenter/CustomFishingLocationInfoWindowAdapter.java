@@ -12,17 +12,17 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.Marker;
 
 public class CustomFishingLocationInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
-    private Context con;
+    private Context context;
     public String name;
     public String data;
 
-    public CustomFishingLocationInfoWindowAdapter(Context con) {
-        this.con = con;
+    public CustomFishingLocationInfoWindowAdapter(Context context) {
+        this.context = context;
     }
     @Nullable
     @Override
     public View getInfoContents(@NonNull Marker marker) {
-        View customInfoWindow = LayoutInflater.from(con).inflate(R.layout.layout_fishing_location, null);
+        View customInfoWindow = LayoutInflater.from(context).inflate(R.layout.layout_fishing_location, null);
         TextView locationName = customInfoWindow.findViewById(R.id.fishingLocationName);
         TextView locationData = customInfoWindow.findViewById(R.id.data);
 

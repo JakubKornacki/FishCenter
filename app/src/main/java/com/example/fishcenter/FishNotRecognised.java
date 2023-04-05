@@ -1,19 +1,15 @@
 package com.example.fishcenter;
 
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.media.Image;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
 
-public class FishNotRecognisedOrOutOfAPICredits extends AppCompatActivity {
+public class FishNotRecognised extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,7 +36,7 @@ public class FishNotRecognisedOrOutOfAPICredits extends AppCompatActivity {
         logoutImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                AlertUtilities.createLogoutDialog(FishNotRecognisedOrOutOfAPICredits.this, firebaseAuth);
+                AlertUtilities.createLogoutDialog(FishNotRecognised.this, firebaseAuth);
             }
         });
     }
