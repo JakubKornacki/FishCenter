@@ -11,9 +11,9 @@ public class UserController {
 
     private final FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
     private final FirebaseStorage firebaseStorage = FirebaseStorage.getInstance();
-    private String currentUserId;
+    private final String currentUserId;
     private User currentUser;
-    private UserCallback userCallback;
+    private final UserCallback userCallback;
 
     public UserController(String currentUserId, UserCallback userCallback) {
         this.currentUserId = currentUserId;

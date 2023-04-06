@@ -1,8 +1,6 @@
 package com.example.fishcenter;
 
 import static androidx.core.content.ContextCompat.startActivity;
-
-import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;

@@ -1,6 +1,8 @@
 package com.example.fishcenter;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -12,17 +14,17 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
 
 public class FishialRecogniseFish extends Thread {
-    private final FishImage fishImage;
+    private final Uri image;
     private final Context context;
-
-
-
-    public FishialRecogniseFish(FishImage fishImage, Context context) {
-        this.fishImage = fishImage;
+    private final ContentResolver contentResolver;
+    public FishialRecogniseFish(Uri image, Context context) {
+        this.image = image;
         this.context = context;
+        contentResolver = context.getContentResolver();
     }
 
     @Override
@@ -31,8 +33,8 @@ public class FishialRecogniseFish extends Thread {
             super.run();
             // get the access token to use the Fishial.AI api
             JSONObject accessToken = fetchAuthorizationToken();
-            JSONObject dataForCloudImageUpload = obtainDataForCloudUpload(accessToken, fishImage);
-            uploadFishImageInCloud(dataForCloudImageUpload, fishImage);
+            JSONObject dataForCloudImageUpload = obtainDataForCloudUpload(accessToken, image);
+            uploadFishImageInCloud(dataForCloudImageUpload, image);
             JSONObject fishialImageRecognitionData = fishDetection(dataForCloudImageUpload, accessToken);
             // way of passing objects between activities using Intent with the help of serializable interface
             // https://stackoverflow.com/questions/13601883/how-to-pass-arraylist-of-objects-from-one-to-another-activity-using-intent-in-an
@@ -49,11 +51,13 @@ public class FishialRecogniseFish extends Thread {
                 // Start the activity called FishRecognisedActivity, the bundle with Fish objects should be attached and transferred over
                 context.startActivity(fishRecognisedIntent);
             } else {
-                throw new FishNotRecognisedException("Fish could not be recognised! Check image or API credits!");
+                throw new FishNotRecognisedException("Fish could not be recognised! Check image supplied, API credits or internet connection!");
             }
         } catch (JSONException | IOException | FishNotRecognisedException exception) {
             Intent fishNotRecognisedOrOutOfAPICredits = new Intent(context, FishNotRecognised.class);
             context.startActivity(fishNotRecognisedOrOutOfAPICredits);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -182,14 +186,15 @@ public class FishialRecogniseFish extends Thread {
     }
 
 
-    private JSONObject obtainDataForCloudUpload(JSONObject accessToken, FishImage fishImage) throws JSONException, IOException {
+    private JSONObject obtainDataForCloudUpload(JSONObject accessToken, Uri fishImage) throws JSONException, IOException, NoSuchAlgorithmException {
         JSONObject response = null;
         JSONObject mainJsonBody = new JSONObject();
-        mainJsonBody.put("filename", fishImage.getImageFileName());
-        mainJsonBody.put("content_type", fishImage.getImageFileMimeType());
-        mainJsonBody.put("byte_size", fishImage.getImageFileSize());
+        mainJsonBody.put("filename", MediaUtilities.getMediaFileName(contentResolver, fishImage));
+        mainJsonBody.put("content_type", MediaUtilities.getMediaMimeType(contentResolver, fishImage));
+        mainJsonBody.put("byte_size", MediaUtilities.getImageFileBytes(contentResolver, fishImage));
         // workaround for removing "\n" from the end of the base64 checksum
-        mainJsonBody.put("checksum", fishImage.getImageFileBytesArrayMD5EncodedBase64().substring(0,23) + "=");
+        byte[] imageM5EncodedBytes = MediaUtilities.getMediaMD5Checksum(contentResolver, fishImage);
+        mainJsonBody.put("checksum", MediaUtilities.getBase64EncodedMedia(imageM5EncodedBytes).substring(0,23) + "=");
         // wrap around the above data in to the another object called blob as required by the endpoint
         JSONObject blob = new JSONObject();
         blob.put("blob", mainJsonBody);
@@ -233,14 +238,14 @@ public class FishialRecogniseFish extends Thread {
         return response;
     }
 
-    private void uploadFishImageInCloud(JSONObject pathForCloudUpload, FishImage fishImage) throws JSONException, IOException {
+    private void uploadFishImageInCloud(JSONObject pathForCloudUpload, Uri fishImage) throws JSONException, IOException {
         // get values of the JSON object used for uploading the image to the cloud
         JSONObject directUploadHeader = pathForCloudUpload.getJSONObject("direct-upload");
         String urlString = directUploadHeader.getString("url");
         JSONObject imageHeaders = directUploadHeader.getJSONObject("headers");
         String contentMd5 = imageHeaders.getString("Content-MD5");
         String contentDisposition = imageHeaders.getString("Content-Disposition");
-        byte[] byteArray = fishImage.getImageFileBytesArray();
+        byte[] byteArray = MediaUtilities.getImageFileBytes(contentResolver, fishImage);
         URL url = new URL(urlString);
         // establish the connection with the endpoint
         HttpURLConnection http = (HttpURLConnection) url.openConnection();

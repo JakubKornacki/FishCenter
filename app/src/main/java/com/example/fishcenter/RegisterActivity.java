@@ -48,7 +48,6 @@ public class RegisterActivity extends AppCompatActivity {
     private ImageButton passwordVisibleImageButton;
     private ImageButton retypePasswordVisibleImageButton;
     private LinearLayout progressSpinnerLayout;
-    private LinearLayout mainContentLayout;
     private ImageButton registerButton;
     private LinearLayout backToLoginLayout;
 
@@ -64,7 +63,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         progressSpinnerLayout = findViewById(R.id.progressSpinnerLayout);
 
-        mainContentLayout = findViewById(R.id.mainContentLayout);
+        LinearLayout mainContentLayout = findViewById(R.id.mainContentLayout);
         backToLoginLayout = createBackToLoginLayout(mainContentLayout);
         mainContentLayout.addView(backToLoginLayout);
 

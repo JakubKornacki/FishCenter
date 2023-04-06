@@ -3,6 +3,7 @@ package com.example.fishcenter;
 
 
 import android.annotation.SuppressLint;
+import android.content.ContentResolver;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
@@ -32,6 +33,7 @@ public class FishRecognitionActivity extends AppCompatActivity {
     private ImageButton goBackImageButton;
     private ImageButton logoutImageButton;
     private FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+    private ContentResolver contentResolver;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -45,7 +47,7 @@ public class FishRecognitionActivity extends AppCompatActivity {
         logoutImageButton = findViewById(R.id.logoutImageButton);
         // allow for the fish image to be clipped
         fishImageImageView.setClipToOutline(true);
-
+        contentResolver = getContentResolver();
         goBackImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -65,11 +67,11 @@ public class FishRecognitionActivity extends AppCompatActivity {
             public void onClick(View view) {
                 // if the user has not selected an image create a toast that explains the error
                 if (imageSelected) {
-                    FishImage fishImage = new FishImage(userFishImage, getContentResolver());
-                    if(MediaUtilities.supportedImageMimeTypes.contains(fishImage.getImageFileMimeType())) {
+                    String mediaMimeType = MediaUtilities.getMediaMimeType(contentResolver, userFishImage);
+                    if(MediaUtilities.supportedImageMimeTypes.contains(mediaMimeType) && !mediaMimeType.equals("image/gif") ) {
                         showSpinnerAndDisableComponents(true);
                         // start the new thread to fetch data about the fish
-                        FishialRecogniseFish fetchFishialRecognitionDataThread = new FishialRecogniseFish(fishImage, FishRecognitionActivity.this);
+                        FishialRecogniseFish fetchFishialRecognitionDataThread = new FishialRecogniseFish(userFishImage, FishRecognitionActivity.this);
                         fetchFishialRecognitionDataThread.start();
                     } else {
                         Toast.makeText(getBaseContext(), "Unsupported file format!", Toast.LENGTH_SHORT).show();

@@ -1,6 +1,7 @@
 package com.example.fishcenter;
 
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -40,6 +41,7 @@ public class CreatePost extends AppCompatActivity implements PostsCallback {
     private PostsController postsController;
     private User currentUser;
     private String mimeType;
+    private ContentResolver contentResolver;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -50,7 +52,7 @@ public class CreatePost extends AppCompatActivity implements PostsCallback {
         mediaController = new MediaController(this);
         userVideoView = findViewById(R.id.userVideoView);
         postTitleEditText = findViewById(R.id.postTitleEditText);
-
+        contentResolver = getContentResolver();
         postsController = new PostsController(CreatePost.this, this);
 
         currentUser = (User) getIntent().getExtras().getSerializable("currentUser");
@@ -109,7 +111,7 @@ public class CreatePost extends AppCompatActivity implements PostsCallback {
             if(uri != null) {
                 userImageView.setVisibility(View.GONE);
                 userVideoView.setVisibility(View.GONE);
-                String mimeType = MediaUtilities.extractMediaMimeType(uri, getContentResolver());
+                String mimeType = MediaUtilities.getMediaMimeType(contentResolver, userMediaUri);
                 if(MediaUtilities.supportedImageMimeTypes.contains(mimeType)) {
                     // load the image from the uri into the image view using glide
                     // Glide helps round off the corners and load media into the image view

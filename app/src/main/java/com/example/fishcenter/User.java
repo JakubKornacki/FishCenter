@@ -5,11 +5,11 @@ import java.util.ArrayList;
 
 public class User implements Serializable {
 
-    private String nickname;
-    private String userUid;
-    private ArrayList<String> postsLiked;
-    private ArrayList<String> postsDisliked;
-    private byte[] profilePicture;
+    private final String nickname;
+    private final String userUid;
+    private final ArrayList<String> postsLiked;
+    private final ArrayList<String> postsDisliked;
+    private final byte[] profilePicture;
 
     public User (String nickname, String userUid, ArrayList<String> postsLiked, ArrayList<String> postsDisliked, byte[] profilePicture) {
         this.nickname = nickname;

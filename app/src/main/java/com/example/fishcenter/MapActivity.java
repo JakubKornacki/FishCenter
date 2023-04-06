@@ -27,12 +27,8 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 
@@ -45,7 +41,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
     private Toolbar toolbar;
     private SupportMapFragment mapFragment;
-    private CustomFishingLocationInfoWindowAdapter adapter;
+    private FishingLocationInfoWindowAdapter adapter;
     private ImageView syncRoomWithFirestoreButton;
     private ArrayList<Marker> refMapMarkers = new ArrayList<>();
     private FishingLocation currentFishingLocation;
@@ -114,7 +110,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         this.googleMap = googleMap;
         googleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
-        adapter = new CustomFishingLocationInfoWindowAdapter(getApplicationContext());
+        adapter = new FishingLocationInfoWindowAdapter(getApplicationContext());
         googleMap.setInfoWindowAdapter(adapter);
         // setup markers that are in the user ROOM database
         fishingLocationsController.getFishingLocationsFromRoomDatabase();

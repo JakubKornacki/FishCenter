@@ -11,12 +11,12 @@ import androidx.annotation.Nullable;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.Marker;
 
-public class CustomFishingLocationInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
+public class FishingLocationInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
     private Context context;
     public String name;
     public String data;
 
-    public CustomFishingLocationInfoWindowAdapter(Context context) {
+    public FishingLocationInfoWindowAdapter(Context context) {
         this.context = context;
     }
     @Nullable
