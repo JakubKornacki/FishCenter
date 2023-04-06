@@ -3,9 +3,6 @@ import androidx.room.TypeConverter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-// https://developer.android.com/training/data-storage/room/referencing-data
-// converters class is necessary to instruct the ROOM database how to store data types other than primitives
-// ROOM database can store boxed types, therefore, Double[] values is perfectly valid and is equivalent to double[]
 
 public class FishingLocationConverters {
     @TypeConverter

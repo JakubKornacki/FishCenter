@@ -1,9 +1,7 @@
 package com.example.fishcenter;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -12,19 +10,14 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 
 public class FishialRecogniseFish extends Thread {
-    // get the access token to use the Fishial.AI api
-    private JSONObject accessToken;
-    private JSONObject dataForCloudImageUpload;
-    private JSONObject fishialImageRecognitionData;
-    private FishImage fishImage;
-    private Context context;
+    private final FishImage fishImage;
+    private final Context context;
+
 
 
     public FishialRecogniseFish(FishImage fishImage, Context context) {
@@ -36,18 +29,16 @@ public class FishialRecogniseFish extends Thread {
     public void run() {
         try {
             super.run();
-            accessToken = fetchAuthorizationToken();
-            dataForCloudImageUpload = obtainDataForCloudUpload(accessToken, fishImage);
+            // get the access token to use the Fishial.AI api
+            JSONObject accessToken = fetchAuthorizationToken();
+            JSONObject dataForCloudImageUpload = obtainDataForCloudUpload(accessToken, fishImage);
             uploadFishImageInCloud(dataForCloudImageUpload, fishImage);
-            fishialImageRecognitionData = fishDetection(dataForCloudImageUpload, accessToken);
-            // get Activity from context
-            // https://stackoverflow.com/questions/9891360/getting-activity-from-context-in-android
-            Activity activity = (Activity) context;
+            JSONObject fishialImageRecognitionData = fishDetection(dataForCloudImageUpload, accessToken);
             // way of passing objects between activities using Intent with the help of serializable interface
             // https://stackoverflow.com/questions/13601883/how-to-pass-arraylist-of-objects-from-one-to-another-activity-using-intent-in-an
             // ArrayList of Fish objects is created by parsing out the JSON data
             if(fishialImageRecognitionData.getJSONArray("results").length() != 0) {
-                Intent fishRecognisedIntent = new Intent(activity, FishRecognisedActivity.class);
+                Intent fishRecognisedIntent = new Intent(context, FishRecognisedActivity.class);
                 HashSet<Fish> fishes = parseJSONToFishObjectHashSet(fishialImageRecognitionData);
                 // New bundle which will be attached to the intent and passed over to the FishRecognisedActivity class
                 Bundle bundle = new Bundle();
@@ -58,284 +49,248 @@ public class FishialRecogniseFish extends Thread {
                 // Start the activity called FishRecognisedActivity, the bundle with Fish objects should be attached and transferred over
                 context.startActivity(fishRecognisedIntent);
             } else {
-                Intent fishNotRecognisedOrOutOfAPICredits = new Intent(activity, FishNotRecognised.class);
-                context.startActivity(fishNotRecognisedOrOutOfAPICredits);
+                throw new FishNotRecognisedException("Fish could not be recognised! Check image or API credits!");
             }
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
+        } catch (JSONException | IOException | FishNotRecognisedException exception) {
+            Intent fishNotRecognisedOrOutOfAPICredits = new Intent(context, FishNotRecognised.class);
+            context.startActivity(fishNotRecognisedOrOutOfAPICredits);
         }
     }
 
 
-    private HashSet<Fish> parseJSONToFishObjectHashSet(JSONObject fishesData){
-        try {
-            HashSet<Fish> fishes = new HashSet<>();
-            // get the species arrayList from fishesData (there is one entry for each fish identified in an image)
-            for(int i = 0; i < fishesData.getJSONArray("results").length(); i++) {
-                JSONObject result = fishesData.getJSONArray("results").getJSONObject(i);
-                JSONArray species = result.getJSONArray("species");
-                for (int j = 0; j < species.length(); j++) {
-                    // always first object
-                    JSONObject fishEntryInJSON = species.getJSONObject(0);
+    private HashSet<Fish> parseJSONToFishObjectHashSet(JSONObject fishesData) throws JSONException{
+        HashSet<Fish> fishes = new HashSet<>();
+        // get the species arrayList from fishesData (there is one entry for each fish identified in an image)
+        for(int i = 0; i < fishesData.getJSONArray("results").length(); i++) {
+            JSONObject result = fishesData.getJSONArray("results").getJSONObject(i);
+            JSONArray species = result.getJSONArray("species");
+            for (int j = 0; j < species.length(); j++) {
+                // always first object
+                JSONObject fishEntryInJSON = species.getJSONObject(0);
 
-                    // get fish description as variables
-                    String latinName = (fishEntryInJSON.getString("name") != null) ? fishEntryInJSON.getString("name") : "Unknown";
-                    float accuracy = (fishEntryInJSON.getString("accuracy") != null) ? Float.parseFloat(fishEntryInJSON.getString("accuracy")) : null;
+                // get fish description as variables
+                fishEntryInJSON.getString("name");
+                String latinName = fishEntryInJSON.getString("name");
+                fishEntryInJSON.getString("accuracy");
+                float accuracy = Float.parseFloat(fishEntryInJSON.getString("accuracy"));
 
-                    JSONObject fishData = fishEntryInJSON.getJSONObject("fishangler-data");
-                    String title = (fishData.has("title")) ? fishData.getString("title") : "Unknown";
+                JSONObject fishData = fishEntryInJSON.getJSONObject("fishangler-data");
+                String title = (fishData.has("title")) ? fishData.getString("title") : "Unknown";
 
-                    String mediaUri = null;
-                    if(fishData.has("photo")) {
-                        if(fishData.getJSONObject("photo").has("mediaUri")) {
-                            mediaUri = fishData.getJSONObject("photo").getString("mediaUri");
-                        }
+                String mediaUri = null;
+                if(fishData.has("photo")) {
+                    if(fishData.getJSONObject("photo").has("mediaUri")) {
+                        mediaUri = fishData.getJSONObject("photo").getString("mediaUri");
                     }
+                }
 
-                    String[] commonNames = null;
-                    if(fishData.has("commonNames")) {
-                        // parse out common names from JSON array to String array
-                        JSONArray commonNamesJSON = fishData.getJSONArray("commonNames");
-                        commonNames = new String[commonNamesJSON.length()];
-                        for (int k = 0; k < commonNamesJSON.length(); k++) {
-                            commonNames[k] = commonNamesJSON.getString(k);
-                        }
+                String[] commonNames = null;
+                if(fishData.has("commonNames")) {
+                    // parse out common names from JSON array to String array
+                    JSONArray commonNamesJSON = fishData.getJSONArray("commonNames");
+                    commonNames = new String[commonNamesJSON.length()];
+                    for (int k = 0; k < commonNamesJSON.length(); k++) {
+                        commonNames[k] = commonNamesJSON.getString(k);
                     }
+                }
 
-                    String distribution = (fishData.has("distribution")) ? fishData.getString("distribution") : "Unknown";
-                    boolean scales = fishData.getBoolean("brack");
-                    boolean saltWater = fishData.getBoolean("saltwater");
-                    boolean freshWater = fishData.getBoolean("fresh");
-                    String coloration = (fishData.has("coloration")) ? fishData.getString("coloration") : "Unknown";
-                    String feedingBehaviour = (fishData.has("feedingBehaviour")) ? fishData.getString("feedingBehaviour") : "Unknown";
-                    String healthWarnings = (fishData.has("healthWarnings")) ? fishData.getString("healthWarnings") : "Unknown";
-                    String foodValue = (fishData.has("foodValue")) ? fishData.getString("foodValue") : "Unknown" ;
+                String distribution = (fishData.has("distribution")) ? fishData.getString("distribution") : "Unknown";
+                boolean scales = fishData.getBoolean("brack");
+                boolean saltWater = fishData.getBoolean("saltwater");
+                boolean freshWater = fishData.getBoolean("fresh");
+                String coloration = (fishData.has("coloration")) ? fishData.getString("coloration") : "Unknown";
+                String feedingBehaviour = (fishData.has("feedingBehaviour")) ? fishData.getString("feedingBehaviour") : "Unknown";
+                String healthWarnings = (fishData.has("healthWarnings")) ? fishData.getString("healthWarnings") : "Unknown";
+                String foodValue = (fishData.has("foodValue")) ? fishData.getString("foodValue") : "Unknown" ;
 
-                    // parse out names of similar species for this fish
-                    String[] similarSpecies = null;
-                    if(fishData.has("similarSpecies")) {
-                        JSONArray similarSpeciesJSON = fishData.getJSONArray("similarSpecies");
-                        similarSpecies = new String[similarSpeciesJSON.length()];
-                        for (int l = 0; l < similarSpeciesJSON.length(); l++) {
-                            JSONObject similarFishJSON = similarSpeciesJSON.getJSONObject(l);
-                            similarSpecies[l] = similarFishJSON.getString("description");
-                        }
+                // parse out names of similar species for this fish
+                String[] similarSpecies = null;
+                if(fishData.has("similarSpecies")) {
+                    JSONArray similarSpeciesJSON = fishData.getJSONArray("similarSpecies");
+                    similarSpecies = new String[similarSpeciesJSON.length()];
+                    for (int l = 0; l < similarSpeciesJSON.length(); l++) {
+                        JSONObject similarFishJSON = similarSpeciesJSON.getJSONObject(l);
+                        similarSpecies[l] = similarFishJSON.getString("description");
                     }
-                    // last bit of information
-                    String environmentDetail = (fishData.has("environmentDetail")) ? fishData.getString("environmentDetail") : "Unknown" ;
-
-                    // create a Fish object out of the gathered info
-                    fishes.add(new Fish(
-                                latinName,
-                            accuracy,
-                            title,
-                            mediaUri,
-                            commonNames,
-                            distribution,
-                            scales,
-                            saltWater,
-                            freshWater,
-                            coloration,
-                            feedingBehaviour,
-                            healthWarnings,
-                            foodValue,
-                            similarSpecies,
-                            environmentDetail)
-                    );
                 }
+                // last bit of information
+                String environmentDetail = (fishData.has("environmentDetail")) ? fishData.getString("environmentDetail") : "Unknown" ;
+
+                // create a Fish object out of the gathered info
+                fishes.add(new Fish(
+                        latinName,
+                        accuracy,
+                        title,
+                        mediaUri,
+                        commonNames,
+                        distribution,
+                        scales,
+                        saltWater,
+                        freshWater,
+                        coloration,
+                        feedingBehaviour,
+                        healthWarnings,
+                        foodValue,
+                        similarSpecies,
+                        environmentDetail)
+                );
             }
-            return fishes;
-        } catch (JSONException ex) {
-            throw new RuntimeException(ex);
         }
+        return fishes;
     }
 
-    private JSONObject fetchAuthorizationToken() {
+    private JSONObject fetchAuthorizationToken() throws JSONException, IOException {
+        JSONObject response = null;
+        // specify the URL for the authorization endpoint
+        URL url = new URL("https://api-users.fishial.ai/v1/auth/token");
+        // establish the connection with the endpoint
+        HttpURLConnection http = (HttpURLConnection) url.openConnection();
+        // define the header as POST request with JSON body and allow for output
+        http.setRequestMethod("POST");
+        http.setRequestProperty("Content-Type", "application/json");
+        http.setDoOutput(true);
+        // create an JSON object and populate it with the API key and API secret key
+        JSONObject fishialAPIKeys = new JSONObject();
 
-        try {
-            JSONObject response = null;
-            // specify the URL for the authorization endpoint
-            URL url = new URL("https://api-users.fishial.ai/v1/auth/token");
-            // establish the connection with the endpoint
-            HttpURLConnection http = (HttpURLConnection) url.openConnection();
-            // define the header as POST request with JSON body and allow for output
-            http.setRequestMethod("POST");
-            http.setRequestProperty("Content-Type", "application/json");
-            http.setDoOutput(true);
-            // create an JSON object and populate it with the API key and API secret key
-            JSONObject fishialAPIKeys = new JSONObject();
+        fishialAPIKeys.put("client_id", context.getString(R.string.FISHIAL_API_KEY));
+        fishialAPIKeys.put("client_secret", context.getString(R.string.FISHIAL_API_SECRET_KEY));
+        // convert the JSON objet which is written with the UTF-8 charset to an byte array
+        byte[] out = fishialAPIKeys.toString().getBytes(StandardCharsets.UTF_8);
+        // get an output stream of the http connection and write out the byte array
+        OutputStream outStream = http.getOutputStream();
+        outStream.write(out);
+        outStream.close();
 
-            fishialAPIKeys.put("client_id", context.getString(R.string.FISHIAL_API_KEY));
-            fishialAPIKeys.put("client_secret", context.getString(R.string.FISHIAL_API_SECRET_KEY));
-            // convert the JSON objet which is written with the UTF-8 charset to an byte array
-            byte[] out = fishialAPIKeys.toString().getBytes(StandardCharsets.UTF_8);
-            // get an output stream of the http connection and write out the byte array
-            OutputStream outStream = http.getOutputStream();
-            outStream.write(out);
-            outStream.close();
-
-            // if https request was successful then read in the response into an StringBuilder object using the http input stream
-            if (http.getResponseCode() == 200) {
-                // create a buffered reader for reading the token data passed back from the authorization endpoint
-                BufferedReader tokenDataReader = new BufferedReader(new InputStreamReader(http.getInputStream()));
-                // StringBuilder to build the response
-                StringBuilder httpResponse = new StringBuilder();
-                // go through the token data line by line and append each line to the StringBuilder
-                String line;
-                while ((line = tokenDataReader.readLine()) != null) {
-                    httpResponse.append(line);
-                }
-                tokenDataReader.close();
-                // Create a response JSON object returned by this method by calling the toString() method on the created StringBuilder
-                response = new JSONObject(httpResponse.toString());
+        // if https request was successful then read in the response into an StringBuilder object using the http input stream
+        if (http.getResponseCode() == 200) {
+            // create a buffered reader for reading the token data passed back from the authorization endpoint
+            BufferedReader tokenDataReader = new BufferedReader(new InputStreamReader(http.getInputStream()));
+            // StringBuilder to build the response
+            StringBuilder httpResponse = new StringBuilder();
+            // go through the token data line by line and append each line to the StringBuilder
+            String line;
+            while ((line = tokenDataReader.readLine()) != null) {
+                httpResponse.append(line);
             }
-            // close the http connection
-            http.disconnect();
-            return response;
-        } catch (JSONException | IOException e) {
-            throw new RuntimeException(e);
+            tokenDataReader.close();
+            // Create a response JSON object returned by this method by calling the toString() method on the created StringBuilder
+            response = new JSONObject(httpResponse.toString());
         }
+        // close the http connection
+        http.disconnect();
+        return response;
     }
 
 
-    private JSONObject obtainDataForCloudUpload(JSONObject accessToken, FishImage fishImage) {
-        try {
-            JSONObject response = null;
-            JSONObject mainJsonBody = new JSONObject();
-            mainJsonBody.put("filename", fishImage.getImageFileName());
-            mainJsonBody.put("content_type", fishImage.getImageFileMimeType());
-            mainJsonBody.put("byte_size", fishImage.getImageFileSize());
-            // workaround for removing "\n" from the end of the base64 checksum
-            mainJsonBody.put("checksum", fishImage.getImageFileBytesArrayMD5EncodedBase64().substring(0,23) + "=");
-            // wrap around the above data in to the another object called blob as required by the endpoint
-            JSONObject blob = new JSONObject();
-            blob.put("blob", mainJsonBody);
+    private JSONObject obtainDataForCloudUpload(JSONObject accessToken, FishImage fishImage) throws JSONException, IOException {
+        JSONObject response = null;
+        JSONObject mainJsonBody = new JSONObject();
+        mainJsonBody.put("filename", fishImage.getImageFileName());
+        mainJsonBody.put("content_type", fishImage.getImageFileMimeType());
+        mainJsonBody.put("byte_size", fishImage.getImageFileSize());
+        // workaround for removing "\n" from the end of the base64 checksum
+        mainJsonBody.put("checksum", fishImage.getImageFileBytesArrayMD5EncodedBase64().substring(0,23) + "=");
+        // wrap around the above data in to the another object called blob as required by the endpoint
+        JSONObject blob = new JSONObject();
+        blob.put("blob", mainJsonBody);
 
-            // parse out the "Bearer (token)" out of the access Token JSON object
-            String token = accessToken.getString("access_token");
-            // specify the URL for the authorization endpoint
-            URL url = new URL("https://api.fishial.ai/v1/recognition/upload");
-            // establish the connection with the endpoint
-            HttpURLConnection http = (HttpURLConnection) url.openConnection();
-            // define the header as POST request with JSON body and allow for output
-            http.setRequestMethod("POST");
-            http.setRequestProperty("Accept", "application/json");
-            http.setRequestProperty("Authorization", "Bearer " + token);
-            http.setRequestProperty("Content-Type", "application/json");
-            http.setDoOutput(true);
+        // parse out the "Bearer (token)" out of the access Token JSON object
+        String token = accessToken.getString("access_token");
+        // specify the URL for the authorization endpoint
+        URL url = new URL("https://api.fishial.ai/v1/recognition/upload");
+        // establish the connection with the endpoint
+        HttpURLConnection http = (HttpURLConnection) url.openConnection();
+        // define the header as POST request with JSON body and allow for output
+        http.setRequestMethod("POST");
+        http.setRequestProperty("Accept", "application/json");
+        http.setRequestProperty("Authorization", "Bearer " + token);
+        http.setRequestProperty("Content-Type", "application/json");
+        http.setDoOutput(true);
 
-            // convert the JSON objet which is written with the UTF-8 charset to an byte array
-            byte[] out = blob.toString().getBytes(StandardCharsets.UTF_8);
-            // get an output stream of the http connection and write out the byte array
-            OutputStream outStream = http.getOutputStream();
-            outStream.write(out);
-            outStream.close();
+        // convert the JSON objet which is written with the UTF-8 charset to an byte array
+        byte[] out = blob.toString().getBytes(StandardCharsets.UTF_8);
+        // get an output stream of the http connection and write out the byte array
+        OutputStream outStream = http.getOutputStream();
+        outStream.write(out);
+        outStream.close();
 
-            if (http.getResponseCode() == 200) {
-                BufferedReader responseDataReader = new BufferedReader(new InputStreamReader(http.getInputStream()));
-                // StringBuilder to build the response
-                StringBuilder httpResponse = new StringBuilder();
-                // go through the token data line by line and append each line to the StringBuilder
-                String line;
-                while ((line = responseDataReader.readLine()) != null) {
-                    httpResponse.append(line);
-                }
-                responseDataReader.close();
-
-                response = new JSONObject(httpResponse.toString());
-
+        if (http.getResponseCode() == 200) {
+            BufferedReader responseDataReader = new BufferedReader(new InputStreamReader(http.getInputStream()));
+            // StringBuilder to build the response
+            StringBuilder httpResponse = new StringBuilder();
+            // go through the token data line by line and append each line to the StringBuilder
+            String line;
+            while ((line = responseDataReader.readLine()) != null) {
+                httpResponse.append(line);
             }
-            // close the http connection
-            http.disconnect();
-            return response;
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        } catch (ProtocolException e) {
-            throw new RuntimeException(e);
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            responseDataReader.close();
+
+            response = new JSONObject(httpResponse.toString());
+
         }
+        // close the http connection
+        http.disconnect();
+        return response;
     }
 
-    private void uploadFishImageInCloud(JSONObject pathForCloudUpload, FishImage fishImage) {
-        try {
-            // get values of the JSON object used for uploading the image to the cloud
-            JSONObject directUploadHeader = pathForCloudUpload.getJSONObject("direct-upload");
-            String urlString = directUploadHeader.getString("url");
-            JSONObject imageHeaders = directUploadHeader.getJSONObject("headers");
-            String contentMd5 = imageHeaders.getString("Content-MD5");
-            String contentDisposition = imageHeaders.getString("Content-Disposition");
-            byte[] byteArray = fishImage.getImageFileBytesArray();
-            URL url = new URL(urlString);
-            // establish the connection with the endpoint
-            HttpURLConnection http = (HttpURLConnection) url.openConnection();
-            // define the header as POST request with JSON body and allow for output
-            http.setRequestMethod("PUT");
-            http.setRequestProperty("Content-Disposition", contentDisposition);
-            http.setRequestProperty("Content-MD5", contentMd5);
-            http.setRequestProperty("Content-Type", "");
-            http.setDoOutput(true);
-            OutputStream outStream = http.getOutputStream();
-            outStream.write(byteArray);
-            outStream.close();
+    private void uploadFishImageInCloud(JSONObject pathForCloudUpload, FishImage fishImage) throws JSONException, IOException {
+        // get values of the JSON object used for uploading the image to the cloud
+        JSONObject directUploadHeader = pathForCloudUpload.getJSONObject("direct-upload");
+        String urlString = directUploadHeader.getString("url");
+        JSONObject imageHeaders = directUploadHeader.getJSONObject("headers");
+        String contentMd5 = imageHeaders.getString("Content-MD5");
+        String contentDisposition = imageHeaders.getString("Content-Disposition");
+        byte[] byteArray = fishImage.getImageFileBytesArray();
+        URL url = new URL(urlString);
+        // establish the connection with the endpoint
+        HttpURLConnection http = (HttpURLConnection) url.openConnection();
+        // define the header as POST request with JSON body and allow for output
+        http.setRequestMethod("PUT");
+        http.setRequestProperty("Content-Disposition", contentDisposition);
+        http.setRequestProperty("Content-MD5", contentMd5);
+        http.setRequestProperty("Content-Type", "");
+        http.setDoOutput(true);
+        OutputStream outStream = http.getOutputStream();
+        outStream.write(byteArray);
+        outStream.close();
 
-            // there shouldn't be any response in this request other than an error
-            if (http.getResponseCode() != 200) {
-                System.out.println("Image upload to the cloud failed");
-                System.out.println(http.getResponseCode());
-                System.out.println(http.getResponseMessage());
-            }
-
-            // close the http connection
-            http.disconnect();
-
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        } catch (ProtocolException e) {
-            throw new RuntimeException(e);
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        // there shouldn't be any response in this request other than an error
+        if (http.getResponseCode() != 200) {
+            System.out.println("Image upload to the cloud failed");
+            System.out.println(http.getResponseCode());
+            System.out.println(http.getResponseMessage());
         }
+
+        // close the http connection
+        http.disconnect();
     }
 
-    private JSONObject fishDetection(JSONObject imageDataOnCloudJSON, JSONObject tokenJSON) {
-        try {
-            JSONObject response = null;
-            String urlPath = imageDataOnCloudJSON.getString("signed-id");
-            String token = tokenJSON.getString("access_token");
+    private JSONObject fishDetection(JSONObject imageDataOnCloudJSON, JSONObject tokenJSON) throws JSONException, IOException {
+        JSONObject response = null;
+        String urlPath = imageDataOnCloudJSON.getString("signed-id");
+        String token = tokenJSON.getString("access_token");
 
-            URL url = new URL("https://api.fishial.ai/v1/recognition/image?q="+urlPath);
-            HttpURLConnection http = (HttpURLConnection)url.openConnection();
-            http.setRequestProperty("Authorization", "Bearer "+token);
+        URL url = new URL("https://api.fishial.ai/v1/recognition/image?q="+urlPath);
+        HttpURLConnection http = (HttpURLConnection)url.openConnection();
+        http.setRequestProperty("Authorization", "Bearer "+token);
 
-            if (http.getResponseCode() == 200) {
-                BufferedReader responseDataReader = new BufferedReader(new InputStreamReader(http.getInputStream()));
-                // StringBuilder to build the response
-                StringBuilder httpResponse = new StringBuilder();
-                // go through the token data line by line and append each line to the StringBuilder
-                String line;
-                while ((line = responseDataReader.readLine()) != null) {
-                    httpResponse.append(line);
-                }
-                // close the buffered reader
-                responseDataReader.close();
-
-                // get fish data in an JSONObject
-                response = new JSONObject(httpResponse.toString());
+        if (http.getResponseCode() == 200) {
+            BufferedReader responseDataReader = new BufferedReader(new InputStreamReader(http.getInputStream()));
+            // StringBuilder to build the response
+            StringBuilder httpResponse = new StringBuilder();
+            // go through the token data line by line and append each line to the StringBuilder
+            String line;
+            while ((line = responseDataReader.readLine()) != null) {
+                httpResponse.append(line);
             }
-            // close the http session
-            http.disconnect();
-            return response;
-        } catch (JSONException e) {
-            throw new RuntimeException(e);}
-        catch (MalformedURLException ex) {
-            throw new RuntimeException(ex);
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
+            // close the buffered reader
+            responseDataReader.close();
+
+            // get fish data in an JSONObject
+            response = new JSONObject(httpResponse.toString());
         }
+        // close the http session
+        http.disconnect();
+        return response;
     }
 }
