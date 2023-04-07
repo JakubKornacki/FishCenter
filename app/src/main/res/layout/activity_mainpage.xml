@@ -50,7 +50,7 @@
                 android:minHeight="48dp"
                 android:padding="5dp"
                 android:src="@drawable/ic_baseline_logout_24_white"
-                tools:ignore="HardcodedText"></ImageButton>
+                tools:ignore="HardcodedText" />
 
 
             <ImageButton
@@ -65,7 +65,7 @@
                 android:minHeight="48dp"
                 android:padding="5dp"
                 android:src="@drawable/ic_baseline_reload_24_white"
-                tools:ignore="HardcodedText"></ImageButton>
+                tools:ignore="HardcodedText" />
         </androidx.appcompat.widget.Toolbar>
 
 
@@ -74,6 +74,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="10dp"
+            android:layoutAnimation="@anim/recyclerview_animation"
             android:layout_marginBottom="60dp"/>
 
     </LinearLayout>

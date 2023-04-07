@@ -1,6 +1,7 @@
 package com.example.fishcenter;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -10,6 +11,7 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -24,9 +26,8 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
     private final FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
     private ImageButton fishRecognitionButton;
     private ImageButton googleMapsButton;
-    private ImageButton logoutImageButton;
     private ImageButton reloadPostsButton;
-    private ArrayList<PostModel> posts = new ArrayList<>();
+    private final ArrayList<PostModel> posts = new ArrayList<>();
     private RecyclerView postsRecyclerView;
     private PostRecyclerViewAdapter adapter;
     private FloatingActionButton createPostButton;
@@ -35,7 +36,7 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
     private LinearLayout linearLayoutNoPostsToLoad;
     private User currentUser;
     private PostsController postsController;
-    private UserController userController;
+    private Context context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,9 +48,11 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
         linearLayoutNoPostsToLoad = findViewById(R.id.linearLayoutNoPostsToLoad);
         progressSpinnerLayout = findViewById(R.id.progressSpinnerLayout);
 
+        context = getApplicationContext();
+
         postsController = new PostsController(MainPageActivity.this, this);
         String currentUserId = firebaseAuth.getCurrentUser().getUid();
-        userController = new UserController(currentUserId, this);
+        UserController userController = new UserController(currentUserId, this);
         // setup the top application bar
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -73,7 +76,7 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
             }
         });
 
-        logoutImageButton = findViewById(R.id.logoutImageButton);
+        ImageButton logoutImageButton = findViewById(R.id.logoutImageButton);
         logoutImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -126,9 +129,9 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
             googleMapsButton.setBackground(null);
         } else {
             progressSpinnerLayout.setVisibility(View.INVISIBLE);
-            reloadPostsButton.setBackground(getDrawable(R.drawable.background_rounded_corners_toggle_5_gray_opacity_25_to_transparent));
-            fishRecognitionButton.setBackground(getDrawable(R.drawable.background_rounded_corners_toggle_5_gray_opacity_30_to_transparent));
-            googleMapsButton.setBackground(getDrawable(R.drawable.background_rounded_corners_toggle_5_gray_opacity_30_to_transparent));
+            reloadPostsButton.setBackground(AppCompatResources.getDrawable(context, R.drawable.background_rounded_corners_toggle_5_gray_opacity_25_to_transparent));
+            fishRecognitionButton.setBackground(AppCompatResources.getDrawable(context, R.drawable.background_rounded_corners_toggle_5_gray_opacity_30_to_transparent));
+            googleMapsButton.setBackground(AppCompatResources.getDrawable(context, R.drawable.background_rounded_corners_toggle_5_gray_opacity_30_to_transparent));
         }
     }
 
@@ -210,7 +213,7 @@ public class MainPageActivity extends AppCompatActivity implements OnClickListen
                 if(currentUser != null) {
                     showSpinnerAndDisableComponents(false);
                 }
-                adapter.notifyDataSetChanged();
+                adapter.notifyItemRangeInserted(0,posts.size());
             }
         });
     }

@@ -28,16 +28,16 @@ import java.util.Locale;
 import java.util.Map;
 
 public class PostsController {
-    private FirebaseFirestore firestore =  FirebaseFirestore.getInstance();
-    private FirebaseStorage firebaseStorage =  FirebaseStorage.getInstance();
+    private final FirebaseFirestore firestore =  FirebaseFirestore.getInstance();
+    private final FirebaseStorage firebaseStorage =  FirebaseStorage.getInstance();
 
-    private FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
-    private String currentUserId;
-    private PostsCallback postsCallback;
+    private final FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+    private final String currentUserId;
+    private final PostsCallback postsCallback;
 
-    private PostsDatabase postsDatabase;
-    private PostsDao postsDao;
-    private Context context;
+    private final PostsDatabase postsDatabase;
+    private final PostsDao postsDao;
+    private final Context context;
 
     public PostsController(Context context, PostsCallback postsCallback) {
         this.postsCallback = postsCallback;
@@ -108,7 +108,7 @@ public class PostsController {
                     String body = post.getString("body");
                     // extract a readable date from the firebase timestamp
                     Date firestoreTimestamp = ((Timestamp) post.get("timestamp")).toDate();
-                    DateFormat dateFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+                    DateFormat dateFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.UK);
                     String postUploadDate = dateFormatter.format(firestoreTimestamp);
                     // saved in firestore as number, need to be converted to string
                     String numLikes = post.get("likes").toString();
@@ -134,7 +134,7 @@ public class PostsController {
                                     if(task.isSuccessful()) {
                                         Uri uri = task.getResult();
                                         String uriMedia = String.valueOf(uri);
-                                        String mimeType = post.get("mimeType").toString();
+                                        String mimeType = post.getString("mimeType");
                                         newLocalPost = new LocalPost(title, body, userProfilePictureBytes, nickname, postUploadDate, numLikes, numDislikes, uriMedia, mimeType, uniquePostRef, userId);
                                     } else {
                                         // this post does not contain any media

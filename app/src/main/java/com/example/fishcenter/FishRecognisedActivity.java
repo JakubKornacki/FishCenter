@@ -35,6 +35,7 @@ public class FishRecognisedActivity extends AppCompatActivity {
     private ImageButton goBackImageButton;
     private ImageButton logoutImageButton;
     private final FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+    private FishScoreController fishScoreController;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -42,6 +43,7 @@ public class FishRecognisedActivity extends AppCompatActivity {
         setContentView(R.layout.activity_fish_recognised);
         goBackImageButton = findViewById(R.id.goBackImageButton);
         logoutImageButton = findViewById(R.id.logoutImageButton);
+        fishScoreController = new FishScoreController();
         goBackImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -68,6 +70,7 @@ public class FishRecognisedActivity extends AppCompatActivity {
         for (Fish fish : fishes) {
             LinearLayout table = drawResultsTable(fish);
             linearLayoutInsideScrollView.addView(table);
+            fishScoreController.createFishWithRandomScore(fish);
         }
 
         // iterate through the returned fishes and append non-duplicates to linear layout

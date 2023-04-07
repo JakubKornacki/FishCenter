@@ -1,7 +1,6 @@
 package com.example.fishcenter;
 
 import android.content.Context;
-import android.net.Uri;
 import android.util.AttributeSet;
 
 import androidx.annotation.NonNull;
@@ -9,7 +8,6 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 
 public class PostModel extends RecyclerView implements Serializable {
     private String title;
