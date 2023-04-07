@@ -25,6 +25,7 @@ public class UserController {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 String userNickname = documentSnapshot.getString("nickname");
+
                 ArrayList<String> postsLikedByUser = (ArrayList<String>) documentSnapshot.get("postsLiked");
                 ArrayList<String> postsDislikedByUser = (ArrayList<String>) documentSnapshot.get("postsDisliked");
 

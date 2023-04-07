@@ -11,29 +11,30 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import java.util.ArrayList;
 
 public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerViewAdapter.PostViewHolder> {
-    private Context con;
-    private ArrayList<PostModel> posts;
-    private OnClickListener listener;
-    private Drawable playVideoIcon;
-    private boolean adapterClickable = true;
+    private final Context context;
+    private final ArrayList<PostModel> posts;
+    private final OnClickListener listener;
+    private final Drawable playVideoIcon;
 
-    public PostRecyclerViewAdapter(Context con, ArrayList<PostModel> posts, OnClickListener listener) {
-        this.con = con;
+
+    public PostRecyclerViewAdapter(Context context, ArrayList<PostModel> posts, OnClickListener listener) {
+        this.context = context;
         this.posts = posts;
         this.listener = listener;
-        playVideoIcon = con.getDrawable(R.drawable.img_play_video_foreground);
+        playVideoIcon = AppCompatResources.getDrawable(context, R.drawable.img_play_video_foreground);
     }
 
     @NonNull
     @Override
     public PostViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        LayoutInflater inflater = LayoutInflater.from(con);
+        LayoutInflater inflater = LayoutInflater.from(context);
         View view = inflater.inflate(R.layout.layout_post, parent, false);
         return new PostViewHolder(view, listener);
     }
@@ -41,7 +42,7 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
     @Override
     public void onBindViewHolder(@NonNull PostViewHolder holder, int position) {
         byte[] photoBytes = posts.get(position).getProfilePhoto();
-        Glide.with(con).asBitmap().load(photoBytes).placeholder(R.drawable.ic_baseline_person_128_white).transform(new RoundedCorners(10)).into(holder.userProfilePicture);
+        Glide.with(context).asBitmap().load(photoBytes).placeholder(R.drawable.ic_baseline_person_128_white).transform(new RoundedCorners(10)).into(holder.userProfilePicture);
         holder.userNickname.setText(posts.get(position).getNickname());
         holder.datePosted.setText(posts.get(position).getDatePosted());
         holder.postTitle.setText(posts.get(position).getTitle());
@@ -50,11 +51,11 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
             String mimeType = posts.get(position).getMimeType();
             if(uri != null) {
                 if(MediaUtilities.supportedImageMimeTypes.contains(mimeType)) {
-                    Glide.with(con).load(uri).transform(new RoundedCorners(30)).into(holder.postImageAndGif);
+                    Glide.with(context).load(uri).transform(new RoundedCorners(30)).into(holder.postImageAndGif);
                     holder.postImageAndGif.setVisibility(View.VISIBLE);
                     holder.postVideoThumbnail.setVisibility(View.GONE);
                 } else if (MediaUtilities.supportedVideoMimeTypes.contains(mimeType)) {
-                    Glide.with(con).load(uri).transform(new RoundedCorners(30)).into(holder.postVideoThumbnail);
+                    Glide.with(context).load(uri).transform(new RoundedCorners(30)).into(holder.postVideoThumbnail);
                     holder.postVideoThumbnail.setForeground(playVideoIcon);
                     holder.postVideoThumbnail.setVisibility(View.VISIBLE);
                     holder.postImageAndGif.setVisibility(View.GONE);
@@ -73,23 +74,19 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
         return posts.size();
     }
 
-    public void setAdapterClickable(boolean clickable) {
-        adapterClickable = clickable;
-    }
-
     public static class PostViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        private ImageView userProfilePicture;
-        private TextView userNickname;
-        private TextView datePosted;
-        private TextView postTitle;
-        private ImageView postImageAndGif;
-        private ImageView postVideoThumbnail;
-        private TextView postBody;
-        private ImageView likesButton;
-        private TextView postLikes;
-        private TextView postDislikes;
-        private ImageView dislikesButton;
-        private OnClickListener listener;
+        private final ImageView userProfilePicture;
+        private final TextView userNickname;
+        private final TextView datePosted;
+        private final TextView postTitle;
+        private final ImageView postImageAndGif;
+        private final ImageView postVideoThumbnail;
+        private final TextView postBody;
+        private final ImageView likesButton;
+        private final TextView postLikes;
+        private final TextView postDislikes;
+        private final ImageView dislikesButton;
+        private final OnClickListener listener;
 
         public PostViewHolder(@NonNull View itemView, OnClickListener listener) {
             super(itemView);
