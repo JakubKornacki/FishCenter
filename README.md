@@ -12,7 +12,7 @@ The following list summarises the main tools and technologies used to develop th
   <li><b>Firebase</b> for managing the backend</li>
   <li><b>Gradle</b> for dependency management</li>
   <li><b>Fishial.AI</b> machine learning models for fish identification</li>
-  <li><b>ROOM database</b> for local data storage</li>
+  <li><b>Room database</b> for local data storage</li>
   <li><b>Open-Meteo Weather API</b> for real-time tide times data</li>
   <li><b>Google Maps API</b> for managing the  map of fishing locations</li>
   <li><b>GitHub</b> for source code management</li>
